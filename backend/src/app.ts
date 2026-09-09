@@ -4,6 +4,7 @@ import { apiReference } from '@scalar/express-api-reference';
 import { ENV } from './config/env.js';
 import { openApiSpec } from './docs/openapi.js';
 import authRoutes from './routes/auth.routes.js';
+import productRoutes from './routes/product.routes.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 
 export const createApp = (): Express => {
@@ -47,6 +48,7 @@ export const createApp = (): Express => {
 
   // Rutas API
   app.use('/api/auth', authRoutes);
+  app.use('/api/products', productRoutes);
 
   // Middleware de errores
   app.use(errorHandler);

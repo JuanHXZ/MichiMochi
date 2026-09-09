@@ -1,6 +1,10 @@
 import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.js';
+import { adminAuth, adminDb } from '../config/firebaseAdmin.js';
 import { UserProfile, AuthResponse } from '../types/index.js';
+
+// Cache en memoria para sesiones activas y perfiles
+const usersStore = new Map<string, UserProfile>();
 
 export class AuthService {
   private static generateToken(user: UserProfile): string {
@@ -95,6 +99,7 @@ export class AuthService {
       console.warn('Advertencia al guardar perfil en Firestore:', err);
     }
 
+    usersStore.set(userProfile.uid, userProfile);
     const token = this.generateToken(userProfile);
 
     return {
@@ -170,6 +175,7 @@ export class AuthService {
       console.warn('Advertencia al consultar perfil en Firestore:', err);
     }
 
+    usersStore.set(userProfile.uid, userProfile);
     const token = this.generateToken(userProfile);
 
     return {
@@ -237,6 +243,7 @@ export class AuthService {
       console.warn('Advertencia al sincronizar Google en Firestore:', err);
     }
 
+    usersStore.set(userProfile.uid, userProfile);
     const token = this.generateToken(userProfile);
 
     return {
@@ -246,30 +253,65 @@ export class AuthService {
   }
 
   /**
-   * Obtener perfil del usuario por UID
+   * Obtener perfil del usuario por UID (con fallback en memoria, JWT claims y Firebase Admin)
    */
-  static async getProfile(uid: string): Promise<UserProfile> {
-    const lookupUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${ENV.FIREBASE_API_KEY}`;
-    const lookupResp = await fetch(lookupUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ localId: [uid] }),
-    });
-
-    const lookupData: any = await lookupResp.json();
-    const userItem = lookupData.users?.[0];
-
-    if (!userItem) {
-      throw { status: 404, message: 'Usuario no encontrado' };
+  static async getProfile(uid: string, fallbackUser?: Partial<UserProfile>): Promise<UserProfile> {
+    // 1. Verificar cache en memoria (usuarios logueados o registrados recientemente)
+    const cached = usersStore.get(uid);
+    if (cached) {
+      return cached;
     }
 
-    return {
-      uid: userItem.localId,
-      email: userItem.email || '',
-      fullName: userItem.displayName || '',
-      photoURL: userItem.photoUrl || null,
-      provider: 'password',
-      createdAt: userItem.createdAt || new Date().toISOString(),
-    };
+    // 2. Si Firebase Admin SDK está configurado con credenciales, consultar usuario
+    if (ENV.FIREBASE_CLIENT_EMAIL && ENV.FIREBASE_PRIVATE_KEY) {
+      try {
+        const userRecord = await adminAuth.getUser(uid);
+        let docData: any = {};
+        try {
+          const docSnap = await adminDb.collection('users').doc(uid).get();
+          if (docSnap.exists) {
+            docData = docSnap.data() || {};
+          }
+        } catch {
+          // Si firestore falla, continuar con datos de auth
+        }
+
+        const profile: UserProfile = {
+          uid: userRecord.uid,
+          email: userRecord.email || fallbackUser?.email || '',
+          fullName: docData.fullName || userRecord.displayName || fallbackUser?.fullName || 'Usuario',
+          phone: docData.phone || userRecord.phoneNumber || fallbackUser?.phone || '',
+          address: docData.address || fallbackUser?.address || '',
+          city: docData.city || fallbackUser?.city || '',
+          photoURL: docData.photoURL || userRecord.photoURL || fallbackUser?.photoURL || null,
+          provider: (docData.provider as any) || (fallbackUser?.provider as any) || 'password',
+          createdAt: docData.createdAt || userRecord.metadata?.creationTime || new Date().toISOString(),
+        };
+
+        usersStore.set(uid, profile);
+        return profile;
+      } catch (adminErr) {
+        console.warn('[AuthService] Advertencia al consultar usuario en Firebase Admin:', adminErr);
+      }
+    }
+
+    // 3. Fallback con datos verificados del JWT en la sesión activa
+    if (fallbackUser && (fallbackUser.uid === uid || !fallbackUser.uid)) {
+      const profile: UserProfile = {
+        uid,
+        email: fallbackUser.email || '',
+        fullName: fallbackUser.fullName || fallbackUser.email?.split('@')[0] || 'Usuario',
+        phone: fallbackUser.phone || '',
+        address: fallbackUser.address || '',
+        city: fallbackUser.city || '',
+        photoURL: fallbackUser.photoURL || null,
+        provider: (fallbackUser.provider as any) || 'password',
+        createdAt: fallbackUser.createdAt || new Date().toISOString(),
+      };
+      usersStore.set(uid, profile);
+      return profile;
+    }
+
+    throw { status: 404, message: 'Usuario no encontrado' };
   }
 }

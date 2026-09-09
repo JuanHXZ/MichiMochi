@@ -20,3 +20,5 @@ export interface AuthResponse {
   user: UserProfile;
   tokens: AuthTokens;
 }
+
+export * from './product.js';

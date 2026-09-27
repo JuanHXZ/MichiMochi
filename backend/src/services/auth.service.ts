@@ -186,29 +186,89 @@ export class AuthService {
 
   /**
    * Inicio de sesión con Google (ID Token verification)
+   * Soporta tanto Firebase ID Token (emitido por Firebase Client SDK)
+   * como Google OAuth ID Token (emitido por Google Identity Provider / mobile)
    */
-  static async loginWithGoogle(idToken: string): Promise<AuthResponse> {
-    const signInWithIdpUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${ENV.FIREBASE_API_KEY}`;
-    const idpResponse = await fetch(signInWithIdpUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        postBody: `id_token=${idToken}&providerId=google.com`,
-        requestUri: 'http://localhost:5000',
-        returnSecureToken: true,
-      }),
-    });
-
-    const idpData: any = await idpResponse.json();
-
-    if (!idpResponse.ok) {
-      throw { status: 401, message: 'Token de Google no válido o expirado.' };
+  static async loginWithGoogle(idToken: string, oauthToken?: string): Promise<AuthResponse> {
+    if (!idToken) {
+      throw { status: 400, message: 'El token de autenticación es requerido.' };
     }
 
-    const uid = idpData.localId;
-    const email = idpData.email || '';
-    const fullName = idpData.displayName || 'Usuario Google';
-    const photoURL = idpData.photoUrl || null;
+    let uid = '';
+    let email = '';
+    let fullName = 'Usuario Google';
+    let photoURL: string | null = null;
+    let verified = false;
+
+    // 1. Intentar verificar Firebase ID Token con Firebase Admin SDK
+    try {
+      const decoded = await adminAuth.verifyIdToken(idToken);
+      if (decoded && decoded.uid) {
+        uid = decoded.uid;
+        email = decoded.email || '';
+        fullName = decoded.name || email.split('@')[0] || 'Usuario Google';
+        photoURL = decoded.picture || null;
+        verified = true;
+      }
+    } catch {
+      // Continuar con verificación REST
+    }
+
+    // 2. Si no se verificó con Admin SDK, verificar Firebase ID Token mediante Identity Toolkit accounts:lookup REST API
+    if (!verified) {
+      try {
+        const lookupUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${ENV.FIREBASE_API_KEY}`;
+        const lookupResp = await fetch(lookupUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        });
+        const lookupData: any = await lookupResp.json();
+
+        if (lookupResp.ok && lookupData.users && lookupData.users.length > 0) {
+          const user = lookupData.users[0];
+          uid = user.localId;
+          email = user.email || '';
+          fullName = user.displayName || user.providerUserInfo?.[0]?.displayName || email.split('@')[0] || 'Usuario Google';
+          photoURL = user.photoUrl || user.providerUserInfo?.[0]?.photoUrl || null;
+          verified = true;
+        }
+      } catch {
+        // Continuar con verificación de IdP directo
+      }
+    }
+
+    // 3. Si se proporcionó oauthToken o si idToken es un Google OAuth ID token directo, verificar vía signInWithIdp
+    if (!verified) {
+      const tokenToVerify = oauthToken || idToken;
+      try {
+        const signInWithIdpUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${ENV.FIREBASE_API_KEY}`;
+        const idpResponse = await fetch(signInWithIdpUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            postBody: `id_token=${tokenToVerify}&providerId=google.com`,
+            requestUri: 'http://localhost:5000',
+            returnSecureToken: true,
+          }),
+        });
+
+        const idpData: any = await idpResponse.json();
+        if (idpResponse.ok && idpData.localId) {
+          uid = idpData.localId;
+          email = idpData.email || '';
+          fullName = idpData.displayName || email.split('@')[0] || 'Usuario Google';
+          photoURL = idpData.photoUrl || null;
+          verified = true;
+        }
+      } catch {
+        // Falló verificación
+      }
+    }
+
+    if (!verified || !uid) {
+      throw { status: 401, message: 'Token de Google no válido o expirado.' };
+    }
 
     let userProfile: UserProfile = {
       uid,
@@ -226,7 +286,7 @@ export class AuthService {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${idpData.idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           fields: {

@@ -23,8 +23,8 @@ export class AuthController {
 
   static async googleLogin(req: Request, res: Response, next: NextFunction) {
     try {
-      const { idToken } = req.body;
-      const result = await AuthService.loginWithGoogle(idToken);
+      const { idToken, oauthToken } = req.body;
+      const result = await AuthService.loginWithGoogle(idToken, oauthToken);
       res.status(200).json({ ok: true, data: result });
     } catch (err) {
       next(err);

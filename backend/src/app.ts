@@ -11,9 +11,17 @@ export const createApp = (): Express => {
   const app = express();
 
   // Middlewares globales
+  const allowedOrigins =
+    ENV.CORS_ORIGIN === '*'
+      ? true
+      : ENV.CORS_ORIGIN.replace(/['"]/g, '')
+          .split(',')
+          .map((o) => o.trim())
+          .filter(Boolean);
+
   app.use(
     cors({
-      origin: ENV.CORS_ORIGIN === '*' ? true : ENV.CORS_ORIGIN.split(','),
+      origin: allowedOrigins,
       credentials: true,
     })
   );

@@ -1,11 +1,11 @@
 import express, { Express } from 'express';
 import cors from 'cors';
 import { apiReference } from '@scalar/express-api-reference';
-import { ENV } from './infrastructure/config/env.js';
-import { openApiSpec } from './presentation/docs/openapi.js';
-import authRoutes from './presentation/routes/auth.routes.js';
-import productRoutes from './presentation/routes/product.routes.js';
-import { errorHandler } from './presentation/middlewares/error.middleware.js';
+import { ENV } from './shared/config/env.js';
+import { openApiSpec } from './shared/docs/openapi.js';
+import authRoutes from './modules/auth/presentation/routes/auth.routes.js';
+import productRoutes from './modules/catalog/presentation/routes/product.routes.js';
+import { errorHandler } from './shared/middlewares/error.middleware.js';
 
 export const createApp = (): Express => {
   const app = express();

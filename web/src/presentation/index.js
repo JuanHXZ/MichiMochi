@@ -1,22 +1,22 @@
-// Pages
-export { default as LoginPage } from './pages/Login/LoginPage';
-export { default as RegisterPage } from './pages/Register/RegisterPage';
-export { default as ForgotPasswordPage } from './pages/ForgotPassword/ForgotPasswordPage';
-export { default as DashboardPage } from './pages/Dashboard/DashboardPage';
-export { default as ProductDetailPage } from './pages/ProductDetail/ProductDetailPage';
-export { default as CartPage } from './pages/Cart/CartPage';
-export { default as ComingSoonPage } from './pages/ComingSoon/ComingSoonPage';
+// Auth Module Pages
+export { default as LoginPage } from '@modules/auth/presentation/pages/Login/LoginPage';
+export { default as RegisterPage } from '@modules/auth/presentation/pages/Register/RegisterPage';
+export { default as ForgotPasswordPage } from '@modules/auth/presentation/pages/ForgotPassword/ForgotPasswordPage';
 
-// Layout Components
-export { default as Navbar } from './components/layout/Navbar/Navbar';
-export { default as SideNavBar } from './components/layout/SideNavBar/SideNavBar';
+// Catalog Module
+export { default as DashboardPage } from '@modules/catalog/presentation/pages/Dashboard/DashboardPage';
+export { default as ProductDetailPage } from '@modules/catalog/presentation/pages/ProductDetail/ProductDetailPage';
+export { default as ProductCard } from '@modules/catalog/presentation/components/ProductCard/ProductCard';
+export { default as HeroBanner } from '@modules/catalog/presentation/components/HeroBanner/HeroBanner';
+export { default as ImageCarousel } from '@modules/catalog/presentation/components/ImageCarousel/ImageCarousel';
 
-// Product Components
-export { default as ProductCard } from './components/product/ProductCard/ProductCard';
-export { default as HeroBanner } from './components/product/HeroBanner/HeroBanner';
-export { default as ImageCarousel } from './components/product/ImageCarousel/ImageCarousel';
+// Cart Module
+export { default as CartPage } from '@modules/cart/presentation/pages/Cart/CartPage';
 
-// Common Components
-export { default as CurrencyToggle } from './components/common/CurrencyToggle/CurrencyToggle';
-export { default as LanguageToggle } from './components/common/LanguageToggle/LanguageToggle';
-export { default as FormSelector } from './components/common/FormSelector/FormSelector';
+// Shared
+export { default as ComingSoonPage } from '@shared/pages/ComingSoon/ComingSoonPage';
+export { default as Navbar } from '@shared/components/Navbar/Navbar';
+export { default as SideNavBar } from '@shared/components/SideNavBar/SideNavBar';
+export { default as CurrencyToggle } from '@shared/components/CurrencyToggle/CurrencyToggle';
+export { default as LanguageToggle } from '@shared/components/LanguageToggle/LanguageToggle';
+export { default as FormSelector } from '@shared/components/FormSelector/FormSelector';

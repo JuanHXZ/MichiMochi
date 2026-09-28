@@ -1,7 +1,7 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { createApp } from '../app.js';
-import { ENV } from '../infrastructure/config/env.js';
+import { ENV } from '../shared/config/env.js';
 
 describe('Backend API Tests', () => {
   const app = createApp();
@@ -169,6 +169,28 @@ describe('Backend API Tests', () => {
       expect(meRes.body.data.user.uid).toBe('standalone-uid-999');
       expect(meRes.body.data.user.email).toBe('standalone@michimochi.com');
       expect(meRes.body.data.user.fullName).toBe('Standalone User');
+    });
+  });
+
+  describe('POST /api/auth/google (Google OAuth Endpoint)', () => {
+    it('should reject request when idToken is missing with 400', async () => {
+      const res = await request(app)
+        .post('/api/auth/google')
+        .send({});
+
+      expect(res.status).toBe(400);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.error).toBe('Validation failed');
+    });
+
+    it('should reject request when idToken is invalid or expired with 401', async () => {
+      const res = await request(app)
+        .post('/api/auth/google')
+        .send({ idToken: 'invalid-fake-google-token-xyz-123' });
+
+      expect(res.status).toBe(401);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.error).toBe('Token de Google no válido o expirado.');
     });
   });
 });

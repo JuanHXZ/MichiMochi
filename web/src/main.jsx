@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import './i18n';
-import { storageAdapter } from '@/infrastructure/storage/storageAdapter';
+import { storageAdapter } from '@shared/services/storageAdapter';
 import {
   LoginPage,
   RegisterPage,

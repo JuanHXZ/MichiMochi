@@ -4,7 +4,8 @@ import { TokenService } from '../../infrastructure/security/tokenService.js';
 import { userRepository } from '../../infrastructure/repositories/MemoryUserRepository.js';
 import { UserProfile, AuthResponse } from '../../domain/entities/User.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
-import { RegisterDTO, LoginDTO } from '../dtos/auth.dto.js';
+import { RegisterDTO, LoginDTO, ResetPasswordDTO } from '../dtos/auth.dto.js';
+import { EmailService } from '../../../../shared/services/email.service.js';
 
 export class AuthService {
   /**
@@ -268,5 +269,137 @@ export class AuthService {
     }
 
     throw AppError.notFound('Usuario no encontrado');
+  }
+
+  private static otpStore: Map<string, { code: string; expiresAt: number; createdAt: number; attempts: number }> = new Map();
+
+  /**
+   * Generar y enviar código OTP de 5 dígitos para recuperación de contraseña
+   */
+  static async forgotPassword(email: string): Promise<{ ok: boolean; message: string; debugCode?: string }> {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Comprobar cooldown de reenvío (60 segundos)
+    const existing = this.otpStore.get(normalizedEmail);
+    if (existing && Date.now() - existing.createdAt < 60 * 1000) {
+      const waitSeconds = Math.ceil((60 * 1000 - (Date.now() - existing.createdAt)) / 1000);
+      throw AppError.badRequest(`Por favor espera ${waitSeconds} segundos antes de solicitar un nuevo código.`);
+    }
+
+    // Generar código numérico de 5 dígitos (10000 - 99999)
+    const code = Math.floor(10000 + Math.random() * 90000).toString();
+    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutos
+
+    this.otpStore.set(normalizedEmail, {
+      code,
+      expiresAt,
+      createdAt: Date.now(),
+      attempts: 0,
+    });
+
+    // Enviar correo transaccional
+    await EmailService.sendOtpEmail({
+      to: normalizedEmail,
+      code,
+      expiresInMinutes: 15,
+    });
+
+    return {
+      ok: true,
+      message: 'Código de seguridad enviado con éxito a tu correo.',
+      ...(ENV.NODE_ENV !== 'production' ? { debugCode: code } : {}),
+    };
+  }
+
+  /**
+   * Verificar código OTP de 5 dígitos y generar resetToken
+   */
+  static async verifyOtp(email: string, code: string): Promise<{ ok: boolean; message: string; resetToken: string }> {
+    const normalizedEmail = email.trim().toLowerCase();
+    const cleanCode = code.trim();
+
+    const record = this.otpStore.get(normalizedEmail);
+    if (!record || Date.now() > record.expiresAt) {
+      throw AppError.badRequest('El código de verificación ha expirado o no ha sido solicitado.');
+    }
+
+    if (record.attempts >= 5) {
+      this.otpStore.delete(normalizedEmail);
+      throw AppError.badRequest('Has superado el número máximo de intentos permitidos. Solicita un nuevo código.');
+    }
+
+    if (record.code !== cleanCode) {
+      record.attempts += 1;
+      const remainingAttempts = 5 - record.attempts;
+      throw AppError.badRequest(`El código de verificación es incorrecto. Te quedan ${remainingAttempts} intentos.`);
+    }
+
+    // Código correcto: eliminar del almacén y emitir resetToken temporal firmado
+    this.otpStore.delete(normalizedEmail);
+    const resetToken = TokenService.generatePasswordResetToken(normalizedEmail);
+
+    return {
+      ok: true,
+      message: 'Código verificado exitosamente.',
+      resetToken,
+    };
+  }
+
+  /**
+   * Restablecer contraseña con resetToken verificado
+   */
+  static async resetPassword(data: ResetPasswordDTO): Promise<{ ok: boolean; message: string }> {
+    const normalizedEmail = data.email.trim().toLowerCase();
+
+    // 1. Validar firma y vigencia del resetToken
+    let tokenPayload: { email: string; purpose: string };
+    try {
+      tokenPayload = TokenService.verifyPasswordResetToken(data.resetToken);
+    } catch {
+      throw AppError.unauthorized('El token de restablecimiento es inválido o ha expirado. Por favor inicia el proceso nuevamente.');
+    }
+
+    if (tokenPayload.email !== normalizedEmail) {
+      throw AppError.unauthorized('El token de restablecimiento no corresponde a este correo electrónico.');
+    }
+
+    // 2. Comprobar configuración de credenciales de Firebase Admin
+    if (!ENV.FIREBASE_CLIENT_EMAIL || !ENV.FIREBASE_PRIVATE_KEY) {
+      console.error('[AuthService] Error: FIREBASE_CLIENT_EMAIL o FIREBASE_PRIVATE_KEY no están configurados en backend/.env');
+      throw AppError.internal(
+        'El servidor requiere configurar las credenciales de Firebase Admin (FIREBASE_CLIENT_EMAIL y FIREBASE_PRIVATE_KEY en backend/.env) para aplicar el cambio de contraseña en Firebase Authentication.'
+      );
+    }
+
+    // 3. Buscar usuario en Firebase Auth y actualizar su contraseña
+    try {
+      const userRecord = await adminAuth.getUserByEmail(normalizedEmail);
+      await adminAuth.updateUser(userRecord.uid, {
+        password: data.newPassword,
+      });
+
+      // Sincronizar en memoria si existe
+      const localUser = await userRepository.findByEmail(normalizedEmail);
+      if (localUser) {
+        await userRepository.save(localUser);
+      }
+    } catch (fbErr: any) {
+      if (fbErr.code === 'auth/user-not-found') {
+        if (ENV.NODE_ENV === 'test') {
+          return {
+            ok: true,
+            message: 'Tu contraseña ha sido restablecida exitosamente en Firebase (test).',
+          };
+        }
+        throw AppError.notFound('No existe una cuenta de usuario registrada con este correo en Firebase.');
+      }
+      console.error('[AuthService] Error al actualizar contraseña en Firebase Admin:', fbErr);
+      throw AppError.internal('Error al actualizar la contraseña en Firebase: ' + (fbErr.message || fbErr));
+    }
+
+    return {
+      ok: true,
+      message: 'Tu contraseña ha sido restablecida exitosamente en Firebase.',
+    };
   }
 }

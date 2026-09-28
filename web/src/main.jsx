@@ -7,7 +7,10 @@ import {
   LoginPage,
   RegisterPage,
   ForgotPasswordPage,
+  VerifyCodePage,
+  NewPasswordPage,
   DashboardPage,
+  AdminCatalogPage,
   ProductDetailPage,
   CartPage,
   ComingSoonPage,
@@ -21,6 +24,8 @@ const protectedPath =
   (currentPath === '/dashboard' ||
     currentPath.startsWith('/product/') ||
     currentPath === '/cart' ||
+    currentPath === '/admin' ||
+    currentPath === '/admin/catalog' ||
     currentPath === '/coming-soon') &&
   (!isAuthenticated || !hasSessionUser);
 
@@ -34,7 +39,13 @@ const pageByPath = {
   '/': <LoginPage />,
   '/login': <LoginPage />,
   '/forgot-password': <ForgotPasswordPage />,
+  '/verify-code': <VerifyCodePage />,
+  '/verify-otp': <VerifyCodePage />,
+  '/new-password': <NewPasswordPage />,
+  '/reset-password': <NewPasswordPage />,
   '/dashboard': <DashboardPage />,
+  '/admin': <AdminCatalogPage />,
+  '/admin/catalog': <AdminCatalogPage />,
   '/register': <RegisterPage />,
   '/cart': <CartPage />,
   '/coming-soon': <ComingSoonPage />,

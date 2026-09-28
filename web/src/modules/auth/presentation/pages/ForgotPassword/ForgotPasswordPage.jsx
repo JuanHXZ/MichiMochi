@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import MichiMochiIMG from '@/shared/assets/MichiMochiIMG.png';
-import NavbarLogo from '@/shared/assets/navbar-logo.png';
+import forgotHeroImg from '@/shared/assets/forgot-hero.png';
 import { MdEmail, MdArrowBack } from 'react-icons/md';
-import { FaHeart, FaStar, FaCookieBite } from 'react-icons/fa';
+import { HiArrowRight } from 'react-icons/hi2';
 import { useAuth } from '../../../application/hooks/useAuth';
 import { isValidEmail } from '../../../domain/authValidation';
 import './ForgotPasswordPage.css';
@@ -10,7 +9,7 @@ import './ForgotPasswordPage.css';
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const { resetPassword, loading, error: authError } = useAuth();
 
   const handleEmailChange = (e) => {
@@ -23,133 +22,137 @@ export default function ForgotPasswordPage() {
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      setError('El correo electrónico es obligatorio.');
+      setError('Por favor introduce tu correo electrónico.');
       return;
     }
 
     if (!isValidEmail(trimmedEmail)) {
-      setError('Ingresa un correo electrónico válido.');
+      setError('Por favor introduce un correo electrónico válido.');
       return;
     }
 
+    setError('');
     const result = await resetPassword(trimmedEmail);
+
     if (result.ok) {
-      setEmailSent(true);
+      if (result.data?.debugCode) {
+        console.log(`%c[MichiMochi Dev] Código OTP enviado a ${trimmedEmail}: ${result.data.debugCode}`, 'background: #FFE8EC; color: #E88D9D; font-size: 14px; font-weight: bold; padding: 4px 8px; border-radius: 4px;');
+      }
+      setIsSuccess(true);
+      sessionStorage.setItem('recovery_email', trimmedEmail);
+
+      // Redirigir al Paso 2 (Verify Code) tras confirmar el envío
+      setTimeout(() => {
+        window.location.href = `/verify-code?email=${encodeURIComponent(trimmedEmail)}`;
+      }, 1200);
+    } else {
+      setError(result.message || 'Error al enviar el código de recuperación.');
     }
   };
 
   return (
-    <div className="forgot-page-container" data-node-id="1:727">
-      <div className="forgot-card-container">
-        {/* Lado Izquierdo: Visual & Branding */}
-        <section className="forgot-visual-section">
-          <div className="forgot-blob-1" />
-          <div className="forgot-blob-2" />
+    <main className="forgot-split-screen" data-node-id="1:727">
+      {/* Lado Izquierdo: Hero Image Section (Node 1:729) */}
+      <section className="forgot-hero-section" data-node-id="1:729">
+        <img
+          src={forgotHeroImg}
+          alt="Artisanal Mochi"
+          className="forgot-hero-image"
+          data-node-id="1:730"
+        />
+        <div className="forgot-hero-overlay" data-node-id="1:731" />
 
-          <div className="forgot-visual-content">
-            <div className="forgot-mochi-wrapper">
-              <img
-                src={MichiMochiIMG}
-                alt="Michi Mochi Illustration"
-                className="forgot-mochi-img"
-              />
-              <div className="forgot-mochi-badge">
-                <span>Sweet Security</span>
-              </div>
-            </div>
+        <div className="forgot-hero-content" data-node-id="1:732">
+          <h2 className="forgot-hero-title" data-node-id="1:734">
+            Dulzura en cada bocado.
+          </h2>
+          <p className="forgot-hero-subtitle" data-node-id="1:736">
+            Pronto volverás a disfrutar de tus sabores favoritos.
+          </p>
+        </div>
+      </section>
 
-            <h1 className="forgot-visual-title">
-              Don't Worry!
-            </h1>
-
-            <p className="forgot-visual-subtitle">
-              We'll help you get back to your favorite chewy treats in no time.
-            </p>
-
-            <div className="login-visual-icons">
-              <FaCookieBite title="Sweet" />
-              <FaStar title="Delightful" />
-              <FaHeart title="Made with love" />
-            </div>
+      {/* Lado Derecho: Minimalist Form Section (Node 1:737) */}
+      <section className="forgot-form-container" data-node-id="1:737">
+        <div className="forgot-form-inner" data-node-id="1:738">
+          {/* Brand Identity (Node 1:740) */}
+          <div className="forgot-brand-identity" data-node-id="1:740">
+            <span className="forgot-brand-title" data-node-id="1:742">
+              Michi Mochi
+            </span>
+            <div className="forgot-brand-accent-line" data-node-id="1:743" />
           </div>
-        </section>
 
-        {/* Lado Derecho: Formulario */}
-        <section className="forgot-form-section">
-          <div className="forgot-brand-header">
-            <img
-              src={NavbarLogo}
-              alt="Michi Mochi Logo"
-              className="forgot-logo"
-            />
-            <h2 className="forgot-form-title">
+          {/* Instructional Content (Node 1:745) */}
+          <div className="forgot-instructional-content" data-node-id="1:745">
+            <h1 className="forgot-heading" data-node-id="1:747">
               Recuperar contraseña
-            </h2>
-            <p className="forgot-form-subtitle">
-              Ingresa el correo electrónico asociado a tu cuenta para enviarte un enlace de restablecimiento.
+            </h1>
+            <p className="forgot-description" data-node-id="1:749">
+              Introduce tu correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña.
             </p>
           </div>
 
-          {emailSent ? (
-            <div className="forgot-auth-success" role="alert">
-              <h3 style={{ margin: '0 0 8px 0', fontSize: '1.1rem', fontWeight: 700 }}>
-                ¡Correo enviado con éxito! ✉️
-              </h3>
-              <p style={{ margin: '0 0 16px 0' }}>
-                Hemos enviado las instrucciones para restablecer tu contraseña a <strong>{email.trim()}</strong>. Revisa tu bandeja de entrada o spam.
+          {/* Alertas de error o éxito */}
+          {(error || authError) && (
+            <div className="forgot-alert-error" role="alert">
+              {error || authError}
+            </div>
+          )}
+
+          {isSuccess ? (
+            <div className="forgot-alert-success" role="alert">
+              <p className="forgot-alert-success-title">¡Código enviado con éxito!</p>
+              <p className="forgot-alert-success-text">
+                Redirigiendo a la pantalla de verificación para <strong>{email.trim()}</strong>...
               </p>
-              <a href="/login" className="forgot-submit-btn" style={{ textDecoration: 'none' }}>
-                Volver a Iniciar Sesión
-              </a>
+              <div className="forgot-spinner" />
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="forgot-form-body">
-              {(error || authError) && (
-                <div className="forgot-auth-error" role="alert">
-                  {error || authError}
-                </div>
-              )}
-
-              <div className="forgot-input-group">
-                <label htmlFor="forgot-email" className="forgot-label">
-                  Correo Electrónico
+            /* Formulario (Node 1:750) */
+            <form onSubmit={handleSubmit} className="forgot-form" data-node-id="1:750">
+              <div className="forgot-input-group" data-node-id="1:751">
+                <label htmlFor="forgot-email" className="forgot-label" data-node-id="1:752">
+                  Correo electrónico
                 </label>
-                <div className="forgot-input-wrapper">
-                  <MdEmail className="forgot-input-icon" />
+                <div className="forgot-input-wrapper" data-node-id="1:753">
+                  <MdEmail className="forgot-input-icon" data-node-id="1:758" />
                   <input
                     id="forgot-email"
                     type="email"
-                    className={`forgot-input ${error ? 'has-error' : ''}`}
-                    placeholder="ejemplo@correo.com"
+                    className={`forgot-input ${error ? 'is-invalid' : ''}`}
+                    placeholder="ejemplo@michi.com"
                     value={email}
                     onChange={handleEmailChange}
                     autoComplete="email"
                     disabled={loading}
+                    data-node-id="1:754"
                   />
                 </div>
-                {error && <span className="forgot-error-message">{error}</span>}
               </div>
 
+              {/* Botón Enviar Código (Node 1:759) */}
               <button
                 type="submit"
-                className="forgot-submit-btn"
+                className="forgot-submit-button"
                 disabled={loading}
-                style={{ opacity: loading ? 0.7 : 1, cursor: loading ? 'wait' : 'pointer' }}
+                data-node-id="1:759"
               >
-                {loading ? 'Enviando enlace...' : 'Enviar correo de recuperación'}
+                <span>{loading ? 'Enviando código...' : 'Enviar código'}</span>
+                <HiArrowRight className="forgot-button-icon" data-node-id="1:764" />
               </button>
 
-              <a href="/login" className="forgot-back-link">
-                <MdArrowBack /> Volver a iniciar sesión
-              </a>
+              {/* Footer Link (Node 1:766) */}
+              <div className="forgot-footer-link-wrapper" data-node-id="1:765">
+                <a href="/login" className="forgot-back-link" data-node-id="1:766">
+                  <MdArrowBack className="forgot-back-icon" data-node-id="1:768" />
+                  <span data-node-id="1:769">Volver al inicio de sesión</span>
+                </a>
+              </div>
             </form>
           )}
-        </section>
-      </div>
-
-      <footer className="forgot-footer-credit">
-        <p>© 2024 Michi Mochi Dessert Co. • Privacy • Terms</p>
-      </footer>
-    </div>
+        </div>
+      </section>
+    </main>
   );
 }

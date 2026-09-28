@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '@shared/components/Navbar/Navbar';
 import SideNavBar from '@shared/components/SideNavBar/SideNavBar';
 import ImageCarousel from '../../components/ImageCarousel/ImageCarousel';
 import { useCartStore } from '@/modules/cart/application/stores/cartStore';
 import { useAuthStore } from '@/modules/auth/application/stores/authStore';
+import { useProductStore } from '../../../application/stores/productStore';
 import { useTranslatedProduct } from '../../../application/hooks/useTranslatedProducts';
 import { useCurrency } from '@/modules/cart/application/hooks/useCurrency';
 import './ProductDetailPage.css';
@@ -16,11 +17,18 @@ export default function ProductDetailPage() {
   const [selectedFlavor, setSelectedFlavor] = useState(null);
   const addItem = useCartStore((state) => state.addItem);
   const user = useAuthStore((state) => state.user);
+  const fetchProductById = useProductStore((state) => state.fetchProductById);
 
   const productId = useMemo(() => {
     const path = window.location.pathname;
     return path.split('/product/')[1];
   }, []);
+
+  useEffect(() => {
+    if (productId) {
+      fetchProductById(productId);
+    }
+  }, [productId, fetchProductById]);
 
   const product = useTranslatedProduct(productId);
   const activeFlavor = selectedFlavor ?? (product?.flavors?.[0]?.id ?? null);

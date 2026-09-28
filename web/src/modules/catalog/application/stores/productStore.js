@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import productsData from '@/shared/data/products.json';
+import { productService } from '../../infrastructure/services/productService';
 
 const PRODUCTS_DATA = productsData.products;
 
@@ -8,6 +9,87 @@ export const useProductStore = create((set, get) => ({
   filteredProducts: PRODUCTS_DATA,
   selectedCategory: 'All',
   searchQuery: '',
+  isLoading: false,
+  error: null,
+
+  fetchProducts: async (filters = {}) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await productService.getProducts(filters);
+      set({ products: data, isLoading: false });
+      get().applyFilters();
+      return data;
+    } catch (err) {
+      set({ error: err.message, isLoading: false });
+      return get().products;
+    }
+  },
+
+  fetchProductById: async (id) => {
+    try {
+      const product = await productService.getProductById(id);
+      if (product) {
+        const { products } = get();
+        const exists = products.some((p) => String(p.id) === String(product.id));
+        if (!exists) {
+          const updated = [...products, product];
+          set({ products: updated });
+          get().applyFilters();
+        }
+      }
+      return product;
+    } catch (err) {
+      console.warn(`[productStore] Error fetching product ${id}:`, err);
+      return get().getProductById(id);
+    }
+  },
+
+  addProduct: async (productData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const created = await productService.createProduct(productData);
+      const { products } = get();
+      const updated = [created, ...products];
+      set({ products: updated, isLoading: false });
+      get().applyFilters();
+      return created;
+    } catch (err) {
+      set({ error: err.message, isLoading: false });
+      throw err;
+    }
+  },
+
+  updateProduct: async (id, productData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const updatedProduct = await productService.updateProduct(id, productData);
+      const { products } = get();
+      const updated = products.map((p) =>
+        String(p.id) === String(id) ? { ...p, ...updatedProduct } : p
+      );
+      set({ products: updated, isLoading: false });
+      get().applyFilters();
+      return updatedProduct;
+    } catch (err) {
+      set({ error: err.message, isLoading: false });
+      throw err;
+    }
+  },
+
+  deleteProduct: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      await productService.deleteProduct(id);
+      const { products } = get();
+      const updated = products.filter((p) => String(p.id) !== String(id));
+      set({ products: updated, isLoading: false });
+      get().applyFilters();
+      return true;
+    } catch (err) {
+      set({ error: err.message, isLoading: false });
+      throw err;
+    }
+  },
 
   setCategory: (category) => {
     set({ selectedCategory: category });

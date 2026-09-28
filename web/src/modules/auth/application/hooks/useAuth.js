@@ -6,6 +6,9 @@ import {
   loginWithGoogle,
   logout as logoutService,
   sendPasswordReset,
+  requestPasswordResetOtp,
+  verifyOtpCode,
+  resetPasswordWithToken as resetPasswordService,
 } from '../../infrastructure/services/authService';
 
 /**
@@ -98,10 +101,10 @@ export function useAuth() {
     setLoading(true);
     setError(null);
     try {
-      await sendPasswordReset(email);
-      return { ok: true };
+      const response = await sendPasswordReset(email);
+      return { ok: true, ...response };
     } catch (err) {
-      let msg = 'Error al enviar el correo de recuperación.';
+      let msg = 'Error al enviar el código de recuperación.';
       if (err.code === 'auth/user-not-found') {
         msg = 'No existe una cuenta registrada con este correo.';
       } else if (err.code === 'auth/invalid-email') {
@@ -109,6 +112,51 @@ export function useAuth() {
       } else if (err.message) {
         msg = err.message;
       }
+      setError(msg);
+      return { ok: false, message: msg };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const requestOtp = useCallback(async (email) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await requestPasswordResetOtp(email);
+      return { ok: true, data: response };
+    } catch (err) {
+      const msg = err.message || 'Error al solicitar el código de recuperación.';
+      setError(msg);
+      return { ok: false, message: msg };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const verifyOtp = useCallback(async (email, code) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await verifyOtpCode(email, code);
+      return { ok: true, data: result };
+    } catch (err) {
+      const msg = err.message || 'Error al verificar el código.';
+      setError(msg);
+      return { ok: false, message: msg };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const resetPasswordWithToken = useCallback(async (email, resetToken, newPassword) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await resetPasswordService(email, resetToken, newPassword);
+      return { ok: true, data: response };
+    } catch (err) {
+      const msg = err.message || 'Error al restablecer la contraseña.';
       setError(msg);
       return { ok: false, message: msg };
     } finally {
@@ -127,6 +175,9 @@ export function useAuth() {
     signInWithGoogle: signInWithGoogleAction,
     logout: logoutAction,
     resetPassword,
+    requestOtp,
+    verifyOtp,
+    resetPasswordWithToken,
   };
 }
 

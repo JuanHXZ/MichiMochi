@@ -43,4 +43,32 @@ export class AuthController {
       next(err);
     }
   }
+
+  static async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await AuthService.forgotPassword(req.body.email);
+      res.status(200).json({ ok: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async verifyOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, code } = req.body;
+      const result = await AuthService.verifyOtp(email, code);
+      res.status(200).json({ ok: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await AuthService.resetPassword(req.body);
+      res.status(200).json({ ok: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
 }

@@ -24,24 +24,26 @@ export const useTranslatedProducts = () => {
 
 export const useTranslatedProduct = (productId) => {
   const { i18n } = useTranslation();
+  const products = useProductStore((state) => state.products);
   const getProductById = useProductStore((state) => state.getProductById);
 
   const translatedProduct = useMemo(() => {
     const product = getProductById(productId);
     return translateProduct(product);
-  }, [productId, getProductById, i18n.language]);
+  }, [productId, getProductById, products, i18n.language]);
 
   return translatedProduct;
 };
 
 export const useTranslatedFeaturedProduct = () => {
   const { i18n } = useTranslation();
+  const products = useProductStore((state) => state.products);
   const getFeaturedProduct = useProductStore((state) => state.getFeaturedProduct);
 
   const translatedFeaturedProduct = useMemo(() => {
     const product = getFeaturedProduct();
     return translateProduct(product);
-  }, [getFeaturedProduct, i18n.language]);
+  }, [getFeaturedProduct, products, i18n.language]);
 
   return translatedFeaturedProduct;
 };

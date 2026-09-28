@@ -19,4 +19,23 @@ export class TokenService {
   static verifyToken(token: string): UserProfile {
     return jwt.verify(token, ENV.JWT_SECRET) as UserProfile;
   }
+
+  static generatePasswordResetToken(email: string): string {
+    return jwt.sign(
+      {
+        email: email.trim().toLowerCase(),
+        purpose: 'password_reset',
+      },
+      ENV.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+  }
+
+  static verifyPasswordResetToken(token: string): { email: string; purpose: string } {
+    const decoded = jwt.verify(token, ENV.JWT_SECRET) as any;
+    if (decoded.purpose !== 'password_reset') {
+      throw new Error('Token inválido para restablecimiento de contraseña');
+    }
+    return decoded;
+  }
 }

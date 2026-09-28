@@ -193,4 +193,117 @@ describe('Backend API Tests', () => {
       expect(res.body.error).toBe('Token de Google no válido o expirado.');
     });
   });
+
+  describe('Password Recovery Flow (RF02 - OTP)', () => {
+    const testEmail = 'recovery.tester@michimochi.com';
+    let generatedOtp = '';
+    let resetToken = '';
+
+    it('should reject forgot-password with invalid email', async () => {
+      const res = await request(app)
+        .post('/api/auth/forgot-password')
+        .send({ email: 'not-an-email' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.error).toBe('Validation failed');
+    });
+
+    it('should generate and send OTP for valid email in forgot-password', async () => {
+      const res = await request(app)
+        .post('/api/auth/forgot-password')
+        .send({ email: testEmail });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data).toHaveProperty('message');
+      expect(res.body.data).toHaveProperty('debugCode');
+      expect(res.body.data.debugCode).toMatch(/^\d{5}$/);
+      generatedOtp = res.body.data.debugCode;
+    });
+
+    it('should enforce cooldown if requesting another OTP immediately', async () => {
+      const res = await request(app)
+        .post('/api/auth/forgot-password')
+        .send({ email: testEmail });
+
+      expect(res.status).toBe(400);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.error).toContain('segundos antes de solicitar un nuevo código');
+    });
+
+    it('should reject verify-otp with invalid code format (not 5 digits)', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-otp')
+        .send({ email: testEmail, code: '123' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.error).toBe('Validation failed');
+    });
+
+    it('should reject verify-otp with incorrect 5-digit code', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-otp')
+        .send({ email: testEmail, code: '00000' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.error).toContain('El código de verificación es incorrecto');
+    });
+
+    it('should successfully verify OTP and return a resetToken', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-otp')
+        .send({ email: testEmail, code: generatedOtp });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data).toHaveProperty('resetToken');
+      expect(typeof res.body.data.resetToken).toBe('string');
+      resetToken = res.body.data.resetToken;
+    });
+
+    it('should reject reset-password with invalid or expired token', async () => {
+      const res = await request(app)
+        .post('/api/auth/reset-password')
+        .send({
+          email: testEmail,
+          resetToken: 'invalid.token.here',
+          newPassword: 'ValidPassword123!',
+        });
+
+      expect(res.status).toBe(401);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.error).toContain('token de restablecimiento es inválido');
+    });
+
+    it('should reject reset-password with weak password', async () => {
+      const res = await request(app)
+        .post('/api/auth/reset-password')
+        .send({
+          email: testEmail,
+          resetToken,
+          newPassword: 'weak',
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.error).toBe('Validation failed');
+    });
+
+    it('should successfully reset password with valid token and strong password', async () => {
+      const res = await request(app)
+        .post('/api/auth/reset-password')
+        .send({
+          email: testEmail,
+          resetToken,
+          newPassword: 'MichiSecure2026!#',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data.message).toContain('restablecida exitosamente');
+    });
+  });
 });

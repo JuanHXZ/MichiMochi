@@ -6,6 +6,7 @@ import HeroBanner from "../../components/HeroBanner/HeroBanner";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { useCartStore } from "@/modules/cart/application/stores/cartStore";
 import { useAuthStore } from "@/modules/auth/application/stores/authStore";
+import { useProductStore } from "../../../application/stores/productStore";
 import { useTranslatedProducts, useTranslatedFeaturedProduct } from "../../../application/hooks/useTranslatedProducts";
 import "./DashboardPage.css";
 
@@ -15,9 +16,16 @@ export default function DashboardPage() {
   const addItem = useCartStore((state) => state.addItem);
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const fetchProducts = useProductStore((state) => state.fetchProducts);
   
   const { filteredProducts } = useTranslatedProducts();
   const featuredProduct = useTranslatedFeaturedProduct();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchProducts();
+    }
+  }, [isAuthenticated, fetchProducts]);
 
   const SORT_OPTIONS = [
     { id: "Popular", label: t('dashboard.filters.popular') },

@@ -235,6 +235,154 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
         },
       },
     },
+    '/api/auth/forgot-password': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Solicitud de recuperación de contraseña (Envío de OTP)',
+        description: 'Genera un código OTP de 5 dígitos (expira en 15 min), lo despacha vía Email (o log/mock en dev) y aplica rate-limiting de 60s.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ForgotPasswordRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Código de recuperación generado y enviado exitosamente.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ok: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Código de recuperación enviado a tu correo.' },
+                    expiresInMinutes: { type: 'number', example: 15 },
+                    debugCode: { type: 'string', nullable: true, example: '48291' },
+                  },
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Correo electrónico faltante o con formato inválido.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Demasiadas solicitudes. Debe esperar el tiempo de enfriamiento (60s).',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/auth/verify-otp': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Verificación de código OTP',
+        description: 'Valida el código de 5 dígitos ingresado por el usuario (máx 5 intentos). Si es correcto, genera un token JWT temporal para restablecimiento.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/VerifyOtpRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Código verificado correctamente. Retorna resetToken.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ok: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        verified: { type: 'boolean', example: true },
+                        resetToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+                        message: { type: 'string', example: 'Código verificado con éxito.' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Código incorrecto, expirado o número máximo de intentos excedido.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/auth/reset-password': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Restablecimiento de contraseña',
+        description: 'Actualiza la contraseña del usuario previa validación del resetToken emitido en la verificación del OTP.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ResetPasswordRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Contraseña restablecida exitosamente.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ok: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Contraseña actualizada exitosamente.' },
+                  },
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Token inválido o expirado, o contraseña no cumple los requisitos.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     '/api/products': {
       get: {
         tags: ['Products'],
@@ -573,6 +721,30 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
         required: ['idToken'],
         properties: {
           idToken: { type: 'string', example: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjEy...' },
+        },
+      },
+      ForgotPasswordRequest: {
+        type: 'object',
+        required: ['email'],
+        properties: {
+          email: { type: 'string', format: 'email', example: 'juan.perez@example.com' },
+        },
+      },
+      VerifyOtpRequest: {
+        type: 'object',
+        required: ['email', 'code'],
+        properties: {
+          email: { type: 'string', format: 'email', example: 'juan.perez@example.com' },
+          code: { type: 'string', pattern: '^\\d{5}$', example: '48291' },
+        },
+      },
+      ResetPasswordRequest: {
+        type: 'object',
+        required: ['email', 'resetToken', 'newPassword'],
+        properties: {
+          email: { type: 'string', format: 'email', example: 'juan.perez@example.com' },
+          resetToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+          newPassword: { type: 'string', format: 'password', example: 'NuevaClave#2026' },
         },
       },
       UserProfile: {

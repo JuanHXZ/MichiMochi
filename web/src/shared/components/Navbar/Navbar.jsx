@@ -53,6 +53,7 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
 
   const navItems = [
     { id: 'catalog', label: t('nav.catalog'), href: '/dashboard' },
+    { id: 'admin-catalog', label: t('nav.adminCatalog'), href: '/admin/catalog' },
     { id: 'favorites', label: t('nav.favorites'), href: '/coming-soon' },
     { id: 'orders', label: t('nav.orders'), href: '/coming-soon' },
     { id: 'rewards', label: t('nav.rewards'), href: '/coming-soon' },
@@ -124,6 +125,14 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
 
             {isMenuOpen && (
               <div className="navbar__menu" role="menu">
+                <a
+                  href="/admin/catalog"
+                  className="navbar__menu-item"
+                  role="menuitem"
+                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  ⚙️ {t('nav.adminCatalog')}
+                </a>
                 <button
                   type="button"
                   className="navbar__menu-item"

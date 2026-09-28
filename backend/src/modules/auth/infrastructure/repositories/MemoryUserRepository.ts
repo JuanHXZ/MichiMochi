@@ -54,6 +54,18 @@ export class MemoryUserRepository implements IUserRepository {
         return user;
       }
     }
+
+    if (ENV.FIREBASE_CLIENT_EMAIL && ENV.FIREBASE_PRIVATE_KEY) {
+      try {
+        const userRecord = await adminAuth.getUserByEmail(normalized);
+        if (userRecord) {
+          return this.findById(userRecord.uid);
+        }
+      } catch {
+        // No encontrado en Firebase Admin
+      }
+    }
+
     return null;
   }
 

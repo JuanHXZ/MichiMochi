@@ -7,7 +7,60 @@
     "rewards": "Rewards",
     "cart": "Cart",
     "account": "Account",
-    "logout": "Logout"
+    "logout": "Logout",
+    "adminCatalog": "Admin Catalog"
+  },
+  "admin": {
+    "title": "Catalog Management",
+    "subtitle": "Comprehensive management of products, prices, stock and promotions",
+    "newProduct": "+ New Product",
+    "editProduct": "Edit Product",
+    "metrics": {
+      "totalProducts": "Total Products",
+      "active": "Active",
+      "featured": "Featured in Hero",
+      "activeDiscounts": "Active Discounts",
+      "totalInventory": "Total Inventory",
+      "units": "units"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, category or ingredient...",
+      "allCategories": "All Categories",
+      "allStatuses": "All statuses",
+      "inStock": "In Stock",
+      "outOfStock": "Out of Stock"
+    },
+    "table": {
+      "product": "Product",
+      "category": "Category",
+      "price": "Price",
+      "stock": "Stock",
+      "visibility": "Visibility",
+      "actions": "Actions",
+      "visible": "Visible",
+      "hidden": "Hidden",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete this product?"
+    },
+    "form": {
+      "titleNew": "Create New Product",
+      "titleEdit": "Edit Product",
+      "name": "Product Name",
+      "shortName": "Short Name",
+      "category": "Category",
+      "price": "Base Price ($ USD)",
+      "discount": "Discount (%)",
+      "stock": "Inventory Units",
+      "description": "Short Description",
+      "longDescription": "Detailed Description (Storytelling)",
+      "image": "Primary Image URL",
+      "featured": "Feature in Hero Banner?",
+      "inStock": "Available for sale (In Stock)",
+      "save": "Save Product",
+      "saveChanges": "Save Changes",
+      "cancel": "Cancel"
+    }
   },
   "sidebar": {
     "dashboard": "Dashboard",

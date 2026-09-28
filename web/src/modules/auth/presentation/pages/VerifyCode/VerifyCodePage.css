@@ -1,0 +1,458 @@
+/* ==========================================================================
+   Verify Code - Desktop Step 2 (Figma Node 1:666 - Exact Implementation)
+   Dimensions: 1280 × 792 (50% / 50% Split Screen)
+   ========================================================================== */
+
+.verify-split-screen {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  background-color: #fffbf8;
+  position: relative;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  font-family: 'Spline Sans', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Lado Izquierdo: Brand Imagery & Glassmorphism Card (Node 1:668 - 1:680)
+   -------------------------------------------------------------------------- */
+.verify-hero-section {
+  flex: 1;
+  width: 50%;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background-color: #e8ded4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verify-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Tarjeta Glassmorphism flotante (Node 1:670) */
+.verify-glass-card {
+  position: absolute;
+  width: 448px;
+  max-width: calc(100% - 64px);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 255, 255, 0.65);
+  border-radius: 32px;
+  padding: 36px 38px;
+  box-shadow: 0 20px 40px -10px rgba(109, 68, 17, 0.12);
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+.verify-glass-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.verify-glass-logo-icon {
+  color: #6d4411;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+}
+
+.verify-glass-brand-text {
+  font-family: 'Spline Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #6d4411;
+  letter-spacing: -0.3px;
+}
+
+.verify-glass-title {
+  font-family: 'Spline Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 34px;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.4px;
+}
+
+.verify-glass-subtitle {
+  font-family: 'Spline Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #3a322b;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Lado Derecho: Verification Form (Node 1:681 - 1:726)
+   -------------------------------------------------------------------------- */
+.verify-form-container {
+  flex: 1;
+  width: 50%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  background-color: #fffbf8;
+  box-sizing: border-box;
+}
+
+.verify-form-inner {
+  width: 100%;
+  max-width: 448px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Section (Node 1:683) */
+.verify-header-section {
+  margin-bottom: 28px;
+}
+
+.verify-top-link-wrapper {
+  margin-bottom: 24px;
+}
+
+.verify-top-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #845000;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.verify-top-back-link:hover {
+  color: #643c00;
+}
+
+.verify-top-back-icon {
+  font-size: 16px;
+}
+
+.verify-heading {
+  font-family: 'Spline Sans', sans-serif;
+  font-size: 34px;
+  font-weight: 800;
+  color: #1e1b18;
+  line-height: 40px;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+}
+
+.verify-instruction-text {
+  font-family: 'Spline Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 24px;
+  color: #50453e;
+  margin: 0;
+}
+
+.verify-form-body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   5 Casillas OTP (Node 1:694 - 1:709)
+   -------------------------------------------------------------------------- */
+.verify-otp-inputs-row {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  width: 100%;
+}
+
+.verify-digit-box {
+  width: calc(20% - 10px);
+  height: 74px;
+  background-color: #f7ede4;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  font-size: 28px;
+  font-weight: 800;
+  color: #201b15;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.verify-digit-box::placeholder {
+  color: #847466;
+  font-size: 24px;
+}
+
+.verify-digit-box:focus {
+  background-color: #ffffff;
+  border-color: #be7328;
+  box-shadow: 0 0 0 4px rgba(190, 115, 40, 0.15);
+  transform: translateY(-2px);
+}
+
+.verify-digit-box.is-filled {
+  background-color: #ffffff;
+  border-color: #be7328;
+}
+
+.verify-digit-box.has-error {
+  border-color: #ba1a1a;
+  background-color: #fff5f5;
+}
+
+/* --------------------------------------------------------------------------
+   Action Section & Button (Node 1:710 - 1:717)
+   -------------------------------------------------------------------------- */
+.verify-action-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.verify-action-button {
+  width: 100%;
+  height: 56px;
+  background-color: #be7328;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 6px -4px rgba(132, 80, 0, 0.2), 0 10px 15px -3px rgba(132, 80, 0, 0.2);
+  font-family: inherit;
+}
+
+.verify-action-button:hover:not(:disabled) {
+  background-color: #a8621d;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px -4px rgba(132, 80, 0, 0.25), 0 12px 20px -3px rgba(132, 80, 0, 0.3);
+}
+
+.verify-action-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.verify-resend-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.verify-resend-text {
+  color: #514438;
+}
+
+.verify-resend-timer {
+  color: #845000;
+}
+
+.verify-resend-button {
+  background: transparent;
+  border: none;
+  color: #845000;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 4px;
+  transition: color 0.2s ease;
+}
+
+.verify-resend-button:hover:not(:disabled) {
+  color: #5e3900;
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Help Card (Node 1:718 - 1:726)
+   -------------------------------------------------------------------------- */
+.verify-help-card {
+  background-color: #f2e5d9;
+  border: 1px solid #d6c3b2;
+  border-radius: 28px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.verify-help-icon-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 9999px;
+  background-color: #237ca5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffffff;
+  font-size: 20px;
+}
+
+.verify-help-text-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.verify-help-title {
+  font-family: 'Spline Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #201b15;
+  margin: 0 0 4px 0;
+}
+
+.verify-help-description {
+  font-family: 'Spline Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #514438;
+  line-height: 18px;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Feedbacks (Error & Success)
+   -------------------------------------------------------------------------- */
+.verify-feedback-error {
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #b91c1c;
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.verify-feedback-success {
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  border-radius: 24px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.verify-feedback-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  background: #d1fae5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.verify-feedback-icon {
+  font-size: 2rem;
+  color: #059669;
+}
+
+.verify-feedback-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #065f46;
+  margin: 0 0 8px 0;
+}
+
+.verify-feedback-text {
+  font-size: 0.9375rem;
+  color: #047857;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+}
+
+.verify-feedback-spinner {
+  width: 26px;
+  height: 26px;
+  border: 3px solid rgba(5, 150, 105, 0.2);
+  border-top-color: #059669;
+  border-radius: 9999px;
+  animation: verifySpin 0.8s linear infinite;
+}
+
+@keyframes verifySpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Adaptations
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .verify-split-screen {
+    flex-direction: column;
+  }
+
+  .verify-hero-section {
+    width: 100%;
+    min-height: 320px;
+    max-height: 400px;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+
+  .verify-glass-card {
+    position: relative;
+    width: 100%;
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .verify-glass-title {
+    font-size: 24px;
+    line-height: 28px;
+  }
+
+  .verify-form-container {
+    width: 100%;
+    min-height: auto;
+    padding: 36px 20px 48px;
+  }
+
+  .verify-heading {
+    font-size: 28px;
+    line-height: 34px;
+  }
+
+  .verify-digit-box {
+    height: 64px;
+    border-radius: 16px;
+    font-size: 24px;
+  }
+}

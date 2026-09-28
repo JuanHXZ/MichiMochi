@@ -20,11 +20,9 @@ export async function apiClient(endpoint, options = {}) {
     ...headers,
   };
 
-  if (requiresAuth) {
-    const token = storageAdapter.getAuthToken();
-    if (token) {
-      requestHeaders['Authorization'] = `Bearer ${token}`;
-    }
+  const token = storageAdapter.getAuthToken();
+  if (token && (requiresAuth || !requestHeaders['Authorization'])) {
+    requestHeaders['Authorization'] = `Bearer ${token}`;
   }
 
   const config = {

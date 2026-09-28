@@ -33,3 +33,23 @@ export const forgotPasswordSchema = z.object({
 });
 
 export type ForgotPasswordDTO = z.infer<typeof forgotPasswordSchema>;
+
+export const verifyOtpSchema = z.object({
+  email: z.string().email('Correo electrónico no válido'),
+  code: z.string().regex(/^\d{5}$/, 'El código de verificación debe contener exactamente 5 dígitos numéricos'),
+});
+
+export type VerifyOtpDTO = z.infer<typeof verifyOtpSchema>;
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email('Correo electrónico no válido'),
+  resetToken: z.string().min(1, 'El token de restablecimiento es requerido'),
+  newPassword: z
+    .string()
+    .min(8, 'La nueva contraseña debe tener al menos 8 caracteres')
+    .regex(/[A-Z]/, 'La contraseña debe contener al menos una letra mayúscula')
+    .regex(/[0-9]/, 'La contraseña debe contener al menos un número')
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, 'La contraseña debe contener al menos un carácter especial ($#%)'),
+});
+
+export type ResetPasswordDTO = z.infer<typeof resetPasswordSchema>;

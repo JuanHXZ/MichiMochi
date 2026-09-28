@@ -98,3 +98,50 @@ export const validateRegistrationForm = (formValues) => {
     errors,
   };
 };
+
+export const validateOtp = (code) => {
+  const cleanCode = (code || '').trim();
+  if (!cleanCode) {
+    return { isValid: false, error: 'El código de verificación es obligatorio.' };
+  }
+  if (!/^\d{5}$/.test(cleanCode)) {
+    return { isValid: false, error: 'El código debe contener exactamente 5 dígitos numéricos.' };
+  }
+  return { isValid: true, error: null };
+};
+
+export const validatePasswordRequirements = (password = '') => {
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  return {
+    hasMinLength,
+    hasUppercase,
+    hasNumber,
+    hasSymbol,
+    isValid: hasMinLength && hasUppercase && hasNumber && hasSymbol,
+  };
+};
+
+export const validateResetPasswordForm = ({ password, confirmPassword }) => {
+  const errors = {};
+  const reqs = validatePasswordRequirements(password);
+
+  if (!reqs.isValid) {
+    errors.password = 'La contraseña no cumple con los requisitos de seguridad mínimos.';
+  }
+
+  if (!confirmPassword) {
+    errors.confirmPassword = 'Debes confirmar tu contraseña.';
+  } else if (password !== confirmPassword) {
+    errors.confirmPassword = 'Las contraseñas no coinciden.';
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+    requirements: reqs,
+  };
+};

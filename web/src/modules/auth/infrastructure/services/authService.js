@@ -75,20 +75,50 @@ export const logout = async () => {
 
 export const logoutFirebase = logout;
 
+export const requestPasswordResetOtp = async (email) => {
+  const data = await apiClient('/auth/forgot-password', {
+    method: 'POST',
+    body: { email: email.trim() },
+  });
+  return data;
+};
+
+export const verifyOtpCode = async (email, code) => {
+  const data = await apiClient('/auth/verify-otp', {
+    method: 'POST',
+    body: {
+      email: email.trim(),
+      code: code.trim(),
+    },
+  });
+  return data.data; // { verified: true, resetToken: string, message: string }
+};
+
+export const resetPasswordWithToken = async (email, resetToken, newPassword) => {
+  const data = await apiClient('/auth/reset-password', {
+    method: 'POST',
+    body: {
+      email: email.trim(),
+      resetToken,
+      newPassword,
+    },
+  });
+  return data;
+};
+
 export const sendPasswordReset = async (email) => {
   const trimmedEmail = email.trim();
+  // Primero intentamos la ruta OTP del backend
   try {
-    await sendPasswordResetEmail(auth, trimmedEmail);
-    return { ok: true };
-  } catch (firebaseErr) {
+    const data = await requestPasswordResetOtp(trimmedEmail);
+    return { ok: true, data };
+  } catch (backendErr) {
+    // Si falla el backend, intentamos fallback a Firebase si aplica
     try {
-      const data = await apiClient('/auth/forgot-password', {
-        method: 'POST',
-        body: { email: trimmedEmail },
-      });
-      return { ok: true, data };
+      await sendPasswordResetEmail(auth, trimmedEmail);
+      return { ok: true };
     } catch {
-      throw firebaseErr;
+      throw backendErr;
     }
   }
 };

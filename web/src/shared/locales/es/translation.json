@@ -7,7 +7,60 @@
     "rewards": "Recompensas",
     "cart": "Carrito",
     "account": "Cuenta",
-    "logout": "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "adminCatalog": "Gestión Catálogo"
+  },
+  "admin": {
+    "title": "Gestión de Catálogo",
+    "subtitle": "Administración integral de productos, precios, stock y promociones",
+    "newProduct": "+ Nuevo Producto",
+    "editProduct": "Editar Producto",
+    "metrics": {
+      "totalProducts": "Total Productos",
+      "active": "Activos",
+      "featured": "Destacados en Hero",
+      "activeDiscounts": "Con Descuento Activo",
+      "totalInventory": "Inventario Total",
+      "units": "unidades"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por nombre, categoría o ingrediente...",
+      "allCategories": "Todas las Categorías",
+      "allStatuses": "Todos los estados",
+      "inStock": "En Stock",
+      "outOfStock": "Agotados"
+    },
+    "table": {
+      "product": "Producto",
+      "category": "Categoría",
+      "price": "Precio",
+      "stock": "Stock",
+      "visibility": "Visibilidad",
+      "actions": "Acciones",
+      "visible": "Visible",
+      "hidden": "Oculto",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Estás seguro de que deseas eliminar este producto?"
+    },
+    "form": {
+      "titleNew": "Crear Nuevo Producto",
+      "titleEdit": "Editar Producto",
+      "name": "Nombre del Producto",
+      "shortName": "Nombre Corto",
+      "category": "Categoría",
+      "price": "Precio Base ($ USD)",
+      "discount": "Descuento (%)",
+      "stock": "Unidades en Inventario",
+      "description": "Descripción Corta",
+      "longDescription": "Descripción Detallada (Storytelling)",
+      "image": "URL de Imagen Principal",
+      "featured": "¿Destacar en el Hero Banner?",
+      "inStock": "Disponible para la venta (En Stock)",
+      "save": "Guardar Producto",
+      "saveChanges": "Guardar Cambios",
+      "cancel": "Cancelar"
+    }
   },
   "sidebar": {
     "dashboard": "Inicio",

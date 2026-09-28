@@ -2,9 +2,12 @@
 export { default as LoginPage } from '@modules/auth/presentation/pages/Login/LoginPage';
 export { default as RegisterPage } from '@modules/auth/presentation/pages/Register/RegisterPage';
 export { default as ForgotPasswordPage } from '@modules/auth/presentation/pages/ForgotPassword/ForgotPasswordPage';
+export { default as VerifyCodePage } from '@modules/auth/presentation/pages/VerifyCode/VerifyCodePage';
+export { default as NewPasswordPage } from '@modules/auth/presentation/pages/NewPassword/NewPasswordPage';
 
 // Catalog Module
 export { default as DashboardPage } from '@modules/catalog/presentation/pages/Dashboard/DashboardPage';
+export { default as AdminCatalogPage } from '@modules/catalog/presentation/pages/AdminCatalog/AdminCatalogPage';
 export { default as ProductDetailPage } from '@modules/catalog/presentation/pages/ProductDetail/ProductDetailPage';
 export { default as ProductCard } from '@modules/catalog/presentation/components/ProductCard/ProductCard';
 export { default as HeroBanner } from '@modules/catalog/presentation/components/HeroBanner/HeroBanner';

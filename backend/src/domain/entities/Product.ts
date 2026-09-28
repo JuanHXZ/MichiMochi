@@ -41,12 +41,6 @@ export interface Product {
   updatedAt?: string;
 }
 
-export type CreateProductDTO = Omit<Product, 'id' | 'createdAt' | 'updatedAt'> & {
-  id?: string;
-};
-
-export type UpdateProductDTO = Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt'>>;
-
 export interface ProductFilterQuery {
   category?: string;
   search?: string;

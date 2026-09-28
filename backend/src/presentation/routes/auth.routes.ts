@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller.js';
 import { validateBody } from '../middlewares/validate.middleware.js';
 import { authenticateJWT } from '../middlewares/auth.middleware.js';
-import { registerSchema, loginSchema, googleAuthSchema } from '../schemas/auth.schema.js';
+import { registerSchema, loginSchema, googleAuthSchema } from '../../application/dtos/auth.dto.js';
 
 const router = Router();
 

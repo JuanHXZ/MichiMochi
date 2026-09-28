@@ -16,6 +16,7 @@ const nutritionalInfoSchema = z.object({
 });
 
 export const createProductSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(2, 'El nombre del producto debe tener al menos 2 caracteres'),
   description: z.string().min(5, 'La descripción debe tener al menos 5 caracteres'),
   price: z.number().positive('El precio debe ser un número positivo mayor a 0'),
@@ -40,7 +41,11 @@ export const createProductSchema = z.object({
   bestServedAt: z.string().optional(),
 });
 
+export type CreateProductDTO = z.infer<typeof createProductSchema>;
+
 export const updateProductSchema = createProductSchema.partial();
+
+export type UpdateProductDTO = z.infer<typeof updateProductSchema>;
 
 export const productFilterSchema = z.object({
   category: z.string().optional(),
@@ -48,3 +53,5 @@ export const productFilterSchema = z.object({
   featured: z.preprocess((val) => (val === 'true' ? true : val === 'false' ? false : val), z.boolean().optional()),
   inStock: z.preprocess((val) => (val === 'true' ? true : val === 'false' ? false : val), z.boolean().optional()),
 });
+
+export type ProductFilterDTO = z.infer<typeof productFilterSchema>;

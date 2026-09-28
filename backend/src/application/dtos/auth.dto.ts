@@ -12,16 +12,24 @@ export const registerSchema = z.object({
   }),
 });
 
+export type RegisterDTO = z.infer<typeof registerSchema>;
+
 export const loginSchema = z.object({
   email: z.string().email('Correo electrónico no válido'),
   password: z.string().min(1, 'La contraseña es requerida'),
 });
+
+export type LoginDTO = z.infer<typeof loginSchema>;
 
 export const googleAuthSchema = z.object({
   idToken: z.string().min(1, 'El token de Google ID es requerido'),
   oauthToken: z.string().optional(),
 });
 
+export type GoogleAuthDTO = z.infer<typeof googleAuthSchema>;
+
 export const forgotPasswordSchema = z.object({
   email: z.string().email('Correo electrónico no válido'),
 });
+
+export type ForgotPasswordDTO = z.infer<typeof forgotPasswordSchema>;

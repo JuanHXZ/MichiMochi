@@ -1,8 +1,8 @@
+import { IProductRepository } from '../../domain/repositories/IProductRepository.js';
+import { Product, ProductFilterQuery } from '../../domain/entities/Product.js';
 import { ENV } from '../config/env.js';
 import { adminDb } from '../config/firebaseAdmin.js';
-import { Product, CreateProductDTO, UpdateProductDTO, ProductFilterQuery } from '../types/product.js';
 
-// Catálogo inicial con los productos característicos de MichiMochi
 const INITIAL_PRODUCTS: Product[] = [
   {
     id: '1',
@@ -92,19 +92,15 @@ const INITIAL_PRODUCTS: Product[] = [
   },
 ];
 
-// Almacén en memoria sincronizado con el ciclo de vida del backend
-const productsStore = new Map<string, Product>(INITIAL_PRODUCTS.map((p) => [p.id, { ...p }]));
+export class MemoryProductRepository implements IProductRepository {
+  private productsStore = new Map<string, Product>(INITIAL_PRODUCTS.map((p) => [p.id, { ...p }]));
 
-export class ProductService {
-  private static isFirestoreConfigured(): boolean {
+  private isFirestoreConfigured(): boolean {
     return Boolean(ENV.FIREBASE_CLIENT_EMAIL && ENV.FIREBASE_PRIVATE_KEY);
   }
 
-  /**
-   * Obtiene todos los productos con filtros opcionales (categoría, búsqueda, featured, inStock)
-   */
-  static async getAll(filters?: ProductFilterQuery): Promise<Product[]> {
-    let products = Array.from(productsStore.values());
+  async findAll(filters?: ProductFilterQuery): Promise<Product[]> {
+    let products = Array.from(this.productsStore.values());
 
     if (filters?.category && filters.category !== 'All') {
       const cat = filters.category.toLowerCase();
@@ -133,139 +129,68 @@ export class ProductService {
     return products;
   }
 
-  /**
-   * Obtiene un producto por su ID
-   * @throws 404 si el producto no existe
-   */
-  static async getById(id: string): Promise<Product> {
-    const product = productsStore.get(id);
-    if (!product) {
-      throw { status: 404, message: `Producto con ID '${id}' no encontrado en el catálogo.` };
+  async findById(id: string): Promise<Product | null> {
+    return this.productsStore.get(id) || null;
+  }
+
+  async findByName(name: string): Promise<Product | null> {
+    const normalized = name.trim().toLowerCase();
+    for (const p of this.productsStore.values()) {
+      if (p.name.trim().toLowerCase() === normalized) {
+        return p;
+      }
     }
+    return null;
+  }
+
+  async create(product: Product): Promise<Product> {
+    this.productsStore.set(product.id, product);
+
+    if (this.isFirestoreConfigured()) {
+      try {
+        await adminDb.collection('products').doc(product.id).set(product);
+      } catch (err) {
+        console.warn(`[MemoryProductRepository] Error al persistir producto en Firestore:`, err);
+      }
+    }
+
     return product;
   }
 
-  /**
-   * Agrega un nuevo producto al catálogo
-   */
-  static async create(data: CreateProductDTO): Promise<Product> {
-    const id = data.id || `prod_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  async update(id: string, product: Product): Promise<Product> {
+    this.productsStore.set(id, product);
 
-    if (productsStore.has(id)) {
-      throw { status: 409, message: `Ya existe un producto con el ID '${id}'.` };
-    }
-
-    // Validar duplicidad por nombre (case-insensitive y trim)
-    const normalizedName = data.name.trim().toLowerCase();
-    const existingByName = Array.from(productsStore.values()).find(
-      (p) => p.name.trim().toLowerCase() === normalizedName
-    );
-    if (existingByName) {
-      throw { status: 409, message: `Ya existe un producto con el nombre '${data.name.trim()}'.` };
-    }
-
-    const now = new Date().toISOString();
-    const newProduct: Product = {
-      ...data,
-      name: data.name.trim(),
-      id,
-      inStock: data.inStock !== undefined ? data.inStock : true,
-      stock: data.stock !== undefined ? data.stock : 10,
-      rating: data.rating ?? 5.0,
-      reviewCount: data.reviewCount ?? 0,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    productsStore.set(id, newProduct);
-
-    // Persistir en Firestore si está configurado
     if (this.isFirestoreConfigured()) {
       try {
-        await adminDb.collection('products').doc(id).set(newProduct);
+        await adminDb.collection('products').doc(id).set(product, { merge: true });
       } catch (err) {
-        console.warn(`[ProductService] Advertencia al persistir producto '${id}' en Firestore:`, err);
+        console.warn(`[MemoryProductRepository] Error al actualizar producto en Firestore:`, err);
       }
     }
 
-    return newProduct;
+    return product;
   }
 
-  /**
-   * Actualiza un producto existente por su ID
-   * @throws 404 si el producto no existe
-   */
-  static async update(id: string, data: UpdateProductDTO): Promise<Product> {
-    const existing = productsStore.get(id);
-    if (!existing) {
-      throw { status: 404, message: `Producto con ID '${id}' no encontrado en el catálogo.` };
-    }
+  async delete(id: string): Promise<boolean> {
+    const result = this.productsStore.delete(id);
 
-    // Validar duplicidad si se actualiza el nombre
-    if (data.name && data.name.trim()) {
-      const normalizedName = data.name.trim().toLowerCase();
-      const existingByName = Array.from(productsStore.values()).find(
-        (p) => p.id !== id && p.name.trim().toLowerCase() === normalizedName
-      );
-      if (existingByName) {
-        throw { status: 409, message: `Ya existe otro producto con el nombre '${data.name.trim()}'.` };
-      }
-    }
-
-    const updatedProduct: Product = {
-      ...existing,
-      ...data,
-      ...(data.name && { name: data.name.trim() }),
-      id: existing.id, // ID inmutable
-      createdAt: existing.createdAt, // createdAt inmutable
-      updatedAt: new Date().toISOString(),
-    };
-
-    productsStore.set(id, updatedProduct);
-
-    // Actualizar en Firestore si está configurado
-    if (this.isFirestoreConfigured()) {
-      try {
-        await adminDb.collection('products').doc(id).set(updatedProduct, { merge: true });
-      } catch (err) {
-        console.warn(`[ProductService] Advertencia al actualizar producto '${id}' en Firestore:`, err);
-      }
-    }
-
-    return updatedProduct;
-  }
-
-  /**
-   * Elimina un producto por su ID
-   * @throws 404 si el producto no existe
-   */
-  static async delete(id: string): Promise<{ id: string; name: string }> {
-    const existing = productsStore.get(id);
-    if (!existing) {
-      throw { status: 404, message: `Producto con ID '${id}' no encontrado en el catálogo.` };
-    }
-
-    productsStore.delete(id);
-
-    // Eliminar de Firestore si está configurado
-    if (this.isFirestoreConfigured()) {
+    if (result && this.isFirestoreConfigured()) {
       try {
         await adminDb.collection('products').doc(id).delete();
       } catch (err) {
-        console.warn(`[ProductService] Advertencia al eliminar producto '${id}' de Firestore:`, err);
+        console.warn(`[MemoryProductRepository] Error al eliminar producto de Firestore:`, err);
       }
     }
 
-    return { id, name: existing.name };
+    return result;
   }
 
-  /**
-   * Reinicia el catálogo a su estado base (útil para pruebas unitarias)
-   */
-  static resetToInitial(): void {
-    productsStore.clear();
+  resetToInitial(): void {
+    this.productsStore.clear();
     for (const p of INITIAL_PRODUCTS) {
-      productsStore.set(p.id, { ...p });
+      this.productsStore.set(p.id, { ...p });
     }
   }
 }
+
+export const productRepository = new MemoryProductRepository();

@@ -1,37 +1,16 @@
-import jwt from 'jsonwebtoken';
-import { ENV } from '../config/env.js';
-import { adminAuth, adminDb } from '../config/firebaseAdmin.js';
-import { UserProfile, AuthResponse } from '../types/index.js';
-
-// Cache en memoria para sesiones activas y perfiles
-const usersStore = new Map<string, UserProfile>();
+import { ENV } from '../../infrastructure/config/env.js';
+import { adminAuth } from '../../infrastructure/config/firebaseAdmin.js';
+import { TokenService } from '../../infrastructure/security/tokenService.js';
+import { userRepository } from '../../infrastructure/repositories/MemoryUserRepository.js';
+import { UserProfile, AuthResponse } from '../../domain/entities/User.js';
+import { AppError } from '../../domain/errors/AppError.js';
+import { RegisterDTO, LoginDTO } from '../dtos/auth.dto.js';
 
 export class AuthService {
-  private static generateToken(user: UserProfile): string {
-    return jwt.sign(
-      {
-        uid: user.uid,
-        email: user.email,
-        fullName: user.fullName,
-        provider: user.provider,
-      },
-      ENV.JWT_SECRET,
-      { expiresIn: ENV.JWT_EXPIRES_IN as any }
-    );
-  }
-
   /**
    * Registro con Email y Password vía Firebase Identity Toolkit REST API
    */
-  static async register(data: {
-    fullName: string;
-    email: string;
-    phone?: string;
-    address?: string;
-    city?: string;
-    password: string;
-    acceptedTerms: boolean;
-  }): Promise<AuthResponse> {
+  static async register(data: RegisterDTO): Promise<AuthResponse> {
     const normalizedEmail = data.email.trim().toLowerCase();
 
     const signUpUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${ENV.FIREBASE_API_KEY}`;
@@ -51,11 +30,11 @@ export class AuthService {
     if (!signUpResponse.ok) {
       const errorCode = signUpData?.error?.message;
       if (errorCode === 'EMAIL_EXISTS') {
-        throw { status: 409, message: 'El correo electrónico ya se encuentra registrado.' };
+        throw AppError.conflict('El correo electrónico ya se encuentra registrado.');
       } else if (errorCode === 'WEAK_PASSWORD : Password should be at least 6 characters') {
-        throw { status: 400, message: 'La contraseña debe tener al menos 6 caracteres.' };
+        throw AppError.badRequest('La contraseña debe tener al menos 6 caracteres.');
       }
-      throw { status: 400, message: signUpData?.error?.message || 'Error al registrar el usuario.' };
+      throw AppError.badRequest(signUpData?.error?.message || 'Error al registrar el usuario.');
     }
 
     const uid = signUpData.localId;
@@ -73,34 +52,8 @@ export class AuthService {
       createdAt: new Date().toISOString(),
     };
 
-    // Crear/actualizar documento en Firestore
-    try {
-      const fsUrl = `https://firestore.googleapis.com/v1/projects/${ENV.FIREBASE_PROJECT_ID}/databases/(default)/documents/users/${uid}`;
-      await fetch(fsUrl, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({
-          fields: {
-            uid: { stringValue: userProfile.uid },
-            email: { stringValue: userProfile.email },
-            fullName: { stringValue: userProfile.fullName },
-            phone: { stringValue: userProfile.phone || '' },
-            address: { stringValue: userProfile.address || '' },
-            city: { stringValue: userProfile.city || '' },
-            provider: { stringValue: userProfile.provider },
-            createdAt: { stringValue: userProfile.createdAt },
-          },
-        }),
-      });
-    } catch (err) {
-      console.warn('Advertencia al guardar perfil en Firestore:', err);
-    }
-
-    usersStore.set(userProfile.uid, userProfile);
-    const token = this.generateToken(userProfile);
+    await userRepository.save(userProfile, idToken);
+    const token = TokenService.generateAccessToken(userProfile);
 
     return {
       user: userProfile,
@@ -111,7 +64,7 @@ export class AuthService {
   /**
    * Inicio de sesión con Email y Password vía Firebase Identity Toolkit REST API
    */
-  static async login(data: { email: string; password: string }): Promise<AuthResponse> {
+  static async login(data: LoginDTO): Promise<AuthResponse> {
     const normalizedEmail = data.email.trim().toLowerCase();
 
     const signInUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${ENV.FIREBASE_API_KEY}`;
@@ -130,11 +83,11 @@ export class AuthService {
     if (!signInResponse.ok) {
       const errorCode = signInData?.error?.message;
       if (errorCode === 'EMAIL_NOT_FOUND' || errorCode === 'INVALID_PASSWORD' || errorCode === 'INVALID_LOGIN_CREDENTIALS') {
-        throw { status: 401, message: 'Correo o contraseña incorrectos.' };
+        throw AppError.unauthorized('Correo o contraseña incorrectos.');
       } else if (errorCode === 'USER_DISABLED') {
-        throw { status: 403, message: 'Esta cuenta ha sido inhabilitada.' };
+        throw AppError.forbidden('Esta cuenta ha sido inhabilitada.');
       }
-      throw { status: 401, message: 'Credenciales inválidas o usuario no encontrado.' };
+      throw AppError.unauthorized('Credenciales inválidas o usuario no encontrado.');
     }
 
     const uid = signInData.localId;
@@ -172,11 +125,11 @@ export class AuthService {
         };
       }
     } catch (err) {
-      console.warn('Advertencia al consultar perfil en Firestore:', err);
+      console.warn('[AuthService] Advertencia al consultar perfil en Firestore:', err);
     }
 
-    usersStore.set(userProfile.uid, userProfile);
-    const token = this.generateToken(userProfile);
+    await userRepository.save(userProfile);
+    const token = TokenService.generateAccessToken(userProfile);
 
     return {
       user: userProfile,
@@ -191,7 +144,7 @@ export class AuthService {
    */
   static async loginWithGoogle(idToken: string, oauthToken?: string): Promise<AuthResponse> {
     if (!idToken) {
-      throw { status: 400, message: 'El token de autenticación es requerido.' };
+      throw AppError.badRequest('El token de autenticación es requerido.');
     }
 
     let uid = '';
@@ -267,10 +220,10 @@ export class AuthService {
     }
 
     if (!verified || !uid) {
-      throw { status: 401, message: 'Token de Google no válido o expirado.' };
+      throw AppError.unauthorized('Token de Google no válido o expirado.');
     }
 
-    let userProfile: UserProfile = {
+    const userProfile: UserProfile = {
       uid,
       email,
       fullName,
@@ -279,32 +232,8 @@ export class AuthService {
       createdAt: new Date().toISOString(),
     };
 
-    // Sincronizar en Firestore
-    try {
-      const fsUrl = `https://firestore.googleapis.com/v1/projects/${ENV.FIREBASE_PROJECT_ID}/databases/(default)/documents/users/${uid}`;
-      await fetch(fsUrl, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({
-          fields: {
-            uid: { stringValue: uid },
-            email: { stringValue: email },
-            fullName: { stringValue: fullName },
-            photoURL: { stringValue: photoURL || '' },
-            provider: { stringValue: 'google' },
-            createdAt: { stringValue: userProfile.createdAt },
-          },
-        }),
-      });
-    } catch (err) {
-      console.warn('Advertencia al sincronizar Google en Firestore:', err);
-    }
-
-    usersStore.set(userProfile.uid, userProfile);
-    const token = this.generateToken(userProfile);
+    await userRepository.save(userProfile, idToken);
+    const token = TokenService.generateAccessToken(userProfile);
 
     return {
       user: userProfile,
@@ -316,46 +245,12 @@ export class AuthService {
    * Obtener perfil del usuario por UID (con fallback en memoria, JWT claims y Firebase Admin)
    */
   static async getProfile(uid: string, fallbackUser?: Partial<UserProfile>): Promise<UserProfile> {
-    // 1. Verificar cache en memoria (usuarios logueados o registrados recientemente)
-    const cached = usersStore.get(uid);
-    if (cached) {
-      return cached;
+    const user = await userRepository.findById(uid);
+    if (user) {
+      return user;
     }
 
-    // 2. Si Firebase Admin SDK está configurado con credenciales, consultar usuario
-    if (ENV.FIREBASE_CLIENT_EMAIL && ENV.FIREBASE_PRIVATE_KEY) {
-      try {
-        const userRecord = await adminAuth.getUser(uid);
-        let docData: any = {};
-        try {
-          const docSnap = await adminDb.collection('users').doc(uid).get();
-          if (docSnap.exists) {
-            docData = docSnap.data() || {};
-          }
-        } catch {
-          // Si firestore falla, continuar con datos de auth
-        }
-
-        const profile: UserProfile = {
-          uid: userRecord.uid,
-          email: userRecord.email || fallbackUser?.email || '',
-          fullName: docData.fullName || userRecord.displayName || fallbackUser?.fullName || 'Usuario',
-          phone: docData.phone || userRecord.phoneNumber || fallbackUser?.phone || '',
-          address: docData.address || fallbackUser?.address || '',
-          city: docData.city || fallbackUser?.city || '',
-          photoURL: docData.photoURL || userRecord.photoURL || fallbackUser?.photoURL || null,
-          provider: (docData.provider as any) || (fallbackUser?.provider as any) || 'password',
-          createdAt: docData.createdAt || userRecord.metadata?.creationTime || new Date().toISOString(),
-        };
-
-        usersStore.set(uid, profile);
-        return profile;
-      } catch (adminErr) {
-        console.warn('[AuthService] Advertencia al consultar usuario en Firebase Admin:', adminErr);
-      }
-    }
-
-    // 3. Fallback con datos verificados del JWT en la sesión activa
+    // Fallback con datos verificados del JWT en la sesión activa
     if (fallbackUser && (fallbackUser.uid === uid || !fallbackUser.uid)) {
       const profile: UserProfile = {
         uid,
@@ -368,10 +263,10 @@ export class AuthService {
         provider: (fallbackUser.provider as any) || 'password',
         createdAt: fallbackUser.createdAt || new Date().toISOString(),
       };
-      usersStore.set(uid, profile);
+      await userRepository.save(profile);
       return profile;
     }
 
-    throw { status: 404, message: 'Usuario no encontrado' };
+    throw AppError.notFound('Usuario no encontrado');
   }
 }

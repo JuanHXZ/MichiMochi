@@ -1,7 +1,7 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { createApp } from '../app.js';
-import { ENV } from '../config/env.js';
+import { ENV } from '../infrastructure/config/env.js';
 
 describe('Backend API Tests', () => {
   const app = createApp();

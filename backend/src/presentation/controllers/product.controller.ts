@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { ProductService } from '../services/product.service.js';
+import { ProductService } from '../../application/services/product.service.js';
 import { AuthRequest } from '../middlewares/auth.middleware.js';
-import { ProductFilterQuery } from '../types/product.js';
+import { ProductFilterQuery } from '../../domain/entities/Product.js';
 
 export class ProductController {
   /**

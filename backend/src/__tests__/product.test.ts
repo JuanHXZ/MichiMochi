@@ -1,8 +1,8 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { createApp } from '../app.js';
-import { ENV } from '../config/env.js';
-import { ProductService } from '../services/product.service.js';
+import { ENV } from '../infrastructure/config/env.js';
+import { ProductService } from '../application/services/product.service.js';
 
 describe('Product Catalog CRUD API Tests', () => {
   const app = createApp();

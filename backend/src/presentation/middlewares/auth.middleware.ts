@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { ENV } from '../config/env.js';
-import { UserProfile } from '../types/index.js';
+import { TokenService } from '../../infrastructure/security/tokenService.js';
+import { UserProfile } from '../../domain/entities/User.js';
 
 export interface AuthRequest extends Request {
   user?: UserProfile;
@@ -18,7 +17,7 @@ export const authenticateJWT = (req: AuthRequest, res: Response, next: NextFunct
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, ENV.JWT_SECRET) as UserProfile;
+    const decoded = TokenService.verifyToken(token);
     req.user = decoded;
     next();
   } catch {

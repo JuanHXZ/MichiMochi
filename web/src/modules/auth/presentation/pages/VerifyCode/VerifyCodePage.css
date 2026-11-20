@@ -4,14 +4,14 @@
    ========================================================================== */
 
 .verify-split-screen {
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   display: flex;
-  background-color: #fffbf8;
+  background-color: var(--background);
   position: relative;
   box-sizing: border-box;
-  overflow-x: hidden;
-  font-family: 'Spline Sans', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  overflow-x: clip;
+  font-family: var(--sans);
 }
 
 /* --------------------------------------------------------------------------
@@ -20,10 +20,10 @@
 .verify-hero-section {
   flex: 1;
   width: 50%;
-  min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
   overflow: hidden;
-  background-color: #e8ded4;
+  background-color: var(--surface-container-high);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,12 +100,12 @@
 .verify-form-container {
   flex: 1;
   width: 50%;
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 48px 32px;
-  background-color: #fffbf8;
+  background-color: var(--background);
   box-sizing: border-box;
 }
 
@@ -129,7 +129,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #845000;
+  color: var(--primary);
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
@@ -137,7 +137,7 @@
 }
 
 .verify-top-back-link:hover {
-  color: #643c00;
+  color: var(--primary-dark);
 }
 
 .verify-top-back-icon {
@@ -145,21 +145,21 @@
 }
 
 .verify-heading {
-  font-family: 'Spline Sans', sans-serif;
+  font-family: var(--sans);
   font-size: 34px;
   font-weight: 800;
-  color: #1e1b18;
+  color: var(--heading-color);
   line-height: 40px;
   margin: 0 0 12px 0;
   letter-spacing: -0.5px;
 }
 
 .verify-instruction-text {
-  font-family: 'Spline Sans', sans-serif;
+  font-family: var(--sans);
   font-size: 15px;
   font-weight: 400;
   line-height: 24px;
-  color: #50453e;
+  color: var(--body-text);
   margin: 0;
 }
 
@@ -170,52 +170,52 @@
 }
 
 /* --------------------------------------------------------------------------
-   5 Casillas OTP (Node 1:694 - 1:709)
+   Single Numeric OTP Input (Node 1:694)
    -------------------------------------------------------------------------- */
 .verify-otp-inputs-row {
   display: flex;
-  gap: 12px;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 28px;
   width: 100%;
 }
 
-.verify-digit-box {
-  width: calc(20% - 10px);
-  height: 74px;
-  background-color: #f7ede4;
-  border: 2px solid transparent;
+.verify-otp-input {
+  width: 100%;
+  min-height: 64px;
+  background-color: var(--surface-container);
+  border: 2px solid var(--border-color);
   border-radius: 20px;
-  font-size: 28px;
+  font-family: var(--mono);
+  font-size: max(1.5rem, 1em);
   font-weight: 800;
-  color: #201b15;
+  letter-spacing: 0.5em;
+  padding: 0.75rem 1rem 0.75rem calc(1rem + 0.5em);
+  color: var(--heading-color);
   text-align: center;
-  outline: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
   box-sizing: border-box;
-  font-family: inherit;
 }
 
-.verify-digit-box::placeholder {
-  color: #847466;
-  font-size: 24px;
+.verify-otp-input::placeholder {
+  color: var(--text-secondary);
 }
 
-.verify-digit-box:focus {
-  background-color: #ffffff;
-  border-color: #be7328;
-  box-shadow: 0 0 0 4px rgba(190, 115, 40, 0.15);
-  transform: translateY(-2px);
+.verify-otp-input:focus-visible {
+  background-color: var(--card-bg);
+  border-color: var(--primary);
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
 }
 
-.verify-digit-box.is-filled {
-  background-color: #ffffff;
-  border-color: #be7328;
+.verify-otp-input.is-filled {
+  background-color: var(--card-bg);
+  border-color: var(--primary);
 }
 
-.verify-digit-box.has-error {
-  border-color: #ba1a1a;
-  background-color: #fff5f5;
+.verify-otp-input.has-error,
+.verify-otp-input:user-invalid {
+  border-color: var(--error);
+  background-color: var(--error-container);
 }
 
 /* --------------------------------------------------------------------------
@@ -231,22 +231,27 @@
 .verify-action-button {
   width: 100%;
   height: 56px;
-  background-color: #be7328;
-  color: #ffffff;
+  background-color: var(--primary);
+  color: var(--on-primary);
   border: none;
   border-radius: 9999px;
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 6px -4px rgba(132, 80, 0, 0.2), 0 10px 15px -3px rgba(132, 80, 0, 0.2);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-md);
   font-family: inherit;
 }
 
 .verify-action-button:hover:not(:disabled) {
-  background-color: #a8621d;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 12px -4px rgba(132, 80, 0, 0.25), 0 12px 20px -3px rgba(132, 80, 0, 0.3);
+  background-color: var(--primary-dark);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .verify-action-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
 }
 
 .verify-action-button:disabled {
@@ -265,17 +270,17 @@
 }
 
 .verify-resend-text {
-  color: #514438;
+  color: var(--body-text);
 }
 
 .verify-resend-timer {
-  color: #845000;
+  color: var(--primary);
 }
 
 .verify-resend-button {
   background: transparent;
   border: none;
-  color: #845000;
+  color: var(--primary);
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -284,7 +289,7 @@
 }
 
 .verify-resend-button:hover:not(:disabled) {
-  color: #5e3900;
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 
@@ -292,8 +297,8 @@
    Help Card (Node 1:718 - 1:726)
    -------------------------------------------------------------------------- */
 .verify-help-card {
-  background-color: #f2e5d9;
-  border: 1px solid #d6c3b2;
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--border-color);
   border-radius: 28px;
   padding: 20px 24px;
   display: flex;
@@ -307,12 +312,12 @@
   width: 38px;
   height: 38px;
   border-radius: 9999px;
-  background-color: #237ca5;
+  background-color: var(--tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #ffffff;
+  color: var(--on-tertiary);
   font-size: 20px;
 }
 
@@ -322,18 +327,18 @@
 }
 
 .verify-help-title {
-  font-family: 'Spline Sans', sans-serif;
+  font-family: var(--sans);
   font-size: 14px;
   font-weight: 600;
-  color: #201b15;
+  color: var(--heading-color);
   margin: 0 0 4px 0;
 }
 
 .verify-help-description {
-  font-family: 'Spline Sans', sans-serif;
+  font-family: var(--sans);
   font-size: 12px;
   font-weight: 400;
-  color: #514438;
+  color: var(--body-text);
   line-height: 18px;
   margin: 0;
 }
@@ -342,9 +347,9 @@
    Feedbacks (Error & Success)
    -------------------------------------------------------------------------- */
 .verify-feedback-error {
-  background-color: #fee2e2;
-  border: 1px solid #ef4444;
-  color: #b91c1c;
+  background-color: var(--error-container);
+  border: 1px solid var(--error);
+  color: var(--on-error-container);
   padding: 12px 18px;
   border-radius: 16px;
   font-size: 0.875rem;
@@ -353,8 +358,8 @@
 }
 
 .verify-feedback-success {
-  background: #ecfdf5;
-  border: 1px solid #10b981;
+  background: color-mix(in oklab, var(--success-green) 14%, var(--card-bg));
+  border: 1px solid var(--success-green);
   border-radius: 24px;
   padding: 32px 24px;
   display: flex;
@@ -367,7 +372,7 @@
   width: 56px;
   height: 56px;
   border-radius: 9999px;
-  background: #d1fae5;
+  background: color-mix(in oklab, var(--success-green) 22%, var(--card-bg));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -376,19 +381,19 @@
 
 .verify-feedback-icon {
   font-size: 2rem;
-  color: #059669;
+  color: var(--success-green);
 }
 
 .verify-feedback-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #065f46;
+  color: var(--heading-color);
   margin: 0 0 8px 0;
 }
 
 .verify-feedback-text {
   font-size: 0.9375rem;
-  color: #047857;
+  color: var(--body-text);
   line-height: 1.5;
   margin: 0 0 16px 0;
 }
@@ -396,10 +401,15 @@
 .verify-feedback-spinner {
   width: 26px;
   height: 26px;
-  border: 3px solid rgba(5, 150, 105, 0.2);
-  border-top-color: #059669;
+  border: 3px solid color-mix(in oklab, var(--success-green) 25%, transparent);
+  border-top-color: var(--success-green);
   border-radius: 9999px;
-  animation: verifySpin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .verify-feedback-spinner {
+    animation: verifySpin 0.8s linear infinite;
+  }
 }
 
 @keyframes verifySpin {
@@ -450,7 +460,7 @@
     line-height: 34px;
   }
 
-  .verify-digit-box {
+  .verify-otp-input {
     height: 64px;
     border-radius: 16px;
     font-size: 24px;

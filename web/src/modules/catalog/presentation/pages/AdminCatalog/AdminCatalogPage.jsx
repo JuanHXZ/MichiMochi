@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '@shared/components/Navbar/Navbar';
 import SideNavBar from '@shared/components/SideNavBar/SideNavBar';
 import { useProductStore } from '@modules/catalog/application/stores/productStore';
 import { useAuthStore } from '@/modules/auth/application/stores/authStore';
 import { useCurrency } from '@/modules/cart/application/hooks/useCurrency';
+import { useToastStore } from '@shared/stores/toastStore';
 import './AdminCatalogPage.css';
 
 const DEFAULT_FORM = {
@@ -39,17 +40,52 @@ export default function AdminCatalogPage() {
     isLoading,
   } = useProductStore();
 
+  const showToast = useToastStore((state) => state.showToast);
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('All');
   const [stockFilter, setStockFilter] = useState('all');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formData, setFormData] = useState(DEFAULT_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedbackMsg, setFeedbackMsg] = useState('');
+  const [productToDelete, setProductToDelete] = useState(null);
+
+  const drawerDialogRef = useRef(null);
+  const deleteDialogRef = useRef(null);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Safari fallback for closedby="any"
+  useEffect(() => {
+    if ('closedBy' in HTMLDialogElement.prototype) return;
+
+    const cleanups = [drawerDialogRef.current, deleteDialogRef.current]
+      .filter(Boolean)
+      .map((dialog) => {
+        const outside = (e) => {
+          const r = dialog.getBoundingClientRect();
+          return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+        };
+        let pressedOutside = false;
+        const onDown = (e) => {
+          pressedOutside = outside(e);
+        };
+        const onUp = (e) => {
+          if (pressedOutside && outside(e)) {
+            dialog.close();
+          }
+          pressedOutside = false;
+        };
+        dialog.addEventListener('pointerdown', onDown);
+        dialog.addEventListener('pointerup', onUp);
+        return () => {
+          dialog.removeEventListener('pointerdown', onDown);
+          dialog.removeEventListener('pointerup', onUp);
+        };
+      });
+
+    return () => cleanups.forEach((fn) => fn());
+  }, []);
 
   const userName =
     String(user?.fullName || '').trim() ||
@@ -94,7 +130,7 @@ export default function AdminCatalogPage() {
       image: '/assets/strawberry1.png',
       images: ['/assets/strawberry1.png'],
     });
-    setIsDrawerOpen(true);
+    drawerDialogRef.current?.showModal();
   };
 
   const handleOpenEdit = (prod) => {
@@ -114,29 +150,48 @@ export default function AdminCatalogPage() {
       image: prod.image || '/assets/strawberry1.png',
       images: prod.images?.length ? prod.images : [prod.image || '/assets/strawberry1.png'],
     });
-    setIsDrawerOpen(true);
+    drawerDialogRef.current?.showModal();
   };
 
   const handleToggleVisibility = async (prod) => {
     try {
       await updateProduct(prod.id, { inStock: !prod.inStock });
     } catch (err) {
-      alert(`Error al actualizar estado: ${err.message}`);
+      showToast({
+        message: `Error al actualizar estado: ${err.message}`,
+        type: 'error',
+      });
     }
   };
 
-  const handleDelete = async (prod) => {
-    const confirmDelete = window.confirm(
-      t('admin.table.deleteConfirm') || `¿Eliminar permanentemente "${prod.name}" del catálogo?`
-    );
-    if (!confirmDelete) return;
+  const handleDelete = (prod) => {
+    setProductToDelete(prod);
+    deleteDialogRef.current?.showModal();
+  };
+
+  const handleDeleteDialogClose = async () => {
+    const dialog = deleteDialogRef.current;
+    const choice = dialog?.returnValue || '';
+    if (dialog) {
+      dialog.returnValue = '';
+    }
+
+    const target = productToDelete;
+    setProductToDelete(null);
+
+    if (choice !== 'confirm' || !target) return;
 
     try {
-      await deleteProduct(prod.id);
-      setFeedbackMsg(`Producto "${prod.name}" eliminado correctamente.`);
-      setTimeout(() => setFeedbackMsg(''), 4000);
+      await deleteProduct(target.id);
+      showToast({
+        message: `Producto "${target.name}" eliminado correctamente.`,
+        type: 'success',
+      });
     } catch (err) {
-      alert(`Error al eliminar: ${err.message}`);
+      showToast({
+        message: `Error al eliminar: ${err.message}`,
+        type: 'error',
+      });
     }
   };
 
@@ -162,16 +217,24 @@ export default function AdminCatalogPage() {
 
       if (formData.id) {
         await updateProduct(formData.id, payload);
-        setFeedbackMsg(`Producto "${payload.name}" actualizado exitosamente.`);
+        showToast({
+          message: `Producto "${payload.name}" actualizado exitosamente.`,
+          type: 'success',
+        });
       } else {
         await addProduct(payload);
-        setFeedbackMsg(`Producto "${payload.name}" creado exitosamente.`);
+        showToast({
+          message: `Producto "${payload.name}" creado exitosamente.`,
+          type: 'success',
+        });
       }
 
-      setIsDrawerOpen(false);
-      setTimeout(() => setFeedbackMsg(''), 4000);
+      drawerDialogRef.current?.close();
     } catch (err) {
-      alert(`Error al guardar: ${err.message}`);
+      showToast({
+        message: `Error al guardar: ${err.message}`,
+        type: 'error',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -188,11 +251,11 @@ export default function AdminCatalogPage() {
       <div className="admin-catalog__layout">
         <SideNavBar />
 
-        <main className="admin-catalog__main">
+        <main id="main-content" className="admin-catalog__main">
           {/* Header */}
           <div className="admin-catalog__header">
             <div className="admin-catalog__header-titles">
-              <span className="admin-catalog__badge">👑 Portal de Administración</span>
+              <span className="admin-catalog__badge"><span aria-hidden="true">👑</span> Portal de Administración</span>
               <h1 className="admin-catalog__title">{t('admin.title')}</h1>
               <p className="admin-catalog__subtitle">{t('admin.subtitle')}</p>
             </div>
@@ -202,31 +265,15 @@ export default function AdminCatalogPage() {
               className="admin-catalog__btn-primary"
               onClick={handleOpenCreate}
             >
-              <span>+</span>
+              <span aria-hidden="true">+</span>
               <span>{t('admin.newProduct')}</span>
             </button>
           </div>
 
-          {feedbackMsg && (
-            <div
-              style={{
-                background: '#dcfce7',
-                color: '#15803d',
-                padding: '0.85rem 1.25rem',
-                borderRadius: '0.75rem',
-                marginBottom: '1.5rem',
-                fontWeight: 500,
-                border: '1px solid #bbf7d0',
-              }}
-            >
-              ✓ {feedbackMsg}
-            </div>
-          )}
-
           {/* Metric KPI Cards */}
-          <section className="admin-catalog__kpis">
+          <section className="admin-catalog__kpis" aria-label="Catalog metrics">
             <div className="admin-kpi-card">
-              <div className="admin-kpi-card__icon admin-kpi-card__icon--brown">🍡</div>
+              <div className="admin-kpi-card__icon admin-kpi-card__icon--brown" aria-hidden="true">🍡</div>
               <div className="admin-kpi-card__content">
                 <span className="admin-kpi-card__value">{totalCount}</span>
                 <span className="admin-kpi-card__label">{t('admin.metrics.totalProducts')}</span>
@@ -234,7 +281,7 @@ export default function AdminCatalogPage() {
             </div>
 
             <div className="admin-kpi-card">
-              <div className="admin-kpi-card__icon admin-kpi-card__icon--gold">⭐</div>
+              <div className="admin-kpi-card__icon admin-kpi-card__icon--gold" aria-hidden="true">⭐</div>
               <div className="admin-kpi-card__content">
                 <span className="admin-kpi-card__value">{featuredCount}</span>
                 <span className="admin-kpi-card__label">{t('admin.metrics.featured')}</span>
@@ -242,7 +289,7 @@ export default function AdminCatalogPage() {
             </div>
 
             <div className="admin-kpi-card">
-              <div className="admin-kpi-card__icon admin-kpi-card__icon--rose">🏷️</div>
+              <div className="admin-kpi-card__icon admin-kpi-card__icon--rose" aria-hidden="true">🏷️</div>
               <div className="admin-kpi-card__content">
                 <span className="admin-kpi-card__value">{discountCount}</span>
                 <span className="admin-kpi-card__label">{t('admin.metrics.activeDiscounts')}</span>
@@ -250,7 +297,7 @@ export default function AdminCatalogPage() {
             </div>
 
             <div className="admin-kpi-card">
-              <div className="admin-kpi-card__icon admin-kpi-card__icon--green">📦</div>
+              <div className="admin-kpi-card__icon admin-kpi-card__icon--green" aria-hidden="true">📦</div>
               <div className="admin-kpi-card__content">
                 <span className="admin-kpi-card__value">{totalInventory}</span>
                 <span className="admin-kpi-card__label">{t('admin.metrics.totalInventory')}</span>
@@ -259,11 +306,16 @@ export default function AdminCatalogPage() {
           </section>
 
           {/* Filter Toolbar */}
-          <section className="admin-catalog__toolbar">
+          <search className="admin-catalog__toolbar">
             <div className="admin-catalog__search-box">
-              <span>🔍</span>
+              <span aria-hidden="true">🔍</span>
+              <label htmlFor="admin-catalog-search" className="visually-hidden">
+                {t('admin.filters.searchPlaceholder')}
+              </label>
               <input
-                type="text"
+                id="admin-catalog-search"
+                name="search"
+                type="search"
                 placeholder={t('admin.filters.searchPlaceholder')}
                 className="admin-catalog__search-input"
                 value={search}
@@ -276,6 +328,7 @@ export default function AdminCatalogPage() {
                 <button
                   key={cat}
                   type="button"
+                  aria-pressed={selectedCat === cat}
                   className={`admin-catalog__cat-pill ${
                     selectedCat === cat ? 'admin-catalog__cat-pill--active' : ''
                   }`}
@@ -287,7 +340,12 @@ export default function AdminCatalogPage() {
             </div>
 
             <div>
+              <label htmlFor="admin-stock-filter" className="visually-hidden">
+                {t('admin.filters.allStatuses')}
+              </label>
               <select
+                id="admin-stock-filter"
+                name="stockFilter"
                 value={stockFilter}
                 onChange={(e) => setStockFilter(e.target.value)}
                 className="admin-form-select"
@@ -298,20 +356,28 @@ export default function AdminCatalogPage() {
                 <option value="outOfStock">{t('admin.filters.outOfStock')}</option>
               </select>
             </div>
-          </section>
+          </search>
 
           {/* Product Data Table */}
           <section className="admin-catalog__table-card">
-            <div className="admin-catalog__table-wrapper">
+            <div
+              tabIndex={0}
+              role="region"
+              aria-labelledby="admin-products-caption"
+              className="admin-catalog__table-wrapper"
+            >
               <table className="admin-table">
+                <caption id="admin-products-caption" className="visually-hidden">
+                  {t('admin.title')}
+                </caption>
                 <thead>
                   <tr>
-                    <th>{t('admin.table.product')}</th>
-                    <th>{t('admin.table.category')}</th>
-                    <th>{t('admin.table.price')}</th>
-                    <th>{t('admin.table.stock')}</th>
-                    <th>{t('admin.table.visibility')}</th>
-                    <th style={{ textAlign: 'right' }}>{t('admin.table.actions')}</th>
+                    <th scope="col">{t('admin.table.product')}</th>
+                    <th scope="col">{t('admin.table.category')}</th>
+                    <th scope="col">{t('admin.table.price')}</th>
+                    <th scope="col">{t('admin.table.stock')}</th>
+                    <th scope="col">{t('admin.table.visibility')}</th>
+                    <th scope="col" style={{ textAlign: 'right' }}>{t('admin.table.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -319,12 +385,16 @@ export default function AdminCatalogPage() {
                     const hasDiscount = Number(prod.discount) > 0;
                     return (
                       <tr key={prod.id}>
-                        <td>
+                        <td data-label={t('admin.table.product')}>
                           <div className="admin-product-cell">
                             <img
                               src={prod.image || '/assets/strawberry1.png'}
                               alt={prod.name}
                               className="admin-product-thumb"
+                              width={56}
+                              height={56}
+                              loading="lazy"
+                              decoding="async"
                               onError={(e) => {
                                 e.target.src = '/assets/strawberry1.png';
                               }}
@@ -337,10 +407,10 @@ export default function AdminCatalogPage() {
                             </div>
                           </div>
                         </td>
-                        <td>
+                        <td data-label={t('admin.table.category')}>
                           <span className="admin-category-badge">{prod.category}</span>
                         </td>
-                        <td>
+                        <td data-label={t('admin.table.price')}>
                           <div className="admin-price-cell">
                             <span className="admin-price-final">
                               {formatPrice(prod.price).formatted}
@@ -357,7 +427,7 @@ export default function AdminCatalogPage() {
                             )}
                           </div>
                         </td>
-                        <td>
+                        <td data-label={t('admin.table.stock')}>
                           <div className="admin-stock-indicator">
                             <span
                               className={`admin-stock-dot ${
@@ -371,17 +441,17 @@ export default function AdminCatalogPage() {
                             <span>{prod.stock || 0} u.</span>
                           </div>
                         </td>
-                        <td>
-                          <label className="admin-switch" title="Activar/Ocultar producto">
-                            <input
-                              type="checkbox"
-                              checked={Boolean(prod.inStock)}
-                              onChange={() => handleToggleVisibility(prod)}
-                            />
-                            <span className="admin-switch__slider" />
-                          </label>
+                        <td data-label={t('admin.table.visibility')}>
+                          <input
+                            type="checkbox"
+                            {...({ switch: '' })}
+                            className="admin-switch-input"
+                            aria-label={`Toggle visibility for ${prod.name}`}
+                            checked={Boolean(prod.inStock)}
+                            onChange={() => handleToggleVisibility(prod)}
+                          />
                         </td>
-                        <td>
+                        <td data-label={t('admin.table.actions')}>
                           <div
                             className="admin-actions-cell"
                             style={{ justifyContent: 'flex-end' }}
@@ -390,17 +460,17 @@ export default function AdminCatalogPage() {
                               type="button"
                               className="admin-action-btn"
                               onClick={() => handleOpenEdit(prod)}
-                              title={t('admin.table.edit')}
+                              aria-label={`${t('admin.table.edit')} ${prod.name}`}
                             >
-                              ✏️ {t('admin.table.edit')}
+                              <span aria-hidden="true">✏️</span> {t('admin.table.edit')}
                             </button>
                             <button
                               type="button"
                               className="admin-action-btn admin-action-btn--delete"
                               onClick={() => handleDelete(prod)}
-                              title={t('admin.table.delete')}
+                              aria-label={`${t('admin.table.delete')} ${prod.name}`}
                             >
-                              🗑️
+                              <span aria-hidden="true">🗑️</span>
                             </button>
                           </div>
                         </td>
@@ -425,193 +495,243 @@ export default function AdminCatalogPage() {
       </div>
 
       {/* Slide-over Drawer (Create / Edit Form) */}
-      {isDrawerOpen && (
-        <div className="admin-drawer-overlay" onClick={() => setIsDrawerOpen(false)}>
-          <div className="admin-drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-drawer__header">
-              <h2 className="admin-drawer__title">
-                {formData.id ? t('admin.form.titleEdit') : t('admin.form.titleNew')}
-              </h2>
-              <button
-                type="button"
-                className="admin-drawer__close"
-                onClick={() => setIsDrawerOpen(false)}
-              >
-                ✕
-              </button>
+      <dialog
+        ref={drawerDialogRef}
+        className="admin-drawer"
+        closedby="any"
+        aria-labelledby="admin-drawer-title"
+      >
+        <div className="admin-drawer__header">
+          <h2 id="admin-drawer-title" className="admin-drawer__title">
+            {formData.id ? t('admin.form.titleEdit') : t('admin.form.titleNew')}
+          </h2>
+          <button
+            type="button"
+            className="admin-drawer__close"
+            onClick={() => drawerDialogRef.current?.close()}
+            aria-label={t('admin.form.cancel')}
+          >
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="admin-drawer__body">
+          <div className="admin-form-group">
+            <label htmlFor="admin-prod-name" className="admin-form-label">{t('admin.form.name')}</label>
+            <input
+              id="admin-prod-name"
+              name="name"
+              type="text"
+              required
+              autoFocus
+              className="admin-form-input"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Ej. Blueberry Dream Mochi"
+            />
+          </div>
+
+          <div className="admin-form-row">
+            <div className="admin-form-group">
+              <label htmlFor="admin-prod-short-name" className="admin-form-label">{t('admin.form.shortName')}</label>
+              <input
+                id="admin-prod-short-name"
+                name="shortName"
+                type="text"
+                className="admin-form-input"
+                value={formData.shortName}
+                onChange={(e) => setFormData({ ...formData, shortName: e.target.value })}
+                placeholder="Ej. Blueberry Dream"
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="admin-drawer__body">
-              <div className="admin-form-group">
-                <label className="admin-form-label">{t('admin.form.name')}</label>
-                <input
-                  type="text"
-                  required
-                  className="admin-form-input"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Ej. Blueberry Dream Mochi"
-                />
-              </div>
-
-              <div className="admin-form-row">
-                <div className="admin-form-group">
-                  <label className="admin-form-label">{t('admin.form.shortName')}</label>
-                  <input
-                    type="text"
-                    className="admin-form-input"
-                    value={formData.shortName}
-                    onChange={(e) => setFormData({ ...formData, shortName: e.target.value })}
-                    placeholder="Ej. Blueberry Dream"
-                  />
-                </div>
-
-                <div className="admin-form-group">
-                  <label className="admin-form-label">{t('admin.form.category')}</label>
-                  <select
-                    className="admin-form-select"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  >
-                    <option value="Strawberry">Strawberry</option>
-                    <option value="Mango">Mango</option>
-                    <option value="Matcha">Matcha</option>
-                    <option value="Chocolate">Chocolate</option>
-                    <option value="Special">Special / Seasonal</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="admin-form-row">
-                <div className="admin-form-group">
-                  <label className="admin-form-label">{t('admin.form.price')}</label>
-                  <input
-                    type="number"
-                    step="0.05"
-                    min="0.1"
-                    required
-                    className="admin-form-input"
-                    value={formData.price}
-                    onChange={(e) =>
-                      setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })
-                    }
-                  />
-                </div>
-
-                <div className="admin-form-group">
-                  <label className="admin-form-label">{t('admin.form.discount')}</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    className="admin-form-input"
-                    value={formData.discount}
-                    onChange={(e) =>
-                      setFormData({ ...formData, discount: parseInt(e.target.value, 10) || 0 })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="admin-form-row">
-                <div className="admin-form-group">
-                  <label className="admin-form-label">{t('admin.form.stock')}</label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    className="admin-form-input"
-                    value={formData.stock}
-                    onChange={(e) =>
-                      setFormData({ ...formData, stock: parseInt(e.target.value, 10) || 0 })
-                    }
-                  />
-                </div>
-
-                <div className="admin-form-group">
-                  <label className="admin-form-label">{t('admin.form.image')}</label>
-                  <input
-                    type="text"
-                    className="admin-form-input"
-                    value={formData.image}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        image: e.target.value,
-                        images: [e.target.value],
-                      })
-                    }
-                    placeholder="/assets/strawberry1.png"
-                  />
-                </div>
-              </div>
-
-              <div className="admin-form-group">
-                <label className="admin-form-label">{t('admin.form.description')}</label>
-                <input
-                  type="text"
-                  required
-                  className="admin-form-input"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Descripción resumida del producto"
-                />
-              </div>
-
-              <div className="admin-form-group">
-                <label className="admin-form-label">{t('admin.form.longDescription')}</label>
-                <textarea
-                  rows={3}
-                  className="admin-form-textarea"
-                  value={formData.longDescription}
-                  onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
-                  placeholder="Historia, origen y detalles del postre..."
-                />
-              </div>
-
-              <label className="admin-form-checkbox">
-                <input
-                  type="checkbox"
-                  checked={formData.featured}
-                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                />
-                <span>{t('admin.form.featured')}</span>
-              </label>
-
-              <label className="admin-form-checkbox">
-                <input
-                  type="checkbox"
-                  checked={formData.inStock}
-                  onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
-                />
-                <span>{t('admin.form.inStock')}</span>
-              </label>
-
-              <div className="admin-drawer__footer">
-                <button
-                  type="button"
-                  className="admin-btn-secondary"
-                  onClick={() => setIsDrawerOpen(false)}
-                >
-                  {t('admin.form.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting || isLoading}
-                  className="admin-catalog__btn-primary"
-                  style={{ padding: '0.65rem 1.5rem' }}
-                >
-                  {isSubmitting
-                    ? 'Guardando...'
-                    : formData.id
-                    ? t('admin.form.saveChanges')
-                    : t('admin.form.save')}
-                </button>
-              </div>
-            </form>
+            <div className="admin-form-group">
+              <label htmlFor="admin-prod-category" className="admin-form-label">{t('admin.form.category')}</label>
+              <select
+                id="admin-prod-category"
+                name="category"
+                className="admin-form-select"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              >
+                <option value="Strawberry">Strawberry</option>
+                <option value="Mango">Mango</option>
+                <option value="Matcha">Matcha</option>
+                <option value="Chocolate">Chocolate</option>
+                <option value="Special">Special / Seasonal</option>
+              </select>
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="admin-form-row">
+            <div className="admin-form-group">
+              <label htmlFor="admin-prod-price" className="admin-form-label">{t('admin.form.price')}</label>
+              <input
+                id="admin-prod-price"
+                name="price"
+                type="number"
+                step="0.05"
+                min="0.1"
+                required
+                className="admin-form-input"
+                value={formData.price}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })
+                }
+              />
+            </div>
+
+            <div className="admin-form-group">
+              <label htmlFor="admin-prod-discount" className="admin-form-label">{t('admin.form.discount')}</label>
+              <input
+                id="admin-prod-discount"
+                name="discount"
+                type="number"
+                min="0"
+                max="100"
+                className="admin-form-input"
+                value={formData.discount}
+                onChange={(e) =>
+                  setFormData({ ...formData, discount: parseInt(e.target.value, 10) || 0 })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="admin-form-row">
+            <div className="admin-form-group">
+              <label htmlFor="admin-prod-stock" className="admin-form-label">{t('admin.form.stock')}</label>
+              <input
+                id="admin-prod-stock"
+                name="stock"
+                type="number"
+                min="0"
+                required
+                className="admin-form-input"
+                value={formData.stock}
+                onChange={(e) =>
+                  setFormData({ ...formData, stock: parseInt(e.target.value, 10) || 0 })
+                }
+              />
+            </div>
+
+            <div className="admin-form-group">
+              <label htmlFor="admin-prod-image" className="admin-form-label">{t('admin.form.image')}</label>
+              <input
+                id="admin-prod-image"
+                name="image"
+                type="text"
+                className="admin-form-input"
+                value={formData.image}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    image: e.target.value,
+                    images: [e.target.value],
+                  })
+                }
+                placeholder="/assets/strawberry1.png"
+              />
+            </div>
+          </div>
+
+          <div className="admin-form-group">
+            <label htmlFor="admin-prod-desc" className="admin-form-label">{t('admin.form.description')}</label>
+            <input
+              id="admin-prod-desc"
+              name="description"
+              type="text"
+              required
+              className="admin-form-input"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Descripción resumida del producto"
+            />
+          </div>
+
+          <div className="admin-form-group">
+            <label htmlFor="admin-prod-long-desc" className="admin-form-label">{t('admin.form.longDescription')}</label>
+            <textarea
+              id="admin-prod-long-desc"
+              name="longDescription"
+              rows={3}
+              className="admin-form-textarea"
+              value={formData.longDescription}
+              onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
+              placeholder="Historia, origen y detalles del postre..."
+            />
+          </div>
+
+          <label htmlFor="admin-prod-featured" className="admin-form-checkbox">
+            <input
+              id="admin-prod-featured"
+              name="featured"
+              type="checkbox"
+              checked={formData.featured}
+              onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+            />
+            <span>{t('admin.form.featured')}</span>
+          </label>
+
+          <label htmlFor="admin-prod-instock" className="admin-form-checkbox">
+            <input
+              id="admin-prod-instock"
+              name="inStock"
+              type="checkbox"
+              checked={formData.inStock}
+              onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+            />
+            <span>{t('admin.form.inStock')}</span>
+          </label>
+
+          <div className="admin-drawer__footer">
+            <button
+              type="button"
+              className="admin-btn-secondary"
+              onClick={() => drawerDialogRef.current?.close()}
+            >
+              {t('admin.form.cancel')}
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || isLoading}
+              className="admin-catalog__btn-primary"
+              style={{ padding: '0.65rem 1.5rem' }}
+            >
+              {isSubmitting
+                ? 'Guardando...'
+                : formData.id
+                ? t('admin.form.saveChanges')
+                : t('admin.form.save')}
+            </button>
+          </div>
+        </form>
+      </dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <dialog
+        ref={deleteDialogRef}
+        className="admin-confirm-dialog"
+        closedby="any"
+        aria-labelledby="delete-dialog-title"
+        onClose={handleDeleteDialogClose}
+      >
+        <h2 id="delete-dialog-title" className="admin-confirm-dialog__title">
+          {t('admin.table.delete')}
+        </h2>
+        <p className="admin-confirm-dialog__text">
+          {t('admin.table.deleteConfirm') ||
+            `¿Eliminar permanentemente "${productToDelete?.name || ''}" del catálogo?`}
+        </p>
+        <form method="dialog" className="admin-confirm-dialog__actions">
+          <button type="submit" value="cancel" className="admin-btn-secondary" autoFocus>
+            {t('admin.form.cancel')}
+          </button>
+          <button type="submit" value="confirm" className="admin-btn-danger">
+            {t('admin.table.delete')}
+          </button>
+        </form>
+      </dialog>
     </div>
   );
 }

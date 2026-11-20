@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import MichiMochiIMG from '@/shared/assets/MichiMochiIMG.png';
-import NavbarLogo from '@/shared/assets/navbar-logo.png';
 import { FaLock, FaEye, FaEyeSlash, FaHeart, FaStar, FaCookieBite } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
 import { useAuth } from '../../../application/hooks/useAuth';
@@ -59,7 +57,7 @@ export default function LoginPage() {
 
   return (
     <div className="login-page-container" data-node-id="1:408">
-      <div className="login-card-container" data-node-id="1:409">
+      <main id="main-content" className="login-card-container" data-node-id="1:409">
         {/* Lado Izquierdo: Branding & Visual */}
         <section className="login-visual-section" data-node-id="1:410">
           <div className="login-blob-1" data-node-id="1:411" />
@@ -68,9 +66,12 @@ export default function LoginPage() {
           <div className="login-visual-content" data-node-id="1:413">
             <div className="login-mochi-wrapper" data-node-id="1:425">
               <img
-                src={MichiMochiIMG}
+                src="/assets/MichiMochiIMG.png"
                 alt="Michi Mochi Playful Illustration"
                 className="login-mochi-img"
+                width={320}
+                height={320}
+                fetchPriority="high"
               />
               <div className="login-mochi-badge" data-node-id="1:427">
                 <span>Mmm... Mochi!</span>
@@ -85,10 +86,10 @@ export default function LoginPage() {
               Step into a world of chewy, creamy, and delightful treats. Your daily dose of happiness is just a sign-in away!
             </p>
 
-            <div className="login-visual-icons" data-node-id="1:418">
-              <FaCookieBite title="Sweet" />
-              <FaStar title="Delightful" />
-              <FaHeart title="Made with love" />
+            <div className="login-visual-icons" data-node-id="1:418" aria-hidden="true">
+              <FaCookieBite />
+              <FaStar />
+              <FaHeart />
             </div>
           </div>
         </section>
@@ -97,9 +98,11 @@ export default function LoginPage() {
         <section className="login-form-section" data-node-id="1:431">
           <div className="login-brand-header" data-node-id="1:433">
             <img
-              src={NavbarLogo}
+              src="/assets/navbar-logo.png"
               alt="Michi Mochi Logo"
               className="login-logo"
+              width={52}
+              height={52}
               data-node-id="1:435"
             />
             <h2 className="login-form-title" data-node-id="1:437">
@@ -123,18 +126,28 @@ export default function LoginPage() {
                 Email Address
               </label>
               <div className="login-input-wrapper" data-node-id="1:443">
-                <MdEmail className="login-input-icon" />
+                <MdEmail className="login-input-icon" aria-hidden="true" />
                 <input
                   id="login-email"
+                  name="email"
                   type="email"
+                  required
+                  spellCheck={false}
+                  enterKeyHint="next"
                   className={`login-input ${errors.email ? 'has-error' : ''}`}
                   placeholder="hello@example.com"
                   value={formValues.email}
                   onChange={handleFieldChange('email')}
-                  autoComplete="email"
+                  autoComplete="username"
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? 'login-email-error' : undefined}
                 />
               </div>
-              {errors.email && <span className="login-error-message">{errors.email}</span>}
+              {errors.email && (
+                <span id="login-email-error" className="login-error-message">
+                  {errors.email}
+                </span>
+              )}
             </div>
 
             {/* Password Field */}
@@ -148,27 +161,37 @@ export default function LoginPage() {
                 </a>
               </div>
               <div className="login-input-wrapper" data-node-id="1:455">
-                <FaLock className="login-input-icon" />
+                <FaLock className="login-input-icon" aria-hidden="true" />
                 <input
                   id="login-password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
+                  required
+                  enterKeyHint="done"
                   className={`login-input ${errors.password ? 'has-error' : ''}`}
                   placeholder="••••••••"
                   value={formValues.password}
                   onChange={handleFieldChange('password')}
                   autoComplete="current-password"
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? 'login-password-error' : undefined}
                 />
                 <button
                   type="button"
                   className="login-password-toggle"
                   onClick={() => setShowPassword((prev) => !prev)}
+                  aria-pressed={showPassword}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   data-node-id="1:461"
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  {showPassword ? <FaEyeSlash aria-hidden="true" /> : <FaEye aria-hidden="true" />}
                 </button>
               </div>
-              {errors.password && <span className="login-error-message">{errors.password}</span>}
+              {errors.password && (
+                <span id="login-password-error" className="login-error-message">
+                  {errors.password}
+                </span>
+              )}
             </div>
 
             {/* Submit Button */}
@@ -200,7 +223,7 @@ export default function LoginPage() {
               data-node-id="1:468"
               style={{ opacity: loading ? 0.7 : 1, cursor: loading ? 'wait' : 'pointer' }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" data-node-id="1:469">
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" data-node-id="1:469">
                 <path
                   fill="#4285F4"
                   d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
@@ -230,7 +253,7 @@ export default function LoginPage() {
             </div>
           </form>
         </section>
-      </div>
+      </main>
 
       {/* Footer Credit */}
       <footer className="login-footer-credit" data-node-id="1:486">

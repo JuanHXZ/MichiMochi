@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useId } from "react";
 import { Menu as MenuIcon, ShoppingCart, LightMode, DarkMode } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useCartStore } from '@modules/cart/application/stores/cartStore';
@@ -11,34 +11,11 @@ import "./Navbar.css";
 
 const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
   const { t } = useTranslation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const userMenuRef = useRef(null);
+  const userMenuId = useId();
   const totalItems = useCartStore((state) => state.totalItems());
   const { theme, toggleTheme } = useThemeStore();
   const { toggleSidebar } = useSidebarStore();
   const clearSession = useAuthStore((state) => state.clearSession);
-
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    const handleEscape = (event) => {
-      if (event.key === "Escape") {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
 
   const handleLogout = () => {
     clearSession();
@@ -61,23 +38,28 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
 
   return (
     <header className="navbar">
+      <a href="#main-content" className="skip-link visually-hidden">
+        Skip to main content
+      </a>
       <div className="navbar__content">
         <div className="navbar__left">
           <button 
+            type="button"
             className="navbar__menu-btn"
             onClick={toggleSidebar}
             aria-label="Toggle menu"
           >
-            <MenuIcon />
+            <MenuIcon aria-hidden="true" />
           </button>
 
-          <span className="navbar__brand-text">Michi Mochi</span>
+          <a href="/dashboard" className="navbar__brand-text">Michi Mochi</a>
           
-          <nav className="navbar__nav">
+          <nav className="navbar__nav" aria-label="Primary">
             {navItems.map((item) => (
               <a
                 key={item.id}
                 href={item.href}
+                aria-current={currentPage === item.id ? 'page' : undefined}
                 className={`navbar__nav-link ${currentPage === item.id ? 'navbar__nav-link--active' : ''}`}
               >
                 {item.label}
@@ -88,61 +70,55 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
 
         <div className="navbar__actions">
           <button 
+            type="button"
             className="navbar__icon-btn" 
             onClick={toggleTheme}
             aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
           >
-            {theme === 'light' ? <DarkMode /> : <LightMode />}
+            {theme === 'light' ? <DarkMode aria-hidden="true" /> : <LightMode aria-hidden="true" />}
           </button>
 
           <LanguageToggle variant="navbar" />
 
           <CurrencyToggle variant="navbar" />
 
-          <button 
+          <a 
+            href="/cart"
             className="navbar__cart-btn" 
-            aria-label="Shopping cart"
-            onClick={() => window.location.href = '/cart'}
+            aria-label={totalItems > 0 ? `Shopping cart (${totalItems})` : 'Shopping cart'}
           >
-            <ShoppingCart />
+            <ShoppingCart aria-hidden="true" />
             {totalItems > 0 && (
-              <span className="navbar__cart-badge">{totalItems}</span>
+              <span className="navbar__cart-badge" aria-hidden="true">{totalItems}</span>
             )}
-          </button>
+          </a>
 
-          <div className="navbar__user" ref={userMenuRef}>
+          <div className="navbar__user">
             <button
               type="button"
               className="navbar__avatar"
-              onClick={() => setIsMenuOpen((prev) => !prev)}
-              aria-haspopup="menu"
-              aria-expanded={isMenuOpen}
+              popoverTarget={userMenuId}
               aria-label="Open user menu"
             >
               {userName.charAt(0).toUpperCase()}
             </button>
 
-            {isMenuOpen && (
-              <div className="navbar__menu" role="menu">
-                <a
-                  href="/admin/catalog"
-                  className="navbar__menu-item"
-                  role="menuitem"
-                  style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
-                >
-                  ⚙️ {t('nav.adminCatalog')}
-                </a>
-                <button
-                  type="button"
-                  className="navbar__menu-item"
-                  role="menuitem"
-                  onClick={handleLogout}
-                >
-                  {t('nav.logout')}
-                </button>
-              </div>
-            )}
+            <div id={userMenuId} popover="auto" className="navbar__menu">
+              <a
+                href="/admin/catalog"
+                className="navbar__menu-item"
+              >
+                <span aria-hidden="true">⚙️</span> {t('nav.adminCatalog')}
+              </a>
+              <button
+                type="button"
+                className="navbar__menu-item"
+                onClick={handleLogout}
+              >
+                {t('nav.logout')}
+              </button>
+            </div>
           </div>
         </div>
 

@@ -1,42 +1,18 @@
 import { useState } from 'react';
-import MichiMochiIMG from '@/shared/assets/MichiMochiIMG.png';
-import NavbarLogo from '@/shared/assets/navbar-logo.png';
 import { FaUser, FaPhoneAlt, FaCity, FaLock, FaEye, FaEyeSlash, FaArrowRight } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
 import { FaLocationDot } from 'react-icons/fa6';
 import { useCities } from '@shared/hooks/useCities';
 import { useAuth } from '../../../application/hooks/useAuth';
 import { validateRegistrationForm } from '../../../domain/authValidation';
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
-import CheckIcon from '@mui/icons-material/Check';
 import FormSelector from '@shared/components/FormSelector/FormSelector';
+import { useToastStore } from '@shared/stores/toastStore';
 import './RegisterPage.css';
-
-function SimpleAlert({ open, onClose }) {
-  return (
-    <Snackbar
-      open={open}
-      autoHideDuration={3500}
-      onClose={onClose}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-    >
-      <Alert
-        onClose={onClose}
-        icon={<CheckIcon fontSize="inherit" />}
-        severity="success"
-        variant="filled"
-        sx={{ width: '100%', borderRadius: '12px' }}
-      >
-        ¡Tu cuenta fue creada exitosamente!
-      </Alert>
-    </Snackbar>
-  );
-}
 
 export default function RegisterPage() {
   const { cities, loading: citiesLoading } = useCities();
   const { register } = useAuth();
+  const showToast = useToastStore((state) => state.showToast);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formValues, setFormValues] = useState({
@@ -51,16 +27,8 @@ export default function RegisterPage() {
   });
   const [errors, setErrors] = useState({});
   const [passwordsMatch, setPasswordsMatch] = useState(null);
-  const [accountCreated, setAccountCreated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState(null);
-
-  const handleCloseAlert = (_, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setAccountCreated(false);
-  };
 
   const validatePasswords = () => {
     if (formValues.password.length === 0 || formValues.confirmPassword.length === 0) {
@@ -125,7 +93,10 @@ export default function RegisterPage() {
     const result = await register(usuario);
 
     if (result.ok) {
-      setAccountCreated(true);
+      showToast({
+        message: '¡Tu cuenta fue creada exitosamente!',
+        type: 'success',
+      });
       setTimeout(() => {
         window.location.href = '/dashboard';
       }, 1500);
@@ -138,8 +109,7 @@ export default function RegisterPage() {
   const showPasswordValidation = passwordsMatch !== null;
 
   return (
-    <div className="register-page-container" data-node-id="1:1092">
-      <SimpleAlert open={accountCreated} onClose={handleCloseAlert} />
+    <main id="main-content" className="register-page-container" data-node-id="1:1092">
 
       {/* Lado Izquierdo: Sweetness Delivered Composition */}
       <section className="register-visual-section" data-node-id="1:1093">
@@ -149,9 +119,12 @@ export default function RegisterPage() {
         <div className="register-visual-content" data-node-id="1:1100">
           <div className="register-hero-img-wrapper" data-node-id="1:1098">
             <img
-              src={MichiMochiIMG}
+              src="/assets/MichiMochiIMG.png"
               alt="Michi Mochi Sweetness"
               className="register-hero-img"
+              width={320}
+              height={320}
+              fetchPriority="high"
             />
           </div>
 
@@ -170,9 +143,11 @@ export default function RegisterPage() {
         <div className="register-form-container" data-node-id="1:1109">
           <div className="register-brand-header" data-node-id="1:1110">
             <img
-              src={NavbarLogo}
+              src="/assets/navbar-logo.png"
               alt="Michi Mochi Logo"
               className="register-logo"
+              width={52}
+              height={52}
               data-node-id="1:1111"
             />
             <h2 className="register-form-title" data-node-id="1:1112">
@@ -206,19 +181,28 @@ export default function RegisterPage() {
                 Nombre completo
               </label>
               <div className="register-input-wrapper" data-node-id="1:1119">
-                <FaUser className="register-input-icon" data-node-id="1:1124" />
+                <FaUser className="register-input-icon" aria-hidden="true" data-node-id="1:1124" />
                 <input
                   id="reg-fullname"
+                  name="fullName"
                   type="text"
+                  required
+                  enterKeyHint="next"
                   className={`register-input ${errors.fullName ? 'has-error' : ''}`}
                   placeholder="Ej. Juan Pérez"
                   value={formValues.fullName}
                   onChange={handleFieldChange('fullName')}
                   autoComplete="name"
+                  aria-invalid={Boolean(errors.fullName)}
+                  aria-describedby={errors.fullName ? 'reg-fullname-error' : undefined}
                   data-node-id="1:1120"
                 />
               </div>
-              {errors.fullName && <span className="register-error-message">{errors.fullName}</span>}
+              {errors.fullName && (
+                <span id="reg-fullname-error" className="register-error-message">
+                  {errors.fullName}
+                </span>
+              )}
             </div>
 
             {/* Email & Phone Row */}
@@ -228,19 +212,29 @@ export default function RegisterPage() {
                   Correo Electrónico
                 </label>
                 <div className="register-input-wrapper" data-node-id="1:1129">
-                  <MdEmail className="register-input-icon" data-node-id="1:1134" />
+                  <MdEmail className="register-input-icon" aria-hidden="true" data-node-id="1:1134" />
                   <input
                     id="reg-email"
+                    name="email"
                     type="email"
+                    required
+                    spellCheck={false}
+                    enterKeyHint="next"
                     className={`register-input ${errors.email ? 'has-error' : ''}`}
                     placeholder="nombre@ejemplo.com"
                     value={formValues.email}
                     onChange={handleFieldChange('email')}
-                    autoComplete="email"
+                    autoComplete="username"
+                    aria-invalid={Boolean(errors.email)}
+                    aria-describedby={errors.email ? 'reg-email-error' : undefined}
                     data-node-id="1:1130"
                   />
                 </div>
-                {errors.email && <span className="register-error-message">{errors.email}</span>}
+                {errors.email && (
+                  <span id="reg-email-error" className="register-error-message">
+                    {errors.email}
+                  </span>
+                )}
               </div>
 
               <div className="register-input-group" data-node-id="1:1135">
@@ -248,19 +242,28 @@ export default function RegisterPage() {
                   Número de Teléfono
                 </label>
                 <div className="register-input-wrapper" data-node-id="1:1138">
-                  <FaPhoneAlt className="register-input-icon" data-node-id="1:1143" />
+                  <FaPhoneAlt className="register-input-icon" aria-hidden="true" data-node-id="1:1143" />
                   <input
                     id="reg-phone"
+                    name="phone"
                     type="tel"
+                    required
+                    enterKeyHint="next"
                     className={`register-input ${errors.phone ? 'has-error' : ''}`}
                     placeholder="+57 3..."
                     value={formValues.phone}
                     onChange={handleFieldChange('phone')}
                     autoComplete="tel"
+                    aria-invalid={Boolean(errors.phone)}
+                    aria-describedby={errors.phone ? 'reg-phone-error' : undefined}
                     data-node-id="1:1139"
                   />
                 </div>
-                {errors.phone && <span className="register-error-message">{errors.phone}</span>}
+                {errors.phone && (
+                  <span id="reg-phone-error" className="register-error-message">
+                    {errors.phone}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -271,19 +274,28 @@ export default function RegisterPage() {
                   Dirección de entrega
                 </label>
                 <div className="register-input-wrapper" data-node-id="1:1148">
-                  <FaLocationDot className="register-input-icon" data-node-id="1:1153" />
+                  <FaLocationDot className="register-input-icon" aria-hidden="true" data-node-id="1:1153" />
                   <input
                     id="reg-address"
+                    name="address"
                     type="text"
+                    required
+                    enterKeyHint="next"
                     className={`register-input ${errors.address ? 'has-error' : ''}`}
                     placeholder="Calle y número"
                     value={formValues.address}
                     onChange={handleFieldChange('address')}
                     autoComplete="street-address"
+                    aria-invalid={Boolean(errors.address)}
+                    aria-describedby={errors.address ? 'reg-address-error' : undefined}
                     data-node-id="1:1149"
                   />
                 </div>
-                {errors.address && <span className="register-error-message">{errors.address}</span>}
+                {errors.address && (
+                  <span id="reg-address-error" className="register-error-message">
+                    {errors.address}
+                  </span>
+                )}
               </div>
 
               <div className="register-input-group" data-node-id="1:1154">
@@ -291,15 +303,25 @@ export default function RegisterPage() {
                   Ciudad
                 </label>
                 <FormSelector
+                  id="reg-city"
+                  name="city"
+                  autoComplete="address-level2"
+                  required
                   icon={FaCity}
                   placeholder={citiesLoading ? 'Cargando ciudades...' : 'Selecciona tu ciudad'}
                   options={cities}
                   value={formValues.city}
                   onChange={handleFieldChange('city')}
                   className={errors.city ? 'has-error' : ''}
+                  aria-invalid={Boolean(errors.city)}
+                  aria-describedby={errors.city ? 'reg-city-error' : undefined}
                   data-node-id="1:1158"
                 />
-                {errors.city && <span className="register-error-message">{errors.city}</span>}
+                {errors.city && (
+                  <span id="reg-city-error" className="register-error-message">
+                    {errors.city}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -309,28 +331,38 @@ export default function RegisterPage() {
                 Contraseña
               </label>
               <div className="register-input-wrapper" data-node-id="1:1166">
-                <FaLock className="register-input-icon" data-node-id="1:1171" />
+                <FaLock className="register-input-icon" aria-hidden="true" data-node-id="1:1171" />
                 <input
                   id="reg-password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
+                  required
+                  enterKeyHint="next"
                   className={`register-input ${errors.password ? 'has-error' : ''}`}
                   placeholder="••••••••"
                   value={formValues.password}
                   onChange={handleFieldChange('password')}
                   onBlur={validatePasswords}
                   autoComplete="new-password"
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? 'reg-password-error' : undefined}
                   data-node-id="1:1167"
                 />
                 <button
                   type="button"
                   className="register-password-toggle"
                   onClick={() => setShowPassword((prev) => !prev)}
+                  aria-pressed={showPassword}
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  {showPassword ? <FaEyeSlash aria-hidden="true" /> : <FaEye aria-hidden="true" />}
                 </button>
               </div>
-              {errors.password && <span className="register-error-message">{errors.password}</span>}
+              {errors.password && (
+                <span id="reg-password-error" className="register-error-message">
+                  {errors.password}
+                </span>
+              )}
             </div>
 
             {/* Confirm Password */}
@@ -339,29 +371,37 @@ export default function RegisterPage() {
                 Confirmar contraseña
               </label>
               <div className="register-input-wrapper" data-node-id="1:1175">
-                <FaLock className="register-input-icon" data-node-id="1:1180" />
+                <FaLock className="register-input-icon" aria-hidden="true" data-node-id="1:1180" />
                 <input
                   id="reg-confirm-password"
+                  name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  enterKeyHint="done"
                   className={`register-input ${errors.confirmPassword ? 'has-error' : ''}`}
                   placeholder="••••••••"
                   value={formValues.confirmPassword}
                   onChange={handleFieldChange('confirmPassword')}
                   onBlur={validatePasswords}
                   autoComplete="new-password"
+                  aria-invalid={Boolean(errors.confirmPassword)}
+                  aria-describedby={errors.confirmPassword ? 'reg-confirm-error' : undefined}
                   data-node-id="1:1176"
                 />
                 <button
                   type="button"
                   className="register-password-toggle"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-pressed={showConfirmPassword}
                   aria-label={showConfirmPassword ? 'Ocultar confirmación' : 'Mostrar confirmación'}
                 >
-                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  {showConfirmPassword ? <FaEyeSlash aria-hidden="true" /> : <FaEye aria-hidden="true" />}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <span className="register-error-message">{errors.confirmPassword}</span>
+                <span id="reg-confirm-error" className="register-error-message">
+                  {errors.confirmPassword}
+                </span>
               )}
               {showPasswordValidation && !errors.confirmPassword && (
                 <span
@@ -401,7 +441,7 @@ export default function RegisterPage() {
               data-node-id="1:1186"
             >
               <span data-node-id="1:1189">{submitting ? 'Creando cuenta...' : 'Crear cuenta'}</span>
-              <FaArrowRight size={14} />
+              <FaArrowRight size={14} aria-hidden="true" />
             </button>
 
             {/* Footer Link to Login */}
@@ -416,9 +456,9 @@ export default function RegisterPage() {
 
         {/* Decorative corner image */}
         <div className="register-corner-decoration" data-node-id="1:1194">
-          <img src={MichiMochiIMG} alt="" />
+          <img src="/assets/MichiMochiIMG.png" alt="" width={120} height={120} loading="lazy" />
         </div>
       </section>
-    </div>
+    </main>
   );
 }

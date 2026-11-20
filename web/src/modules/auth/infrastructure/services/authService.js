@@ -67,6 +67,11 @@ export const loginWithGoogle = async () => {
 export const logout = async () => {
   storageAdapter.clearAuthSession();
   try {
+    await apiClient('/auth/logout', { method: 'POST' });
+  } catch {
+    // Ignore backend errors during client-side logout
+  }
+  try {
     await signOut(auth);
   } catch (err) {
     console.warn('Error al cerrar sesión de Firebase en cliente:', err);

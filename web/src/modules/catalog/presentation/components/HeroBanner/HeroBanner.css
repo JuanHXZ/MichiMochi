@@ -12,10 +12,6 @@
   background: var(--surface-container);
 }
 
-.hero-banner:hover {
-  transform: scale(1.005);
-}
-
 .hero-banner__overlay {
   position: absolute;
   inset: 0;
@@ -31,8 +27,14 @@
   transition: transform 0.7s ease;
 }
 
-.hero-banner:hover .hero-banner__image {
-  transform: scale(1.05);
+@media (prefers-reduced-motion: no-preference) {
+  .hero-banner:hover {
+    transform: scale(1.005);
+  }
+
+  .hero-banner:hover .hero-banner__image {
+    transform: scale(1.05);
+  }
 }
 
 .hero-banner__content {
@@ -74,7 +76,7 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
   padding: 1rem 2rem;
   border-radius: 9999px;
   border: none;
@@ -82,15 +84,17 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow: var(--shadow-lg);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .hero-banner__btn:hover {
   background: var(--primary-dark);
 }
 
-.hero-banner__btn:active {
-  transform: scale(0.95);
+@media (prefers-reduced-motion: no-preference) {
+  .hero-banner__btn:active {
+    transform: scale(0.95);
+  }
 }
 
 @media (max-width: 768px) {

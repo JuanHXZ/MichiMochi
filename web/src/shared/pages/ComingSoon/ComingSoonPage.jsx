@@ -23,9 +23,9 @@ export default function ComingSoonPage() {
       <div className="coming-soon__layout">
         <SideNavBar />
         
-        <main className="coming-soon__main">
+        <main id="main-content" className="coming-soon__main">
           <div className="coming-soon__content">
-            <div className="coming-soon__icon-container">
+            <div className="coming-soon__icon-container" aria-hidden="true">
               <span className="coming-soon__icon">🎉</span>
               <div className="coming-soon__icon-decoration">
                 <span>🍡</span>
@@ -49,42 +49,42 @@ export default function ComingSoonPage() {
 
             <div className="coming-soon__features">
               <div className="coming-soon__feature-card">
-                <span className="coming-soon__feature-icon">🍡</span>
-                <h3 className="coming-soon__feature-title">
+                <span className="coming-soon__feature-icon" aria-hidden="true">🍡</span>
+                <h2 className="coming-soon__feature-title">
                   {t('comingSoon.features.newFlavors.title')}
-                </h3>
+                </h2>
                 <p className="coming-soon__feature-text">
                   {t('comingSoon.features.newFlavors.text')}
                 </p>
               </div>
 
               <div className="coming-soon__feature-card">
-                <span className="coming-soon__feature-icon">⭐</span>
-                <h3 className="coming-soon__feature-title">
+                <span className="coming-soon__feature-icon" aria-hidden="true">⭐</span>
+                <h2 className="coming-soon__feature-title">
                   {t('comingSoon.features.rewards.title')}
-                </h3>
+                </h2>
                 <p className="coming-soon__feature-text">
                   {t('comingSoon.features.rewards.text')}
                 </p>
               </div>
 
               <div className="coming-soon__feature-card">
-                <span className="coming-soon__feature-icon">📦</span>
-                <h3 className="coming-soon__feature-title">
+                <span className="coming-soon__feature-icon" aria-hidden="true">📦</span>
+                <h2 className="coming-soon__feature-title">
                   {t('comingSoon.features.tracking.title')}
-                </h3>
+                </h2>
                 <p className="coming-soon__feature-text">
                   {t('comingSoon.features.tracking.text')}
                 </p>
               </div>
             </div>
 
-            <button 
+            <a
+              href="/dashboard"
               className="coming-soon__cta"
-              onClick={() => window.location.href = '/dashboard'}
             >
               {t('comingSoon.backToCatalog')}
-            </button>
+            </a>
           </div>
         </main>
       </div>

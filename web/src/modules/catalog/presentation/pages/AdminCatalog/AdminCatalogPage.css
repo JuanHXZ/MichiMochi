@@ -1,15 +1,15 @@
 /* Admin Catalog Page Styles */
 .admin-catalog {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--background);
   padding-top: 80px;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .admin-catalog__layout {
   display: block;
-  min-height: calc(100vh - 80px);
-  overflow-x: hidden;
+  min-height: calc(100dvh - 80px);
+  overflow-x: clip;
 }
 
 .admin-catalog__main {
@@ -69,7 +69,7 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--primary, #412817);
-  color: #ffffff;
+  color: var(--on-primary, #ffffff);
   padding: 0.75rem 1.75rem;
   border-radius: 9999px;
   border: none;
@@ -77,12 +77,11 @@
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(65, 40, 23, 0.2);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .admin-catalog__btn-primary:hover {
-  background: var(--heading-color);
-  transform: translateY(-1px);
+  background: var(--primary-dark, #673d00);
   box-shadow: 0 6px 20px rgba(65, 40, 23, 0.28);
 }
 
@@ -119,8 +118,17 @@
 }
 
 .admin-kpi-card:hover {
-  transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(65, 40, 23, 0.08);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .admin-catalog__btn-primary:hover {
+    transform: translateY(-1px);
+  }
+
+  .admin-kpi-card:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .admin-kpi-card__icon {
@@ -196,12 +204,22 @@
   max-width: 450px;
 }
 
+.admin-catalog__search-box:has(:focus-visible) {
+  border-color: var(--primary);
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .admin-catalog__search-input {
   border: none;
   background: transparent;
   width: 100%;
   font-size: 0.9rem;
   color: var(--body-text);
+  outline: none;
+}
+
+.admin-catalog__search-input:focus-visible {
   outline: none;
 }
 
@@ -220,7 +238,7 @@
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .admin-catalog__cat-pill:hover {
@@ -229,7 +247,7 @@
 
 .admin-catalog__cat-pill--active {
   background: var(--primary, #412817);
-  color: #ffffff;
+  color: var(--on-primary, #ffffff);
   border-color: var(--primary, #412817);
 }
 
@@ -243,14 +261,24 @@
 }
 
 .admin-catalog__table-wrapper {
-  overflow-x: auto;
+  container-type: inline-size;
+  max-block-size: min(600px, 75dvh);
+  overflow: auto;
+  overscroll-behavior: contain;
   width: 100%;
 }
 
 .admin-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
+}
+
+.admin-table thead {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
 }
 
 .admin-table th {
@@ -277,6 +305,57 @@
 
 .admin-table tr:hover {
   background: rgba(65, 40, 23, 0.015);
+}
+
+@container (width < 600px) {
+  .admin-table,
+  .admin-table tbody,
+  .admin-table tr,
+  .admin-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .admin-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .admin-table tr {
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  }
+
+  .admin-table tr:last-child {
+    border-bottom: none;
+  }
+
+  .admin-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: none;
+  }
+
+  .admin-table td:not(:last-child) {
+    border-bottom: 1px dashed var(--border-color, rgba(0, 0, 0, 0.06));
+  }
+
+  .admin-table td::before {
+    content: attr(data-label) ": ";
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-inline-end: 0.5rem;
+    flex-shrink: 0;
+  }
 }
 
 /* Table Column Elements */
@@ -380,49 +459,17 @@
 }
 
 /* Visibility Switch */
-.admin-switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
-
-.admin-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.admin-switch__slider {
-  position: absolute;
+.admin-switch-input {
+  accent-color: var(--primary, #845000);
+  inline-size: 2.25rem;
+  block-size: 1.35rem;
+  margin: 0;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #cbd5e1;
-  transition: 0.2s;
-  border-radius: 24px;
 }
 
-.admin-switch__slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.2s;
-  border-radius: 50%;
-}
-
-input:checked + .admin-switch__slider {
-  background-color: var(--primary, #412817);
-}
-
-input:checked + .admin-switch__slider:before {
-  transform: translateX(20px);
+.admin-switch-input:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 4px;
 }
 
 /* Action Buttons */
@@ -443,7 +490,7 @@ input:checked + .admin-switch__slider:before {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .admin-action-btn:hover {
@@ -458,31 +505,90 @@ input:checked + .admin-switch__slider:before {
   background: rgba(225, 29, 72, 0.05);
 }
 
-/* Slide-over Drawer / Modal */
-.admin-drawer-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(3px);
-  z-index: 1000;
-  display: flex;
-  justify-content: flex-end;
-  animation: fadeIn 0.2s ease-out;
+/* Slide-over Drawer / Modal (<dialog>) */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .admin-drawer {
   background: var(--card-bg, #ffffff);
-  width: 100%;
+  color: var(--body-text);
+  width: min(100%, 520px);
   max-width: 520px;
-  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
   box-shadow: -6px 0 24px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+.admin-drawer[open] {
   display: flex;
   flex-direction: column;
-  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .admin-drawer[open] {
+    animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+.admin-drawer::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+.admin-confirm-dialog {
+  background: var(--card-bg, #ffffff);
+  color: var(--body-text);
+  border: 1px solid var(--border-color);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  width: min(calc(100dvw - 2rem), 420px);
+  box-shadow: var(--shadow-lg);
+}
+
+.admin-confirm-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+.admin-confirm-dialog__title {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--heading-color);
+}
+
+.admin-confirm-dialog__text {
+  margin: 0 0 1.5rem;
+  color: var(--body-text);
+  line-height: 1.5;
+}
+
+.admin-confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.admin-btn-danger {
+  padding: 0.65rem 1.25rem;
+  border-radius: 9999px;
+  border: none;
+  background: var(--error, #ba1a1a);
+  color: var(--on-error, #ffffff);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
 .admin-drawer__header {
@@ -539,16 +645,22 @@ input:checked + .admin-switch__slider:before {
   font-size: 0.9rem;
   color: var(--body-text);
   background: var(--surface-bright, #fff8f5);
-  outline: none;
   font-family: inherit;
   transition: border-color 0.2s ease;
 }
 
-.admin-form-input:focus,
-.admin-form-select:focus,
-.admin-form-textarea:focus {
+.admin-form-input:focus-visible,
+.admin-form-select:focus-visible,
+.admin-form-textarea:focus-visible {
   border-color: var(--primary, #412817);
-  box-shadow: 0 0 0 3px rgba(65, 40, 23, 0.1);
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.admin-form-input:user-invalid,
+.admin-form-select:user-invalid,
+.admin-form-textarea:user-invalid {
+  border-color: var(--error, #ba1a1a);
 }
 
 .admin-form-row {

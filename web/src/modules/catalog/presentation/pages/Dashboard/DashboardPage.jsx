@@ -83,7 +83,7 @@ export default function DashboardPage() {
       <div className="dashboard-stitch__layout">
         <SideNavBar />
 
-        <main className="dashboard-stitch__main">
+        <main id="main-content" className="dashboard-stitch__main">
           {featuredProduct && (
             <HeroBanner product={featuredProduct} onOrderClick={handleOrderNow} />
           )}

@@ -1,15 +1,27 @@
 .stitch-card {
+  position: relative;
+  container-type: inline-size;
   background: var(--card-bg);
   padding: 1rem;
   border-radius: 0.5rem;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
-  cursor: pointer;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .stitch-card:hover {
   box-shadow: var(--shadow-md);
+}
+
+.stitch-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.stitch-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
 }
 
 .stitch-card__image-container {
@@ -27,14 +39,17 @@
   transition: transform 0.5s ease;
 }
 
-.stitch-card:hover .stitch-card__image {
-  transform: scale(1.1);
+@media (prefers-reduced-motion: no-preference) {
+  .stitch-card:hover .stitch-card__image {
+    transform: scale(1.1);
+  }
 }
 
 .stitch-card__favorite {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+  z-index: 1;
   padding: 0.5rem;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
@@ -45,12 +60,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .stitch-card__favorite:hover {
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
 }
 
 .stitch-card__body {
@@ -87,11 +102,13 @@
 }
 
 .stitch-card__add-btn {
+  position: relative;
+  z-index: 1;
   width: 100%;
   margin-top: 0.5rem;
   padding: 0.75rem;
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
   border: none;
   border-radius: 0.75rem;
   font-weight: 700;
@@ -101,13 +118,15 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .stitch-card__add-btn:hover {
   background: var(--primary-dark);
 }
 
-.stitch-card__add-btn:active {
-  transform: scale(0.95);
+@media (prefers-reduced-motion: no-preference) {
+  .stitch-card__add-btn:active {
+    transform: scale(0.95);
+  }
 }

@@ -1,45 +1,84 @@
+.sidenav-dialog {
+  --drawer-width: min(18rem, 80dvw, 100dvw - 24px);
+  --drawer-backdrop: 0;
+  inset: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  overflow: visible;
+}
+
+.sidenav-dialog::backdrop {
+  background: #000;
+  opacity: calc(var(--drawer-backdrop) / 2);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.sidenav__scroller {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--drawer-width) 100%;
+  overflow-x: scroll;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sidenav__scroller {
+    scroll-behavior: smooth;
+  }
+}
+
+.sidenav__scroller::after {
+  content: '';
+  scroll-snap-align: end;
+  scroll-initial-target: nearest;
+}
+
 .sidenav {
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding-top: 6rem; /* Space for close button */
+  padding-top: 6rem;
   padding-left: 1rem;
   padding-right: 1rem;
-  height: 100vh;
-  width: 16rem;
+  height: 100svh;
+  width: var(--drawer-width);
   background: var(--summary-bg);
   border-right: 1px solid var(--border-color);
   box-shadow: var(--shadow-md);
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
+  overflow-y: auto;
+  scroll-snap-align: start;
+  scrollbar-width: none;
 }
 
-.sidenav--open {
-  transform: translateX(0);
-}
-
-.sidenav__overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  animation: fadeIn 0.3s ease;
-}
-
-.sidenav__overlay {
-  display: block;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+@supports (animation-timeline: scroll()) {
+  .sidenav-dialog {
+    timeline-scope: --drawer-fade;
+    animation: fade-drawer-backdrop linear both;
+    animation-timeline: --drawer-fade;
   }
-  to {
-    opacity: 1;
+
+  .sidenav__scroller {
+    scroll-timeline: --drawer-fade x;
+  }
+
+  @property --drawer-backdrop {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+
+  @keyframes fade-drawer-backdrop {
+    0% { --drawer-backdrop: 1; }
+    100% { --drawer-backdrop: 0; }
   }
 }
 
@@ -54,15 +93,17 @@
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .sidenav__close:hover {
   background: var(--surface-bright);
 }
 
-.sidenav__close:active {
-  transform: scale(0.9);
+@media (prefers-reduced-motion: no-preference) {
+  .sidenav__close:active {
+    transform: scale(0.9);
+  }
 }
 
 .sidenav__header {
@@ -106,7 +147,7 @@
   text-align: left;
   cursor: pointer;
   border-radius: 0.75rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .sidenav__link:hover {
@@ -140,13 +181,12 @@
   background: var(--surface-bright);
   border-radius: 0.75rem;
   border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .sidenav__theme:hover {
   border-color: var(--primary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
 }
 
 .sidenav__theme-label {
@@ -165,13 +205,13 @@
   align-items: center;
   justify-content: center;
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
   border: none;
   border-radius: 50%;
   width: 2.25rem;
   height: 2.25rem;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: background-color 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), box-shadow 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
@@ -189,7 +229,6 @@
 
 .sidenav__theme-toggle:hover {
   background: var(--primary-dark);
-  transform: scale(1.15) rotate(15deg);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
@@ -198,8 +237,7 @@
 }
 
 .sidenav__theme-toggle:active {
-  transform: scale(0.95) rotate(0deg);
-  transition: all 0.1s ease;
+  transition: transform 0.1s ease;
 }
 
 /* Icon animation */
@@ -207,18 +245,15 @@
   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.sidenav__theme-toggle:hover svg {
-  transform: rotate(180deg) scale(1.1);
-}
-
-.sidenav__theme-toggle:active svg {
-  transform: rotate(0deg) scale(0.9);
-}
-
 .sidenav__cart-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
   width: 100%;
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
   padding: 0.75rem;
   border-radius: 0.75rem;
   border: none;
@@ -226,13 +261,35 @@
   font-size: 0.9375rem;
   cursor: pointer;
   box-shadow: var(--shadow-md);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .sidenav__cart-btn:hover {
   background: var(--primary-dark);
 }
 
-.sidenav__cart-btn:active {
-  transform: scale(0.95);
+@media (prefers-reduced-motion: no-preference) {
+  .sidenav__theme:hover {
+    transform: translateY(-1px);
+  }
+
+  .sidenav__theme-toggle:hover {
+    transform: scale(1.15) rotate(15deg);
+  }
+
+  .sidenav__theme-toggle:active {
+    transform: scale(0.95) rotate(0deg);
+  }
+
+  .sidenav__theme-toggle:hover svg {
+    transform: rotate(180deg) scale(1.1);
+  }
+
+  .sidenav__theme-toggle:active svg {
+    transform: rotate(0deg) scale(0.9);
+  }
+
+  .sidenav__cart-btn:active {
+    transform: scale(0.95);
+  }
 }

@@ -6,8 +6,7 @@ import { useAuth } from '../../../application/hooks/useAuth';
 import './VerifyCodePage.css';
 
 export default function VerifyCodePage() {
-  // En Figma Node 1:666 hay exactamente 5 casillas de dígitos OTP (1:695 a 1:707)
-  const [digits, setDigits] = useState(['', '', '', '', '']);
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -16,20 +15,41 @@ export default function VerifyCodePage() {
   const [email, setEmail] = useState('');
 
   const { verifyOtp, requestOtp } = useAuth();
-  const inputRefs = useRef([]);
+  const otpInputRef = useRef(null);
+  const formRef = useRef(null);
+  const otpAbortRef = useRef(null);
+
+  const stopSmsOtpListener = () => {
+    if (otpAbortRef.current) {
+      otpAbortRef.current.abort();
+      otpAbortRef.current = null;
+    }
+  };
+
+  const startSmsOtpListener = async () => {
+    if (!('OTPCredential' in window)) return;
+    stopSmsOtpListener();
+    const ac = new AbortController();
+    otpAbortRef.current = ac;
+    try {
+      const otp = await navigator.credentials.get({
+        otp: { transport: ['sms'] },
+        signal: ac.signal,
+      });
+      if (!otp?.code) return;
+      setCode(String(otp.code).replace(/\D/g, '').slice(0, 5));
+      formRef.current?.requestSubmit();
+    } catch (err) {
+      if (err?.name === 'AbortError') return;
+    }
+  };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const emailParam = params.get('email');
-    if (emailParam) {
-      setEmail(emailParam);
-    } else {
-      const stored = sessionStorage.getItem('recovery_email') || '';
-      setEmail(stored);
-    }
-
-    // Auto-focus en la primera casilla
-    inputRefs.current[0]?.focus();
+    const stored = sessionStorage.getItem('recovery_email') || '';
+    setEmail(stored);
+    otpInputRef.current?.focus();
+    startSmsOtpListener();
+    return () => stopSmsOtpListener();
   }, []);
 
   // Temporizador para el botón de reenvío
@@ -41,55 +61,19 @@ export default function VerifyCodePage() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  const handleDigitChange = (index, value) => {
-    const cleanValue = value.replace(/\D/g, '');
+  const handleCodeChange = (e) => {
+    const cleanValue = e.target.value.replace(/\D/g, '').slice(0, 5);
     if (error) setError('');
-
-    const newDigits = [...digits];
-    newDigits[index] = cleanValue.slice(-1);
-    setDigits(newDigits);
-
-    // Auto-salto a la siguiente casilla
-    if (cleanValue && index < 4) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace') {
-      if (!digits[index] && index > 0) {
-        inputRefs.current[index - 1]?.focus();
-      }
-    } else if (e.key === 'ArrowLeft' && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && index < 4) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData('text').replace(/\D/g, '');
-    if (!pasteData) return;
-
-    const chars = pasteData.slice(0, 5).split('');
-    const newDigits = ['', '', '', '', ''];
-    chars.forEach((char, i) => {
-      newDigits[i] = char;
-    });
-    setDigits(newDigits);
-    if (error) setError('');
-
-    const nextIndex = Math.min(chars.length, 4);
-    inputRefs.current[nextIndex]?.focus();
+    setCode(cleanValue);
   };
 
   const handleVerify = async (e) => {
     if (e) e.preventDefault();
-    const code = digits.join('');
+    stopSmsOtpListener();
 
     if (code.length < 5) {
       setError('Por favor ingresa los 5 dígitos del código de verificación.');
+      otpInputRef.current?.focus();
       return;
     }
 
@@ -112,7 +96,7 @@ export default function VerifyCodePage() {
 
         // Transición al Paso 3 (New Password)
         setTimeout(() => {
-          window.location.href = `/new-password?email=${encodeURIComponent(email)}`;
+          window.location.href = '/new-password';
         }, 1200);
       } else {
         setError(result.message || 'Código de verificación incorrecto o expirado.');
@@ -138,12 +122,13 @@ export default function VerifyCodePage() {
     try {
       const result = await requestOtp(email);
       if (result.ok) {
-        if (result.data?.debugCode) {
+        if (import.meta.env.DEV && result.data?.debugCode) {
           console.log(`%c[MichiMochi Dev] Nuevo código OTP reenviado a ${email}: ${result.data.debugCode}`, 'background: #FFE8EC; color: #E88D9D; font-size: 14px; font-weight: bold; padding: 4px 8px; border-radius: 4px;');
         }
         setResendCooldown(60);
-        setDigits(['', '', '', '', '']);
-        inputRefs.current[0]?.focus();
+        setCode('');
+        otpInputRef.current?.focus();
+        startSmsOtpListener();
       } else {
         setError(result.message || 'No fue posible reenviar el código.');
       }
@@ -155,20 +140,23 @@ export default function VerifyCodePage() {
   };
 
   return (
-    <main className="verify-split-screen" data-node-id="1:666">
+    <main id="main-content" className="verify-split-screen" data-node-id="1:666">
       {/* Lado Izquierdo: Brand Imagery (Node 1:668) */}
       <section className="verify-hero-section" data-node-id="1:668">
         <img
           src={verifyHeroImg}
           alt="Michi Mochi Assortment"
           className="verify-hero-image"
+          width={640}
+          height={792}
+          fetchPriority="high"
           data-node-id="1:669"
         />
 
         {/* Tarjeta Glassmorphism flotante (Node 1:670) */}
         <div className="verify-glass-card" data-node-id="1:670">
           <div className="verify-glass-brand" data-node-id="1:672">
-            <div className="verify-glass-logo-icon" data-node-id="1:673">
+            <div className="verify-glass-logo-icon" aria-hidden="true" data-node-id="1:673">
               <FaFlag className="verify-flag-icon" />
             </div>
             <span className="verify-glass-brand-text" data-node-id="1:676">
@@ -193,7 +181,7 @@ export default function VerifyCodePage() {
           <div className="verify-header-section" data-node-id="1:683">
             <div className="verify-top-link-wrapper" data-node-id="1:684">
               <a href="/login" className="verify-top-back-link" data-node-id="1:685">
-                <MdArrowBack className="verify-top-back-icon" data-node-id="1:687" />
+                <MdArrowBack className="verify-top-back-icon" aria-hidden="true" data-node-id="1:687" />
                 <span data-node-id="1:689">Volver al inicio de sesión</span>
               </a>
             </div>
@@ -202,8 +190,8 @@ export default function VerifyCodePage() {
               Verificar código
             </h2>
 
-            <p className="verify-instruction-text" data-node-id="1:693">
-              Hemos enviado un código de seguridad a tu correo electrónico
+            <p id="otp-hint" className="verify-instruction-text" data-node-id="1:693">
+              Hemos enviado un código de seguridad de 5 dígitos a tu correo electrónico
               {email ? (
                 <> (<strong>{email}</strong>)</>
               ) : null}
@@ -213,7 +201,7 @@ export default function VerifyCodePage() {
 
           {isVerified ? (
             <div className="verify-feedback-success" role="alert">
-              <div className="verify-feedback-icon-wrap">
+              <div className="verify-feedback-icon-wrap" aria-hidden="true">
                 <MdCheckCircle className="verify-feedback-icon" />
               </div>
               <h3 className="verify-feedback-title">¡Código verificado!</h3>
@@ -225,47 +213,38 @@ export default function VerifyCodePage() {
           ) : (
             <>
               {error && (
-                <div className="verify-feedback-error" role="alert">
+                <div id="otp-error" className="verify-feedback-error" role="alert">
                   {error}
                 </div>
               )}
 
-              {/* Input Fields: 5 Casillas OTP (Node 1:694) */}
-              <form onSubmit={handleVerify} className="verify-form-body">
-                <div
-                  className="verify-otp-inputs-row"
-                  onPaste={handlePaste}
-                  data-node-id="1:694"
-                >
-                  {digits.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      ref={(el) => (inputRefs.current[idx] = el)}
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleDigitChange(idx, e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(idx, e)}
-                      placeholder="•"
-                      className={`verify-digit-box ${digit ? 'is-filled' : ''} ${error ? 'has-error' : ''}`}
-                      aria-label={`Dígito ${idx + 1}`}
-                      disabled={loading}
-                      autoComplete="one-time-code"
-                      data-node-id={
-                        idx === 0
-                          ? '1:695'
-                          : idx === 1
-                          ? '1:698'
-                          : idx === 2
-                          ? '1:701'
-                          : idx === 3
-                          ? '1:704'
-                          : '1:707'
-                      }
-                    />
-                  ))}
+              {/* Input Field: Single numeric OTP (Node 1:694) */}
+              <form ref={formRef} onSubmit={handleVerify} className="verify-form-body">
+                <div className="verify-otp-inputs-row" data-node-id="1:694">
+                  <label htmlFor="otp-code" className="visually-hidden">
+                    Código de verificación de 5 dígitos
+                  </label>
+                  <input
+                    ref={otpInputRef}
+                    id="otp-code"
+                    name="otp"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="\d{5}"
+                    maxLength={5}
+                    required
+                    enterKeyHint="done"
+                    spellCheck={false}
+                    value={code}
+                    onChange={handleCodeChange}
+                    placeholder="•••••"
+                    aria-invalid={Boolean(error)}
+                    aria-describedby={error ? 'otp-hint otp-error' : 'otp-hint'}
+                    className={`verify-otp-input ${code ? 'is-filled' : ''} ${error ? 'has-error' : ''}`}
+                    disabled={loading}
+                    data-node-id="1:695"
+                  />
                 </div>
 
                 {/* Action Button & Resend Section (Node 1:710) */}
@@ -273,7 +252,7 @@ export default function VerifyCodePage() {
                   <button
                     type="submit"
                     className="verify-action-button"
-                    disabled={loading || digits.join('').length < 5}
+                    disabled={loading}
                     data-node-id="1:711"
                   >
                     <span>{loading ? 'Verificando...' : 'Verificar'}</span>
@@ -305,13 +284,13 @@ export default function VerifyCodePage() {
 
                 {/* Help Card (Node 1:718) */}
                 <aside className="verify-help-card" data-node-id="1:719">
-                  <div className="verify-help-icon-circle" data-node-id="1:720">
+                  <div className="verify-help-icon-circle" aria-hidden="true" data-node-id="1:720">
                     <MdSupportAgent className="verify-help-icon" data-node-id="1:721" />
                   </div>
                   <div className="verify-help-text-content" data-node-id="1:722">
-                    <h4 className="verify-help-title" data-node-id="1:724">
+                    <h3 className="verify-help-title" data-node-id="1:724">
                       ¿Necesitas ayuda?
-                    </h4>
+                    </h3>
                     <p className="verify-help-description" data-node-id="1:726">
                       Si tienes problemas con el acceso, recuerda revisar tu carpeta de correo no
                       deseado o contacta a nuestro equipo de dulzura.

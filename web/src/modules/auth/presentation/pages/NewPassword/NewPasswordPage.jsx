@@ -26,23 +26,10 @@ export default function NewPasswordPage() {
   const { resetPasswordWithToken } = useAuth();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const emailParam = params.get('email');
-    const tokenParam = params.get('token');
-
-    if (emailParam) {
-      setEmail(emailParam);
-    } else {
-      const stored = sessionStorage.getItem('recovery_email') || '';
-      setEmail(stored);
-    }
-
-    if (tokenParam) {
-      setResetToken(tokenParam);
-    } else {
-      const storedToken = sessionStorage.getItem('recovery_reset_token') || '';
-      setResetToken(storedToken);
-    }
+    const storedEmail = sessionStorage.getItem('recovery_email') || '';
+    const storedToken = sessionStorage.getItem('recovery_reset_token') || '';
+    setEmail(storedEmail);
+    setResetToken(storedToken);
   }, []);
 
   // Validación de requisitos de seguridad en tiempo real
@@ -100,13 +87,16 @@ export default function NewPasswordPage() {
   };
 
   return (
-    <main className="new-pass-split-screen" data-node-id="1:797">
+    <main id="main-content" className="new-pass-split-screen" data-node-id="1:797">
       {/* Lado Izquierdo: Brand Imagery (Node 1:799) */}
       <section className="new-pass-hero-section" data-node-id="1:799">
         <img
           src={newPasswordHeroImg}
           alt="Artisanal Mochi Arrangement"
           className="new-pass-hero-image"
+          width={640}
+          height={792}
+          fetchPriority="high"
           data-node-id="1:800"
         />
         <div className="new-pass-hero-overlay" data-node-id="1:801" />
@@ -155,7 +145,7 @@ export default function NewPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="new-pass-form" data-node-id="1:819">
               {error && (
-                <div className="new-pass-error-alert" role="alert">
+                <div id="new-pass-error" className="new-pass-error-alert" role="alert">
                   {error}
                 </div>
               )}
@@ -167,10 +157,13 @@ export default function NewPasswordPage() {
                     Nueva contraseña
                   </label>
                   <div className="new-pass-input-wrapper" data-node-id="1:824">
-                    <MdLock className="new-pass-input-icon-left" data-node-id="1:829" />
+                    <MdLock className="new-pass-input-icon-left" aria-hidden="true" data-node-id="1:829" />
                     <input
                       id="new-password-input"
+                      name="newPassword"
                       type={showPassword ? 'text' : 'password'}
+                      required
+                      enterKeyHint="next"
                       className="new-pass-input"
                       placeholder="••••••••"
                       value={password}
@@ -179,6 +172,8 @@ export default function NewPasswordPage() {
                         if (error) setError('');
                       }}
                       autoComplete="new-password"
+                      aria-invalid={Boolean(error)}
+                      aria-describedby={error ? 'new-pass-requirements new-pass-error' : 'new-pass-requirements'}
                       disabled={loading}
                       data-node-id="1:825"
                     />
@@ -186,14 +181,14 @@ export default function NewPasswordPage() {
                       type="button"
                       className="new-pass-visibility-toggle"
                       onClick={() => setShowPassword(!showPassword)}
-                      tabIndex={-1}
+                      aria-pressed={showPassword}
                       aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
                       data-node-id="1:830"
                     >
                       {showPassword ? (
-                        <MdVisibilityOff data-node-id="1:832" />
+                        <MdVisibilityOff aria-hidden="true" data-node-id="1:832" />
                       ) : (
-                        <MdVisibility data-node-id="1:832" />
+                        <MdVisibility aria-hidden="true" data-node-id="1:832" />
                       )}
                     </button>
                   </div>
@@ -209,10 +204,13 @@ export default function NewPasswordPage() {
                     Confirmar contraseña
                   </label>
                   <div className="new-pass-input-wrapper" data-node-id="1:836">
-                    <MdShield className="new-pass-input-icon-left" data-node-id="1:841" />
+                    <MdShield className="new-pass-input-icon-left" aria-hidden="true" data-node-id="1:841" />
                     <input
                       id="confirm-password-input"
+                      name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      enterKeyHint="done"
                       className="new-pass-input"
                       placeholder="••••••••"
                       value={confirmPassword}
@@ -221,6 +219,8 @@ export default function NewPasswordPage() {
                         if (error) setError('');
                       }}
                       autoComplete="new-password"
+                      aria-invalid={Boolean(error)}
+                      aria-describedby={error ? 'new-pass-error' : undefined}
                       disabled={loading}
                       data-node-id="1:837"
                     />
@@ -228,23 +228,23 @@ export default function NewPasswordPage() {
                       type="button"
                       className="new-pass-visibility-toggle"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      tabIndex={-1}
+                      aria-pressed={showConfirmPassword}
                       aria-label={
                         showConfirmPassword ? 'Ocultar contraseña' : 'Ver contraseña'
                       }
                       data-node-id="1:842"
                     >
                       {showConfirmPassword ? (
-                        <MdVisibilityOff data-node-id="1:844" />
+                        <MdVisibilityOff aria-hidden="true" data-node-id="1:844" />
                       ) : (
-                        <MdVisibility data-node-id="1:844" />
+                        <MdVisibility aria-hidden="true" data-node-id="1:844" />
                       )}
                     </button>
                   </div>
                 </div>
 
                 {/* Checklist de Requisitos de Seguridad (Node 1:845) */}
-                <div className="new-pass-checklist-card" data-node-id="1:845">
+                <div id="new-pass-requirements" className="new-pass-checklist-card" data-node-id="1:845">
                   <span className="new-pass-checklist-title" data-node-id="1:847">
                     REQUISITOS DE SEGURIDAD
                   </span>
@@ -309,7 +309,7 @@ export default function NewPasswordPage() {
                 <button
                   type="submit"
                   className="new-pass-submit-btn"
-                  disabled={loading || !isPasswordValid || password !== confirmPassword}
+                  disabled={loading}
                   data-node-id="1:870"
                 >
                   <span data-node-id="1:872">

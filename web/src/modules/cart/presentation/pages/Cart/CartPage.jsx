@@ -9,11 +9,13 @@ import { translateProducts } from '@shared/utils/translateProduct';
 import { useCurrency } from '@modules/cart/application/hooks/useCurrency';
 import { calculateOrderSummary } from '@modules/cart/domain/orderCalculator';
 import { BUSINESS_CONSTANTS } from '@shared/constants/businessConstants';
+import { useToastStore } from '@shared/stores/toastStore';
 import './CartPage.css';
 
 export default function CartPage() {
   const { t, i18n } = useTranslation();
   const { format: formatPrice } = useCurrency();
+  const showToast = useToastStore((state) => state.showToast);
   const [promoCode, setPromoCode] = useState('');
   const { items: rawItems, updateQuantity, removeItem } = useCartStore();
   const user = useAuthStore((state) => state.user);
@@ -41,11 +43,17 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    alert('Proceeding to checkout...');
+    showToast({
+      message: 'Proceeding to checkout...',
+      type: 'success',
+    });
   };
 
   const handleApplyPromo = () => {
-    alert(`Applying promo code: ${promoCode}`);
+    showToast({
+      message: `Applying promo code: ${promoCode}`,
+      type: 'info',
+    });
   };
 
   if (items.length === 0) {
@@ -54,13 +62,13 @@ export default function CartPage() {
         <Navbar userName={userName} currentPage="cart" />
         <div className="cart__layout">
           <SideNavBar />
-          <div className="cart__empty">
+          <main id="main-content" className="cart__empty">
             <h1 className="cart__empty-title">{t('cart.empty.title')}</h1>
             <p className="cart__empty-text">{t('cart.empty.text')}</p>
-            <button onClick={handleBack} className="cart__empty-btn">
+            <button type="button" onClick={handleBack} className="cart__empty-btn">
               {t('cart.empty.button')}
             </button>
-          </div>
+          </main>
         </div>
       </div>
     );
@@ -73,7 +81,7 @@ export default function CartPage() {
       <div className="cart__layout">
         <SideNavBar />
 
-        <main className="cart__content">
+        <main id="main-content" className="cart__content">
           <section className="cart__items-section">
             <div className="cart__header">
               <h1 className="cart__title">{t('cart.title')}</h1>
@@ -87,22 +95,27 @@ export default function CartPage() {
                     src={item.image} 
                     alt={item.name}
                     className="cart-item__image"
+                    width={128}
+                    height={128}
+                    loading="lazy"
+                    decoding="async"
                   />
                   
                   <div className="cart-item__details">
                     <div className="cart-item__header">
                       <div>
-                        <h3 className="cart-item__name">{item.name}</h3>
+                        <h2 className="cart-item__name">{item.name}</h2>
                         {item.featured && (
                           <span className="cart-item__badge">{t('cart.item.limited')}</span>
                         )}
                       </div>
                       <button
+                        type="button"
                         onClick={() => removeItem(item.id)}
                         className="cart-item__delete"
-                        aria-label="Remove item"
+                        aria-label={`Remove ${item.name}`}
                       >
-                        <Delete />
+                        <Delete aria-hidden="true" />
                       </button>
                     </div>
                     
@@ -111,18 +124,20 @@ export default function CartPage() {
                     <div className="cart-item__footer">
                       <div className="cart-item__quantity">
                         <button
+                          type="button"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           className="cart-item__quantity-btn"
                           disabled={item.quantity <= 1}
-                          aria-label="Decrease quantity"
+                          aria-label={`Decrease quantity for ${item.name}`}
                         >
                           −
                         </button>
                         <span className="cart-item__quantity-value">{item.quantity}</span>
                         <button
+                          type="button"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="cart-item__quantity-btn"
-                          aria-label="Increase quantity"
+                          aria-label={`Increase quantity for ${item.name}`}
                         >
                           +
                         </button>
@@ -178,7 +193,12 @@ export default function CartPage() {
               
               {/* Promo Code */}
               <div className="cart-summary__promo">
+                <label htmlFor="cart-promo-code" className="visually-hidden">
+                  {t('cart.summary.promoPlaceholder')}
+                </label>
                 <input
+                  id="cart-promo-code"
+                  name="promoCode"
                   type="text"
                   placeholder={t('cart.summary.promoPlaceholder')}
                   value={promoCode}
@@ -186,6 +206,7 @@ export default function CartPage() {
                   className="cart-summary__promo-input"
                 />
                 <button
+                  type="button"
                   onClick={handleApplyPromo}
                   className="cart-summary__promo-btn"
                   disabled={!promoCode.trim()}
@@ -195,6 +216,7 @@ export default function CartPage() {
               </div>
               
               <button 
+                type="button"
                 onClick={handleCheckout}
                 className="cart-summary__checkout-btn"
               >
@@ -207,9 +229,9 @@ export default function CartPage() {
             </div>
 
             <div className="cart-rewards">
-              <CardGiftcard className="cart-rewards__icon" />
+              <CardGiftcard className="cart-rewards__icon" aria-hidden="true" />
               <div className="cart-rewards__content">
-                <h3 className="cart-rewards__title">{t('cart.rewards.title')}</h3>
+                <h2 className="cart-rewards__title">{t('cart.rewards.title')}</h2>
                 <p className="cart-rewards__text">
                   {t('cart.rewards.text')}
                 </p>
@@ -217,9 +239,9 @@ export default function CartPage() {
             </div>
 
             <div className="cart-delivery">
-              <LocalShipping className="cart-delivery__icon" />
+              <LocalShipping className="cart-delivery__icon" aria-hidden="true" />
               <div className="cart-delivery__content">
-                <h3 className="cart-delivery__title">{t('cart.delivery.title')}</h3>
+                <h2 className="cart-delivery__title">{t('cart.delivery.title')}</h2>
                 <p className="cart-delivery__text">{t('cart.delivery.text')}</p>
               </div>
             </div>

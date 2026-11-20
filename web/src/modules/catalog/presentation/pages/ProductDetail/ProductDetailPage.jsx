@@ -77,12 +77,13 @@ export default function ProductDetailPage() {
       <div className="product-detail__layout">
         <SideNavBar />
 
-        <div className="product-detail__main">
-          <main className="product-detail__content">
+        <main id="main-content" className="product-detail__main">
+          <div className="product-detail__content">
             <section className="product-detail__image-section">
               <div className="product-detail__image-container">
-                <ImageCarousel 
-                  images={product.images || [product.image]} 
+                <ImageCarousel
+                  key={product.id}
+                  images={product.images || [product.image]}
                   productName={product.name}
                 />
                 {product.featured && (
@@ -95,13 +96,21 @@ export default function ProductDetailPage() {
 
             <section className="product-detail__info">
               <nav className="product-detail__breadcrumbs" aria-label="Breadcrumb">
-                <a href="/dashboard" className="product-detail__breadcrumb-link">{t('productDetail.breadcrumbs.catalog')}</a>
-                <span className="product-detail__breadcrumb-separator">›</span>
-                <a href="/dashboard" className="product-detail__breadcrumb-link">
-                  {product.category || 'Daifuku'}
-                </a>
-                <span className="product-detail__breadcrumb-separator">›</span>
-                <span className="product-detail__breadcrumb-current">{product.name}</span>
+                <ol className="product-detail__breadcrumb-list">
+                  <li>
+                    <a href="/dashboard" className="product-detail__breadcrumb-link">{t('productDetail.breadcrumbs.catalog')}</a>
+                  </li>
+                  <li>
+                    <a href="/dashboard" className="product-detail__breadcrumb-link">
+                      {product.category || 'Daifuku'}
+                    </a>
+                  </li>
+                  <li>
+                    <a href={window.location.pathname} aria-current="page" className="product-detail__breadcrumb-current">
+                      {product.name}
+                    </a>
+                  </li>
+                </ol>
               </nav>
 
               <h1 className="product-detail__title">{product.name}</h1>
@@ -121,7 +130,7 @@ export default function ProductDetailPage() {
                   )}
                 </div>
                 <div className="product-detail__rating-badge">
-                  <span>⭐</span>
+                  <span aria-hidden="true">⭐</span>
                   <span>{product.rating}/5 ({product.reviewCount}+ {t('productDetail.reviews')})</span>
                 </div>
               </div>
@@ -131,12 +140,14 @@ export default function ProductDetailPage() {
               </p>
 
               <div className="product-detail__flavors">
-                <h3 className="product-detail__flavors-title">{t('productDetail.selectFlavor')}</h3>
+                <h2 className="product-detail__flavors-title">{t('productDetail.selectFlavor')}</h2>
                 <div className="product-detail__flavors-list">
                   {product.flavors?.map((flavor) => (
                     <button
+                      type="button"
                       key={flavor.id}
                       onClick={() => setSelectedFlavor(flavor.id)}
+                      aria-pressed={activeFlavor === flavor.id}
                       className={`product-detail__flavor-btn ${
                         activeFlavor === flavor.id ? 'active' : ''
                       }`}
@@ -150,6 +161,7 @@ export default function ProductDetailPage() {
               <div className="product-detail__actions-row">
                 <div className="product-detail__quantity">
                   <button 
+                    type="button"
                     onClick={() => handleQuantityChange(-1)}
                     className="product-detail__quantity-btn"
                     aria-label="Decrease quantity"
@@ -158,6 +170,7 @@ export default function ProductDetailPage() {
                   </button>
                   <span className="product-detail__quantity-value">{quantity}</span>
                   <button 
+                    type="button"
                     onClick={() => handleQuantityChange(1)}
                     className="product-detail__quantity-btn"
                     aria-label="Increase quantity"
@@ -167,36 +180,37 @@ export default function ProductDetailPage() {
                 </div>
 
                 <button 
+                  type="button"
                   onClick={handleAddToCart}
                   className="product-detail__add-to-cart-desktop"
                 >
-                  <span>🛒</span>
+                  <span aria-hidden="true">🛒</span>
                   <span>{t('productDetail.addToCart')}</span>
                   <span className="product-detail__total-price">{formatPrice(totalPrice).formatted}</span>
                 </button>
               </div>
             </section>
-          </main>
+          </div>
 
           <section className="product-detail__features">
             <div className="product-detail__feature">
-              <div className="product-detail__feature-icon">🌾</div>
+              <div className="product-detail__feature-icon" aria-hidden="true">🌾</div>
               <div className="product-detail__feature-content">
-                <h4 className="product-detail__feature-title">{t('productDetail.features.organic.title')}</h4>
+                <h2 className="product-detail__feature-title">{t('productDetail.features.organic.title')}</h2>
                 <p className="product-detail__feature-description">{t('productDetail.features.organic.description')}</p>
               </div>
             </div>
             <div className="product-detail__feature">
-              <div className="product-detail__feature-icon">⏰</div>
+              <div className="product-detail__feature-icon" aria-hidden="true">⏰</div>
               <div className="product-detail__feature-content">
-                <h4 className="product-detail__feature-title">{t('productDetail.features.fresh.title')}</h4>
+                <h2 className="product-detail__feature-title">{t('productDetail.features.fresh.title')}</h2>
                 <p className="product-detail__feature-description">{t('productDetail.features.fresh.description')}</p>
               </div>
             </div>
             <div className="product-detail__feature">
-              <div className="product-detail__feature-icon">💧</div>
+              <div className="product-detail__feature-icon" aria-hidden="true">💧</div>
               <div className="product-detail__feature-content">
-                <h4 className="product-detail__feature-title">{t('productDetail.features.sweetness.title')}</h4>
+                <h2 className="product-detail__feature-title">{t('productDetail.features.sweetness.title')}</h2>
                 <p className="product-detail__feature-description">{t('productDetail.features.sweetness.description')}</p>
               </div>
             </div>
@@ -212,9 +226,9 @@ export default function ProductDetailPage() {
               <p className="product-detail__story-text">
                 {t('productDetail.story.description2')}
               </p>
-              <a href="#" className="product-detail__story-link">
+              <a href="/coming-soon" className="product-detail__story-link">
                 <span>{t('productDetail.story.link')}</span>
-                <span>→</span>
+                <span aria-hidden="true">→</span>
               </a>
             </div>
             <div className="product-detail__story-image">
@@ -222,12 +236,18 @@ export default function ProductDetailPage() {
                 src="https://images.unsplash.com/photo-1582716401301-b2407dc7563d?w=600" 
                 alt="Traditional Mochitsuki process"
                 className="product-detail__story-img"
+                width={600}
+                height={450}
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
               />
             </div>
           </section>
 
           <div className="product-detail__bottom-bar">
             <button 
+              type="button"
               onClick={handleAddToCart}
               className="product-detail__add-to-cart"
             >
@@ -235,7 +255,7 @@ export default function ProductDetailPage() {
               <span className="product-detail__total-price">{formatPrice(totalPrice).formatted}</span>
             </button>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

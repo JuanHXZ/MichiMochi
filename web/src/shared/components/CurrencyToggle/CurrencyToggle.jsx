@@ -14,11 +14,12 @@ export default function CurrencyToggle({ variant = 'navbar' }) {
   if (variant === 'sidebar') {
     return (
       <button 
+        type="button"
         className="currency-toggle currency-toggle--sidebar"
         onClick={toggleCurrency}
         aria-label={`Change currency to ${nextCurrency}`}
       >
-        <AttachMoney className="currency-toggle__icon" />
+        <AttachMoney className="currency-toggle__icon" aria-hidden="true" />
         <span className="currency-toggle__text">
           {t('sidebar.currency')}: <strong>{currentCurrency}</strong>
         </span>
@@ -28,12 +29,13 @@ export default function CurrencyToggle({ variant = 'navbar' }) {
 
   return (
     <button 
+      type="button"
       className="currency-toggle currency-toggle--navbar"
       onClick={toggleCurrency}
       aria-label={`Change currency to ${nextCurrency}`}
       title={`Switch to ${nextCurrency}`}
     >
-      <AttachMoney className="currency-toggle__icon" />
+      <AttachMoney className="currency-toggle__icon" aria-hidden="true" />
       <span className="currency-toggle__currency">{currentCurrency}</span>
     </button>
   );

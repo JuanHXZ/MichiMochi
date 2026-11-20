@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
     const result = await resetPassword(trimmedEmail);
 
     if (result.ok) {
-      if (result.data?.debugCode) {
+      if (import.meta.env.DEV && result.data?.debugCode) {
         console.log(`%c[MichiMochi Dev] Código OTP enviado a ${trimmedEmail}: ${result.data.debugCode}`, 'background: #FFE8EC; color: #E88D9D; font-size: 14px; font-weight: bold; padding: 4px 8px; border-radius: 4px;');
       }
       setIsSuccess(true);
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
 
       // Redirigir al Paso 2 (Verify Code) tras confirmar el envío
       setTimeout(() => {
-        window.location.href = `/verify-code?email=${encodeURIComponent(trimmedEmail)}`;
+        window.location.href = '/verify-code';
       }, 1200);
     } else {
       setError(result.message || 'Error al enviar el código de recuperación.');
@@ -51,13 +51,16 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="forgot-split-screen" data-node-id="1:727">
+    <main id="main-content" className="forgot-split-screen" data-node-id="1:727">
       {/* Lado Izquierdo: Hero Image Section (Node 1:729) */}
       <section className="forgot-hero-section" data-node-id="1:729">
         <img
           src={forgotHeroImg}
           alt="Artisanal Mochi"
           className="forgot-hero-image"
+          width={640}
+          height={792}
+          fetchPriority="high"
           data-node-id="1:730"
         />
         <div className="forgot-hero-overlay" data-node-id="1:731" />
@@ -95,7 +98,7 @@ export default function ForgotPasswordPage() {
 
           {/* Alertas de error o éxito */}
           {(error || authError) && (
-            <div className="forgot-alert-error" role="alert">
+            <div id="forgot-email-error" className="forgot-alert-error" role="alert">
               {error || authError}
             </div>
           )}
@@ -116,15 +119,21 @@ export default function ForgotPasswordPage() {
                   Correo electrónico
                 </label>
                 <div className="forgot-input-wrapper" data-node-id="1:753">
-                  <MdEmail className="forgot-input-icon" data-node-id="1:758" />
+                  <MdEmail className="forgot-input-icon" aria-hidden="true" data-node-id="1:758" />
                   <input
                     id="forgot-email"
+                    name="email"
                     type="email"
+                    required
+                    spellCheck={false}
+                    enterKeyHint="done"
                     className={`forgot-input ${error ? 'is-invalid' : ''}`}
                     placeholder="ejemplo@michi.com"
                     value={email}
                     onChange={handleEmailChange}
-                    autoComplete="email"
+                    autoComplete="username"
+                    aria-invalid={Boolean(error || authError)}
+                    aria-describedby={error || authError ? 'forgot-email-error' : undefined}
                     disabled={loading}
                     data-node-id="1:754"
                   />
@@ -139,13 +148,13 @@ export default function ForgotPasswordPage() {
                 data-node-id="1:759"
               >
                 <span>{loading ? 'Enviando código...' : 'Enviar código'}</span>
-                <HiArrowRight className="forgot-button-icon" data-node-id="1:764" />
+                <HiArrowRight className="forgot-button-icon" aria-hidden="true" data-node-id="1:764" />
               </button>
 
               {/* Footer Link (Node 1:766) */}
               <div className="forgot-footer-link-wrapper" data-node-id="1:765">
                 <a href="/login" className="forgot-back-link" data-node-id="1:766">
-                  <MdArrowBack className="forgot-back-icon" data-node-id="1:768" />
+                  <MdArrowBack className="forgot-back-icon" aria-hidden="true" data-node-id="1:768" />
                   <span data-node-id="1:769">Volver al inicio de sesión</span>
                 </a>
               </div>

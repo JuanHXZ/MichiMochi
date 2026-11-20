@@ -11,13 +11,8 @@ export default function ProductCard({ product, onAddToCart }) {
   const addItem = useCartStore((state) => state.addItem);
 
   if (!product) return null;
-  
-  const handleCardClick = () => {
-    window.location.href = `/product/${product.id}`;
-  };
 
-  const handleAddClick = (e) => {
-    e.stopPropagation();
+  const handleAddClick = () => {
     if (typeof onAddToCart === 'function') {
       onAddToCart(product);
     } else {
@@ -26,34 +21,41 @@ export default function ProductCard({ product, onAddToCart }) {
   };
 
   return (
-    <article className="stitch-card" onClick={handleCardClick} role="button" tabIndex={0}>
+    <article className="stitch-card">
       <div className="stitch-card__image-container">
         <img
           src={product.image}
           alt={product.name}
           className="stitch-card__image"
+          width={400}
+          height={400}
           loading="lazy"
+          decoding="async"
         />
         <button 
+          type="button"
           className="stitch-card__favorite" 
-          aria-label="Add to favorites"
-          onClick={(e) => e.stopPropagation()}
+          aria-label={`Add ${product.shortName || product.name} to favorites`}
         >
-          <Favorite />
+          <Favorite aria-hidden="true" />
         </button>
       </div>
 
       <div className="stitch-card__body">
         <div className="stitch-card__header">
           <div>
-            <h3 className="stitch-card__title">{product.shortName || product.name}</h3>
+            <h3 className="stitch-card__title">
+              <a href={`/product/${product.id}`} className="stitch-card__link">
+                {product.shortName || product.name}
+              </a>
+            </h3>
             <p className="stitch-card__subtitle">{product.description}</p>
           </div>
           <span className="stitch-card__price">{formattedPrice.formatted}</span>
         </div>
 
-        <button className="stitch-card__add-btn" onClick={handleAddClick}>
-          <AddShoppingCart fontSize="small" /> {t('dashboard.card.add')}
+        <button type="button" className="stitch-card__add-btn" onClick={handleAddClick}>
+          <AddShoppingCart fontSize="small" aria-hidden="true" /> {t('dashboard.card.add')}
         </button>
       </div>
     </article>

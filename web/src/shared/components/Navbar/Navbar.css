@@ -35,27 +35,20 @@
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .navbar__menu-btn:hover {
   background: var(--summary-bg);
 }
 
-.navbar__menu-btn:active {
-  transform: scale(0.9);
-}
-
 .navbar__brand-text {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary);
+  text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.navbar__brand-text:active {
-  transform: scale(0.95);
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .navbar__nav {
@@ -76,7 +69,7 @@
   text-decoration: none;
   padding-bottom: 0.25rem;
   border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   cursor: pointer;
 }
 
@@ -84,8 +77,18 @@
   color: var(--primary);
 }
 
-.navbar__nav-link:active {
-  transform: scale(0.95);
+@media (prefers-reduced-motion: no-preference) {
+  .navbar__menu-btn:active {
+    transform: scale(0.9);
+  }
+
+  .navbar__brand-text:active {
+    transform: scale(0.95);
+  }
+
+  .navbar__nav-link:active {
+    transform: scale(0.95);
+  }
 }
 
 .navbar__nav-link--active {
@@ -109,7 +112,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -127,7 +130,6 @@
 
 .navbar__icon-btn:hover {
   background: var(--summary-bg);
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -136,21 +138,12 @@
 }
 
 .navbar__icon-btn:active {
-  transform: translateY(0) scale(0.95);
-  transition: all 0.1s ease;
+  transition: transform 0.1s ease;
 }
 
 /* Icon rotation animation for theme toggle */
 .navbar__icon-btn svg {
   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.navbar__icon-btn:hover svg {
-  transform: rotate(20deg) scale(1.1);
-}
-
-.navbar__icon-btn:active svg {
-  transform: rotate(0deg) scale(0.9);
 }
 
 .navbar__cart-btn {
@@ -159,20 +152,39 @@
   color: var(--body-text);
   background: transparent;
   border: none;
+  text-decoration: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .navbar__cart-btn:hover {
   background: var(--summary-bg);
 }
 
-.navbar__cart-btn:active {
-  transform: scale(0.9);
+@media (prefers-reduced-motion: no-preference) {
+  .navbar__icon-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .navbar__icon-btn:active {
+    transform: translateY(0) scale(0.95);
+  }
+
+  .navbar__icon-btn:hover svg {
+    transform: rotate(20deg) scale(1.1);
+  }
+
+  .navbar__icon-btn:active svg {
+    transform: rotate(0deg) scale(0.9);
+  }
+
+  .navbar__cart-btn:active {
+    transform: scale(0.9);
+  }
 }
 
 .navbar__cart-badge {
@@ -180,7 +192,7 @@
   top: 0;
   right: 0;
   background-color: var(--primary);
-  color: white;
+  color: var(--on-primary);
   font-size: 0.625rem;
   font-weight: 700;
   width: 18px;
@@ -200,32 +212,44 @@
   height: 2.5rem;
   border-radius: 50%;
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
   border: 2px solid var(--primary);
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease;
   overflow: hidden;
-}
-
-.navbar__avatar:active {
-  transform: scale(0.95);
+  anchor-name: --navbar-user-trigger;
 }
 
 .navbar__menu {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: var(--shadow-md);
-  min-width: 160px;
+  min-width: 180px;
+  padding: 0.25rem 0;
   overflow: hidden;
-  z-index: 1000;
+}
+
+@supports (position-area: block-end) {
+  .navbar__menu {
+    position-anchor: --navbar-user-trigger;
+    inset: auto;
+    margin: 0.5rem 0 0;
+    position-area: block-end span-inline-start;
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+  }
+}
+
+@supports not (position-area: block-end) {
+  .navbar__menu {
+    position: fixed;
+    inset: 4.75rem 1.5rem auto auto;
+    margin: 0;
+  }
 }
 
 .navbar__menu-item {
@@ -237,10 +261,20 @@
   color: var(--body-text);
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .navbar__menu-item:hover {
   background: var(--summary-bg);
   color: var(--heading-color);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .navbar__avatar:active {
+    transform: scale(0.95);
+  }
 }

@@ -1,6 +1,6 @@
 .coming-soon {
-  min-height: 100vh;
-  background: var(--bg-primary);
+  min-height: 100dvh;
+  background: var(--background);
 }
 
 .coming-soon__layout {
@@ -10,7 +10,7 @@
 
 .coming-soon__main {
   flex: 1;
-  min-height: calc(100vh - 80px);
+  min-height: calc(100dvh - 80px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,19 +20,7 @@
 .coming-soon__content {
   max-width: 900px;
   text-align: center;
-  animation: fadeInUp 0.6s ease-out;
   padding-top: 2rem;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Icon Section */
@@ -45,16 +33,6 @@
 .coming-soon__icon {
   font-size: 6rem;
   display: block;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
 }
 
 .coming-soon__icon-decoration {
@@ -69,35 +47,88 @@
 .coming-soon__icon-decoration span {
   position: absolute;
   font-size: 2rem;
-  animation: float 3s ease-in-out infinite;
 }
 
 .coming-soon__icon-decoration span:nth-child(1) {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  animation-delay: 0s;
 }
 
 .coming-soon__icon-decoration span:nth-child(2) {
   top: 50%;
   right: 0;
   transform: translateY(-50%);
-  animation-delay: 0.5s;
 }
 
 .coming-soon__icon-decoration span:nth-child(3) {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  animation-delay: 1s;
 }
 
 .coming-soon__icon-decoration span:nth-child(4) {
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  animation-delay: 1.5s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coming-soon__content {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .coming-soon__icon {
+    animation: bounce 2s infinite;
+  }
+
+  .coming-soon__icon-decoration span {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @supports (animation-delay: calc(sibling-index() * 0.5s)) {
+    .coming-soon__icon-decoration span {
+      animation-delay: calc((sibling-index() - 1) * 0.5s);
+    }
+  }
+
+  @supports not (animation-delay: calc(sibling-index() * 0.5s)) {
+    .coming-soon__icon-decoration span:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .coming-soon__icon-decoration span:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+
+    .coming-soon__icon-decoration span:nth-child(3) {
+      animation-delay: 1s;
+    }
+
+    .coming-soon__icon-decoration span:nth-child(4) {
+      animation-delay: 1.5s;
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes float {
@@ -150,13 +181,18 @@
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 2rem 1.5rem;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .coming-soon__feature-card:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--primary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coming-soon__feature-card:hover {
+    transform: translateY(-4px);
+  }
 }
 
 .coming-soon__feature-icon {
@@ -180,28 +216,40 @@
 
 /* CTA Button */
 .coming-soon__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
   border: none;
   border-radius: 12px;
   padding: 1rem 2.5rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, filter 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .coming-soon__cta:hover {
-  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   background: var(--primary-hover, var(--primary));
   filter: brightness(1.1);
 }
 
 .coming-soon__cta:active {
-  transform: translateY(0);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .coming-soon__cta:hover {
+    transform: translateY(-2px);
+  }
+
+  .coming-soon__cta:active {
+    transform: translateY(0);
+  }
 }
 
 /* Responsive Design */

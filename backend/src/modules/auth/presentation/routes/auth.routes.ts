@@ -16,6 +16,7 @@ const router = Router();
 router.post('/register', validateBody(registerSchema), AuthController.register);
 router.post('/login', validateBody(loginSchema), AuthController.login);
 router.post('/google', validateBody(googleAuthSchema), AuthController.googleLogin);
+router.post('/logout', AuthController.logout);
 router.get('/me', authenticateJWT, AuthController.getMe);
 router.post('/forgot-password', validateBody(forgotPasswordSchema), AuthController.forgotPassword);
 router.post('/verify-otp', validateBody(verifyOtpSchema), AuthController.verifyOtp);

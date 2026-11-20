@@ -11,7 +11,7 @@
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 0.875rem;
   font-weight: 600;
   font-family: 'Spline Sans', sans-serif;
@@ -20,17 +20,12 @@
 .language-toggle--navbar:hover {
   background: var(--surface-container);
   border-color: var(--primary);
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .language-toggle--navbar .language-toggle__icon {
   font-size: 1.25rem;
   transition: transform 0.3s ease;
-}
-
-.language-toggle--navbar:hover .language-toggle__icon {
-  transform: rotate(20deg) scale(1.1);
 }
 
 .language-toggle__lang {
@@ -49,7 +44,7 @@
   color: var(--body-text);
   padding: 0.875rem 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
   font-size: 0.9375rem;
   font-family: 'Spline Sans', sans-serif;
   border-radius: 8px;
@@ -59,7 +54,6 @@
 .language-toggle--sidebar:hover {
   background: var(--surface-container);
   color: var(--primary);
-  transform: scale(1.05);
 }
 
 .language-toggle--sidebar .language-toggle__icon {
@@ -67,8 +61,22 @@
   transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.language-toggle--sidebar:hover .language-toggle__icon {
-  transform: rotate(180deg) scale(1.1);
+@media (prefers-reduced-motion: no-preference) {
+  .language-toggle--navbar:hover {
+    transform: translateY(-2px);
+  }
+
+  .language-toggle--navbar:hover .language-toggle__icon {
+    transform: rotate(20deg) scale(1.1);
+  }
+
+  .language-toggle--sidebar:hover {
+    transform: scale(1.05);
+  }
+
+  .language-toggle--sidebar:hover .language-toggle__icon {
+    transform: rotate(180deg) scale(1.1);
+  }
 }
 
 .language-toggle__text {

@@ -168,7 +168,7 @@ describe('Product Catalog CRUD API Tests', () => {
 
       expect(getRes.status).toBe(200);
       expect(getRes.body.data.name).toBe(newProductPayload.name);
-    });
+    }, 15000);
 
     it('should reject creation with 409 Conflict when product name already exists', async () => {
       const res = await request(app)

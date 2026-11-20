@@ -11,9 +11,23 @@ export const createApp = (): Express => {
   const app = express();
 
   // Middlewares globales
+  app.use((_req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+    res.setHeader('X-Frame-Options', 'DENY');
+    next();
+  });
+
+  const defaultDevOrigins = [
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'http://localhost:8081',
+  ];
+
   const allowedOrigins =
     ENV.CORS_ORIGIN === '*'
-      ? true
+      ? defaultDevOrigins
       : ENV.CORS_ORIGIN.replace(/['"]/g, '')
           .split(',')
           .map((o) => o.trim())

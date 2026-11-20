@@ -28,6 +28,7 @@ export async function apiClient(endpoint, options = {}) {
   const config = {
     method,
     headers: requestHeaders,
+    credentials: 'include',
   };
 
   if (body) {

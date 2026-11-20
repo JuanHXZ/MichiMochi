@@ -1,7 +1,6 @@
 import React from "react";
 import { ArrowForward } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
-import strawberryPromo from "@/shared/assets/strawberry-promo.png";
 import "./HeroBanner.css";
 
 export default function HeroBanner({ product, onOrderClick }) {
@@ -13,9 +12,12 @@ export default function HeroBanner({ product, onOrderClick }) {
     <section className="hero-banner">
       <div className="hero-banner__overlay" />
       <img
-        src={strawberryPromo}
+        src="/assets/strawberry-promo.png"
         alt={product.name}
         className="hero-banner__image"
+        width={1200}
+        height={500}
+        fetchPriority="high"
       />
       <div className="hero-banner__content">
         <span className="hero-banner__badge">{t('dashboard.hero.badge')}</span>

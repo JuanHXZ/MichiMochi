@@ -1,6 +1,15 @@
 :root {
   /* Material Design 3 - Michi Mochi (from Stitch Desktop Dashboard) */
-  
+  color-scheme: light dark;
+
+  &:has(> head > meta[name="color-scheme"][content="dark"]) {
+    color-scheme: dark;
+  }
+
+  &:has(> head > meta[name="color-scheme"][content="light"]) {
+    color-scheme: light;
+  }
+
   /* Primary Colors */
   --primary: #845000;
   --primary-dark: #673d00;
@@ -11,7 +20,7 @@
   --primary-fixed: #ffddbb;
   --primary-fixed-dim: #ffb867;
   --inverse-primary: #ffb867;
-  
+
   /* Secondary Colors */
   --secondary: #765938;
   --secondary-container: #fed6ad;
@@ -21,7 +30,7 @@
   --on-secondary-container: #795b3a;
   --secondary-fixed: #ffddbb;
   --secondary-fixed-dim: #e6c098;
-  
+
   /* Tertiary Colors */
   --tertiary: #006387;
   --tertiary-container: #237ca5;
@@ -31,7 +40,7 @@
   --on-tertiary-container: #fcfcff;
   --tertiary-fixed: #c4e7ff;
   --tertiary-fixed-dim: #82d0fc;
-  
+
   /* Surface Colors */
   --surface: #fff8f4;
   --surface-dim: #e4d8ce;
@@ -43,29 +52,29 @@
   --surface-container-highest: #ede0d7;
   --surface-variant: #ede0d7;
   --surface-tint: #885200;
-  
+
   /* Text Colors */
   --on-surface: #201b15;
   --on-surface-variant: #514438;
   --on-background: #201b15;
-  
+
   /* Background */
   --background: #fff8f4;
-  
+
   /* Error */
   --error: #ba1a1a;
   --error-container: #ffdad6;
   --on-error: #ffffff;
   --on-error-container: #93000a;
-  
+
   /* Outline & Border */
   --outline: #847466;
   --outline-variant: #d6c3b2;
-  
+
   /* Inverse */
   --inverse-surface: #362f29;
   --inverse-on-surface: #fbeee4;
-  
+
   /* Semantic Aliases for easier use */
   --heading-color: var(--on-surface);
   --body-text: var(--on-surface-variant);
@@ -77,7 +86,7 @@
   --accent-blue: var(--tertiary);
   --success-green: #4caf50;
   --error-red: var(--error);
-  
+
   /* Shadows */
   --shadow-sm: 0 2px 8px rgba(32, 27, 21, 0.08);
   --shadow-md: 0 4px 16px rgba(32, 27, 21, 0.12);
@@ -99,19 +108,33 @@
   --sans: 'Spline Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: 'Spline Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
+}
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
+@supports (color: light-dark(white, black)) {
+  :root {
+    --primary: light-dark(#845000, #ffb867);
+    --primary-dark: light-dark(#673d00, #d89b4f);
+    --on-primary: light-dark(#ffffff, #452b00);
+    --surface: light-dark(#fff8f4, #1a1410);
+    --surface-bright: light-dark(#fff8f4, #413731);
+    --surface-container-lowest: light-dark(#ffffff, #140f0c);
+    --surface-container-low: light-dark(#fef1e7, #201b15);
+    --surface-container: light-dark(#f8ece2, #25201a);
+    --surface-container-high: light-dark(#f3e6dc, #2f2a24);
+    --on-surface: light-dark(#201b15, #ede0d7);
+    --on-surface-variant: light-dark(#514438, #d6c3b2);
+    --background: light-dark(#fff8f4, #1a1410);
+    --outline: light-dark(#847466, #9f9080);
+    --outline-variant: light-dark(#d6c3b2, #51453a);
+    --error: light-dark(#ba1a1a, #ffb4ab);
+    --error-container: light-dark(#ffdad6, #93000a);
+    --on-error: light-dark(#ffffff, #690005);
+    --on-error-container: light-dark(#93000a, #ffdad6);
+    --bg: var(--background);
+    --text: var(--on-surface-variant);
+    --text-h: var(--on-surface);
+    --border: var(--outline-variant);
+    --code-bg: var(--surface-container);
   }
 }
 
@@ -223,31 +246,24 @@ html.dark #social .button-icon {
   box-sizing: border-box;
 }
 
-/* Smooth theme transition */
-* {
-  transition: background-color 0.3s ease, 
-              color 0.3s ease, 
-              border-color 0.3s ease,
-              box-shadow 0.3s ease;
-}
-
-/* Disable transition for specific properties that should be instant */
-*:focus,
-*:active,
-button,
-input,
-textarea,
-select {
-  transition: background-color 0.3s ease, 
-              color 0.3s ease, 
-              border-color 0.3s ease,
-              box-shadow 0.3s ease,
-              transform 0.2s ease;
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
 }
 
 body {
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
+  font-family: var(--sans);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -259,7 +275,7 @@ body {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 h1,
@@ -267,28 +283,25 @@ h2 {
   font-family: var(--heading);
   font-weight: 500;
   color: var(--text-h);
+  text-wrap: balance;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+  letter-spacing: -0.03em;
+  margin: 2rem 0;
 }
+
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5rem;
 }
+
 p {
   margin: 0;
+  text-wrap: pretty;
 }
 
 code,
@@ -304,4 +317,50 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.skip-link:focus-visible {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 2000;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+}
+
+:where(a:any-link, button, input, select, textarea, [tabindex="0"]):focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  :where(a:any-link, button, input, select, textarea, [tabindex="0"]):focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
+.route-loading {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  color: var(--body-text);
+  font-weight: 600;
 }

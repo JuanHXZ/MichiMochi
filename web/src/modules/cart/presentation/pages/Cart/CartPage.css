@@ -1,5 +1,5 @@
 .cart {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--background);
   font-family: 'Spline Sans', system-ui, -apple-system, sans-serif;
   padding-top: 80px; /* Navbar fixed height */
@@ -7,7 +7,7 @@
 
 .cart__layout {
   display: block;
-  min-height: calc(100vh - 80px);
+  min-height: calc(100dvh - 80px);
 }
 
 /* Content Layout */
@@ -61,14 +61,19 @@
   display: flex;
   gap: 1.5rem;
   box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   border: 1px solid var(--border-color);
 }
 
 .cart-item:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--primary);
-  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cart-item:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .cart-item__image {
@@ -121,7 +126,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .cart-item__delete:hover {
@@ -166,14 +171,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   box-shadow: var(--shadow-sm);
 }
 
 .cart-item__quantity-btn:hover:not(:disabled) {
   background: var(--primary);
-  color: white;
-  transform: scale(1.1);
+  color: var(--on-primary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cart-item__quantity-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+  }
 }
 
 .cart-item__quantity-btn:disabled {
@@ -309,13 +319,13 @@
   color: var(--heading-color);
   font-size: 0.9375rem;
   font-family: inherit;
-  outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.cart-summary__promo-input:focus {
+.cart-summary__promo-input:focus-visible {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--accent-bg);
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .cart-summary__promo-input::placeholder {
@@ -327,17 +337,16 @@
   border-radius: 12px;
   border: none;
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .cart-summary__promo-btn:hover:not(:disabled) {
   background: var(--primary-dark);
-  transform: translateY(-1px);
 }
 
 .cart-summary__promo-btn:disabled {
@@ -351,20 +360,29 @@
   border-radius: 50px;
   border: none;
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
   box-shadow: var(--shadow-lg);
   margin-bottom: 0.75rem;
 }
 
 .cart-summary__checkout-btn:hover {
-  transform: translateY(-2px);
   box-shadow: 0 8px 28px rgba(193, 130, 52, 0.3);
   background: var(--primary-dark);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cart-summary__promo-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .cart-summary__checkout-btn:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .cart-summary__terms {
@@ -474,19 +492,24 @@
   border-radius: 50px;
   border: none;
   background: var(--primary);
-  color: white;
+  color: var(--on-primary);
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
   box-shadow: var(--shadow-lg);
 }
 
 .cart__empty-btn:hover {
-  transform: translateY(-2px);
   box-shadow: 0 8px 28px rgba(193, 130, 52, 0.3);
   background: var(--primary-dark);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cart__empty-btn:hover {
+    transform: translateY(-2px);
+  }
 }
 
 /* Responsive */

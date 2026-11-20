@@ -3,18 +3,18 @@
    ========================================================================== */
 
 .login-page-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 48px 24px;
-  background: linear-gradient(135deg, #fff8f4 0%, #fef1e7 100%);
+  background: linear-gradient(135deg, var(--background) 0%, var(--surface-container-low) 100%);
   position: relative;
   box-sizing: border-box;
-  font-family: 'Spline Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #201b15;
+  font-family: var(--sans);
+  color: var(--on-surface);
 }
 
 /* Container Tarjeta Principal */
@@ -22,10 +22,10 @@
   width: 100%;
   max-width: 1152px;
   min-height: 720px;
-  background: #ffffff;
-  border: 1px solid rgba(237, 224, 215, 0.6);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 48px;
-  box-shadow: 0px 20px 50px -10px rgba(132, 80, 0, 0.12);
+  box-shadow: var(--shadow-lg);
   display: flex;
   overflow: hidden;
   position: relative;
@@ -34,7 +34,7 @@
 /* Lado Izquierdo: Branding y Visual */
 .login-visual-section {
   flex: 1;
-  background: #fef1e7;
+  background: var(--surface-container-low);
   padding: 48px;
   display: flex;
   flex-direction: column;
@@ -94,38 +94,43 @@
   height: 100%;
   object-fit: contain;
   border-radius: 40px;
-  transform: rotate(2deg);
   filter: drop-shadow(0px 15px 25px rgba(132, 80, 0, 0.15));
-  transition: transform 0.3s ease;
 }
 
-.login-mochi-img:hover {
-  transform: rotate(0deg) scale(1.03);
+@media (prefers-reduced-motion: no-preference) {
+  .login-mochi-img {
+    transform: rotate(2deg);
+    transition: transform 0.3s ease;
+  }
+
+  .login-mochi-img:hover {
+    transform: rotate(0deg) scale(1.03);
+  }
 }
 
 .login-mochi-badge {
   position: absolute;
   bottom: -12px;
   right: -12px;
-  background: #fff8f4;
-  border: 1px solid #ede0d7;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   border-radius: 32px;
   padding: 10px 24px;
-  box-shadow: 0px 10px 20px -3px rgba(132, 80, 0, 0.12);
+  box-shadow: var(--shadow-md);
   transform: rotate(-3deg);
 }
 
 .login-mochi-badge span {
   font-weight: 700;
   font-size: 1.15rem;
-  color: #845000;
+  color: var(--primary);
 }
 
 .login-visual-title {
   font-size: 2.5rem;
   font-weight: 900;
   line-height: 1.2;
-  color: #201b15;
+  color: var(--heading-color);
   margin: 0 0 16px 0;
   letter-spacing: -0.8px;
 }
@@ -133,7 +138,7 @@
 .login-visual-subtitle {
   font-size: 1.05rem;
   line-height: 1.6;
-  color: #514438;
+  color: var(--body-text);
   margin: 0 0 24px 0;
 }
 
@@ -142,13 +147,13 @@
   gap: 16px;
   justify-content: center;
   font-size: 1.4rem;
-  color: #c18234;
+  color: var(--primary);
 }
 
 /* Lado Derecho: Formulario */
 .login-form-section {
   flex: 1;
-  background: #ffffff;
+  background: var(--card-bg);
   padding: 60px 80px;
   display: flex;
   flex-direction: column;
@@ -168,13 +173,13 @@
 .login-form-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #201b15;
+  color: var(--heading-color);
   margin: 0 0 8px 0;
 }
 
 .login-form-subtitle {
   font-size: 0.95rem;
-  color: #6d5d50;
+  color: var(--body-text);
   margin: 0;
 }
 
@@ -199,19 +204,19 @@
 .login-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #514438;
+  color: var(--body-text);
 }
 
 .login-forgot-link {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #c18234;
+  color: var(--primary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .login-forgot-link:hover {
-  color: #9e6420;
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 
@@ -225,36 +230,37 @@
   position: absolute;
   left: 18px;
   font-size: 1.15rem;
-  color: #9b8a7c;
+  color: var(--text-secondary);
   pointer-events: none;
 }
 
 .login-input {
   width: 100%;
-  background: #fef1e7;
-  border: 1px solid transparent;
+  background: var(--surface-container-low);
+  border: 1px solid var(--border-color);
   border-radius: 9999px;
   padding: 14px 48px;
   font-size: 0.95rem;
-  color: #201b15;
-  outline: none;
-  transition: all 0.2s ease;
+  color: var(--heading-color);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
   box-sizing: border-box;
 }
 
 .login-input::placeholder {
-  color: #bfaea0;
+  color: var(--text-secondary);
 }
 
-.login-input:focus {
-  background: #ffffff;
-  border-color: #c18234;
-  box-shadow: 0 0 0 4px rgba(193, 130, 52, 0.15);
+.login-input:focus-visible {
+  background: var(--card-bg);
+  border-color: var(--primary);
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
 }
 
-.login-input.has-error {
-  border-color: #e53e3e;
-  background: #fff5f5;
+.login-input.has-error,
+.login-input:user-invalid {
+  border-color: var(--error);
+  background: var(--error-container);
 }
 
 .login-password-toggle {
@@ -266,25 +272,25 @@
   padding: 0;
   display: flex;
   align-items: center;
-  color: #9b8a7c;
+  color: var(--text-secondary);
   font-size: 1.1rem;
   transition: color 0.2s ease;
 }
 
 .login-password-toggle:hover {
-  color: #201b15;
+  color: var(--heading-color);
 }
 
 .login-error-message {
   font-size: 0.8rem;
-  color: #e53e3e;
+  color: var(--error);
   margin: 4px 0 0 16px;
 }
 
 .login-auth-error {
-  background: #fff5f5;
-  border: 1px solid #feb2b2;
-  color: #c53030;
+  background: var(--error-container);
+  border: 1px solid var(--error);
+  color: var(--on-error-container);
   padding: 10px 18px;
   border-radius: 12px;
   font-size: 0.875rem;
@@ -292,8 +298,8 @@
 }
 
 .login-submit-btn {
-  background: #c18234;
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
   border-radius: 9999px;
   padding: 15px;
@@ -301,18 +307,23 @@
   font-weight: 700;
   cursor: pointer;
   margin-top: 6px;
-  box-shadow: 0px 10px 20px -3px rgba(132, 80, 0, 0.25);
-  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .login-submit-btn:hover {
-  background: #ad7027;
-  box-shadow: 0px 12px 24px -3px rgba(132, 80, 0, 0.35);
-  transform: translateY(-1px);
+  background: var(--primary-dark);
+  box-shadow: var(--shadow-lg);
 }
 
-.login-submit-btn:active {
-  transform: translateY(0);
+@media (prefers-reduced-motion: no-preference) {
+  .login-submit-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .login-submit-btn:active {
+    transform: translateY(0);
+  }
 }
 
 /* Separador or continue with */
@@ -325,20 +336,20 @@
 .login-divider-line {
   flex: 1;
   height: 1px;
-  background: #ede0d7;
+  background: var(--border-color);
 }
 
 .login-divider-text {
   padding: 0 16px;
   font-size: 0.875rem;
-  color: #847466;
+  color: var(--text-secondary);
 }
 
 /* Boton Social Google */
 .login-google-btn {
   width: 100%;
-  background: #ffffff;
-  border: 1px solid #d6c3b2;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 9999px;
   padding: 13px;
   display: flex;
@@ -347,14 +358,14 @@
   gap: 12px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #201b15;
+  color: var(--heading-color);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .login-google-btn:hover {
-  background: #faf7f5;
-  border-color: #bfaea0;
+  background: var(--surface-container-low);
+  border-color: var(--primary);
 }
 
 /* Enlace a Registro */
@@ -362,12 +373,12 @@
   text-align: center;
   margin-top: 24px;
   font-size: 0.95rem;
-  color: #514438;
+  color: var(--body-text);
 }
 
 .login-signup-link {
   font-weight: 700;
-  color: #c18234;
+  color: var(--primary);
   text-decoration: none;
   margin-left: 4px;
 }
@@ -380,7 +391,7 @@
 .login-footer-credit {
   margin-top: 24px;
   font-size: 0.85rem;
-  color: #847466;
+  color: var(--text-secondary);
   text-align: center;
 }
 

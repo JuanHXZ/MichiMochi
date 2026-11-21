@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MichiMochi — Servidor en Contenedor Docker (Ubuntu + Apache)</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fbf2ed; color: #412817; text-align: center; padding: 50px; margin: 0; }
+    .card { background: #fff; max-width: 680px; margin: auto; padding: 34px; border-radius: 14px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); border-top: 6px solid #0277bd; }
+    .badge { background: #0277bd; color: #fff; padding: 5px 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 0.9rem; }
+    th { background: #5a3e2b; color: #fff; padding: 8px; text-align: left; }
+    td { border: 1px solid #d3c3bb; padding: 7px 8px; text-align: left; }
+    tr:nth-child(even) td { background: #fbf2ed; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">FASE 2: CONTENEDOR DOCKER ACTIVO</span>
+    <h1>🍡 MichiMochi Dessert Co.</h1>
+    <p>Plataforma de Comercio Electrónico de Mochis Artesanales en Colombia</p>
+    <hr/>
+    <p><b>Stack Orquestado:</b> Dockerfile (Ubuntu 22.04 + Apache 2.4) + MySQL 8.0 (<code>db</code>)</p>
+    <p><b>Base de Datos:</b> <code>michimochi</code> | <b>Volumen Persistente:</b> <code>db_data</code></p>
+    <table>
+      <tr><th>ID</th><th>Producto</th><th>Categoría</th><th>Precio (USD)</th><th>Stock</th></tr>
+      <tr><td>1</td><td>Strawberry Dream Mochi</td><td>Strawberry</td><td>$4.25</td><td>32</td></tr>
+      <tr><td>2</td><td>Mango Sunshine Mochi</td><td>Mango</td><td>$4.50</td><td>38</td></tr>
+      <tr><td>3</td><td>Matcha Zen Mochi</td><td>Matcha</td><td>$4.75</td><td>28</td></tr>
+      <tr><td>4</td><td>Velvet Chocolate Mochi</td><td>Chocolate</td><td>$4.50</td><td>45</td></tr>
+    </table>
+    <p style="margin-top: 20px; font-size: 0.85rem; color: #5a3e2b;">
+      <b>Evidencia:</b> GA10-220501097-AA5-EV01 — ADSO SENA (CEET)
+    </p>
+  </div>
+</body>
+</html>

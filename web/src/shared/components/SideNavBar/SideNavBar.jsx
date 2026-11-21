@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+﻿import React, { useEffect, useRef, useCallback } from "react";
 import { Close, LightMode, DarkMode } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
 import { useProductStore } from '@modules/catalog/application/stores/productStore';
@@ -17,6 +17,7 @@ export default function SideNavBar() {
   const dialogRef = useRef(null);
   const scrollerRef = useRef(null);
   const sheetRef = useRef(null);
+  const closeTimeoutRef = useRef(null);
 
   const CATEGORIES = [
     { id: "All", labelKey: "sidebar.categories.all", icon: "🍰", isComingSoon: false },
@@ -26,15 +27,52 @@ export default function SideNavBar() {
     { id: "Special", labelKey: "sidebar.categories.seasonal", icon: "🌸", isComingSoon: true },
   ];
 
-  const closeDrawer = () => {
+  const finalizeClose = useCallback(() => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    const dialog = dialogRef.current;
+    if (dialog?.open) {
+      dialog.close();
+    }
+    closeSidebar();
+  }, [closeSidebar]);
+
+  const closeDrawer = useCallback(() => {
     const scroller = scrollerRef.current;
     const dialog = dialogRef.current;
-    if (!scroller || !dialog) {
-      closeSidebar();
+    if (!scroller || !dialog || !dialog.open) {
+      finalizeClose();
       return;
     }
-    scroller.scrollTo({ left: scroller.offsetWidth, behavior: 'auto' });
-  };
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+
+    if (prefersReducedMotion || maxScroll === 0) {
+      finalizeClose();
+      return;
+    }
+
+    const handleScrollEnd = () => {
+      scroller.removeEventListener('scrollend', handleScrollEnd);
+      finalizeClose();
+    };
+    scroller.addEventListener('scrollend', handleScrollEnd, { once: true });
+
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    closeTimeoutRef.current = setTimeout(() => {
+      scroller.removeEventListener('scrollend', handleScrollEnd);
+      finalizeClose();
+    }, 260);
+
+    scroller.scrollTo({ left: maxScroll, behavior: 'auto' });
+  }, [finalizeClose]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -45,6 +83,10 @@ export default function SideNavBar() {
     let cancelled = false;
 
     const openDrawer = async () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
       if (!dialog.open) {
         dialog.showModal();
       }
@@ -62,13 +104,13 @@ export default function SideNavBar() {
     if (isOpen) {
       openDrawer();
     } else if (dialog.open) {
-      scroller.scrollTo({ left: scroller.offsetWidth, behavior: 'auto' });
+      closeDrawer();
     }
 
     return () => {
       cancelled = true;
     };
-  }, [isOpen]);
+  }, [isOpen, closeDrawer]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -83,8 +125,7 @@ export default function SideNavBar() {
         const entry = entries.at(-1);
         if (!entry) return;
         if (entry.intersectionRatio < visibleThreshold && dialog.open) {
-          dialog.close();
-          closeSidebar();
+          finalizeClose();
         }
       },
       { root: dialog, threshold: [visibleThreshold, 1] }
@@ -105,15 +146,21 @@ export default function SideNavBar() {
       if (onScrollFallback) {
         scroller.removeEventListener('scroll', onScrollFallback);
       }
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+      if (dialog.open) {
+        dialog.close();
+      }
     };
-  }, [closeSidebar]);
+  }, [finalizeClose]);
 
   const handleCategoryClick = (categoryId, isComingSoon) => {
+    finalizeClose();
     if (isComingSoon) {
       window.location.assign('/coming-soon');
     } else {
       setCategory(categoryId);
-      closeDrawer();
 
       if (window.location.pathname !== '/dashboard') {
         window.location.assign('/dashboard');
@@ -196,6 +243,7 @@ export default function SideNavBar() {
             <a
               href="/cart"
               className="sidenav__cart-btn"
+              onClick={finalizeClose}
             >
               {t('nav.cart')}
             </a>

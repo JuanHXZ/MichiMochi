@@ -1,11 +1,31 @@
+import crypto from 'node:crypto';
 import { ENV } from '../../../../shared/config/env.js';
 import { adminAuth } from '../../../../shared/config/firebaseAdmin.js';
 import { TokenService } from '../../infrastructure/security/tokenService.js';
-import { userRepository } from '../../infrastructure/repositories/MemoryUserRepository.js';
+import { userRepository } from '../../infrastructure/repositories/userRepository.factory.js';
+import { otpRepository } from '../../infrastructure/repositories/otpRepository.factory.js';
 import { UserProfile, AuthResponse } from '../../domain/entities/User.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
 import { RegisterDTO, LoginDTO, ResetPasswordDTO } from '../dtos/auth.dto.js';
 import { EmailService } from '../../../../shared/services/email.service.js';
+
+const OTP_EXPIRY_MS = 15 * 60 * 1000;
+const OTP_COOLDOWN_MS = 60 * 1000;
+const OTP_MAX_ATTEMPTS = 5;
+
+function hashOtpCode(email: string, code: string): string {
+  return crypto
+    .createHmac('sha256', ENV.OTP_PEPPER)
+    .update(`${email.trim().toLowerCase()}:${code.trim()}`)
+    .digest('hex');
+}
+
+function constantTimeHexEqual(expectedHex: string, actualHex: string): boolean {
+  const expectedBuf = Buffer.from(expectedHex, 'hex');
+  const actualBuf = Buffer.from(actualHex, 'hex');
+  if (expectedBuf.length !== actualBuf.length) return false;
+  return crypto.timingSafeEqual(expectedBuf, actualBuf);
+}
 
 export class AuthService {
   /**
@@ -39,12 +59,13 @@ export class AuthService {
     }
 
     const uid = signUpData.localId;
-    const idToken = signUpData.idToken;
 
+    // El rol inicial siempre es 'customer'; ignorar cualquier campo externo.
     const userProfile: UserProfile = {
       uid,
       email: normalizedEmail,
       fullName: data.fullName.trim(),
+      role: 'customer',
       phone: data.phone || '',
       address: data.address || '',
       city: data.city || '',
@@ -53,7 +74,7 @@ export class AuthService {
       createdAt: new Date().toISOString(),
     };
 
-    await userRepository.save(userProfile, idToken);
+    await userRepository.save(userProfile);
     const token = TokenService.generateAccessToken(userProfile);
 
     return {
@@ -92,56 +113,33 @@ export class AuthService {
     }
 
     const uid = signInData.localId;
-    const idToken = signInData.idToken;
+    const existing = await userRepository.findById(uid);
 
-    let userProfile: UserProfile = {
+    const userProfile: UserProfile = {
       uid,
       email: normalizedEmail,
-      fullName: signInData.displayName || normalizedEmail.split('@')[0],
-      photoURL: signInData.profilePicture || null,
-      provider: 'password',
-      createdAt: new Date().toISOString(),
+      fullName: existing?.fullName || signInData.displayName || normalizedEmail.split('@')[0],
+      role: existing?.role ?? 'customer',
+      phone: existing?.phone || '',
+      address: existing?.address || '',
+      city: existing?.city || '',
+      photoURL: existing?.photoURL ?? signInData.profilePicture ?? null,
+      provider: existing?.provider || 'password',
+      createdAt: existing?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
-    // Intentar enriquecer datos con Firestore si existe documento
-    try {
-      const fsUrl = `https://firestore.googleapis.com/v1/projects/${ENV.FIREBASE_PROJECT_ID}/databases/(default)/documents/users/${uid}`;
-      const fsResp = await fetch(fsUrl, {
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
-
-      if (fsResp.ok) {
-        const fsData: any = await fsResp.json();
-        const fields = fsData.fields || {};
-        userProfile = {
-          uid,
-          email: fields.email?.stringValue || userProfile.email,
-          fullName: fields.fullName?.stringValue || userProfile.fullName,
-          phone: fields.phone?.stringValue || '',
-          address: fields.address?.stringValue || '',
-          city: fields.city?.stringValue || '',
-          photoURL: fields.photoURL?.stringValue || userProfile.photoURL,
-          provider: (fields.provider?.stringValue as any) || 'password',
-          createdAt: fields.createdAt?.stringValue || userProfile.createdAt,
-        };
-      }
-    } catch (err) {
-      console.warn('[AuthService] Advertencia al consultar perfil en Firestore:', err);
-    }
-
-    await userRepository.save(userProfile);
-    const token = TokenService.generateAccessToken(userProfile);
+    const savedUser = await userRepository.save(userProfile);
+    const token = TokenService.generateAccessToken(savedUser);
 
     return {
-      user: userProfile,
+      user: savedUser,
       tokens: { accessToken: token, expiresIn: ENV.JWT_EXPIRES_IN },
     };
   }
 
   /**
    * Inicio de sesión con Google (ID Token verification)
-   * Soporta tanto Firebase ID Token (emitido por Firebase Client SDK)
-   * como Google OAuth ID Token (emitido por Google Identity Provider / mobile)
    */
   static async loginWithGoogle(idToken: string, oauthToken?: string): Promise<AuthResponse> {
     if (!idToken) {
@@ -152,9 +150,9 @@ export class AuthService {
     let email = '';
     let fullName = 'Usuario Google';
     let photoURL: string | null = null;
+    let firebaseClaimRole: UserProfile['role'] | null = null;
     let verified = false;
 
-    // 1. Intentar verificar Firebase ID Token con Firebase Admin SDK
     try {
       const decoded = await adminAuth.verifyIdToken(idToken);
       if (decoded && decoded.uid) {
@@ -162,13 +160,15 @@ export class AuthService {
         email = decoded.email || '';
         fullName = decoded.name || email.split('@')[0] || 'Usuario Google';
         photoURL = decoded.picture || null;
+        if (decoded.role === 'admin' || decoded.role === 'customer') {
+          firebaseClaimRole = decoded.role;
+        }
         verified = true;
       }
     } catch {
       // Continuar con verificación REST
     }
 
-    // 2. Si no se verificó con Admin SDK, verificar Firebase ID Token mediante Identity Toolkit accounts:lookup REST API
     if (!verified) {
       try {
         const lookupUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${ENV.FIREBASE_API_KEY}`;
@@ -192,7 +192,6 @@ export class AuthService {
       }
     }
 
-    // 3. Si se proporcionó oauthToken o si idToken es un Google OAuth ID token directo, verificar vía signInWithIdp
     if (!verified) {
       const tokenToVerify = oauthToken || idToken;
       try {
@@ -202,7 +201,7 @@ export class AuthService {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             postBody: `id_token=${tokenToVerify}&providerId=google.com`,
-            requestUri: 'http://localhost:5000',
+            requestUri: ENV.APP_URL,
             returnSecureToken: true,
           }),
         });
@@ -224,26 +223,37 @@ export class AuthService {
       throw AppError.unauthorized('Token de Google no válido o expirado.');
     }
 
+    const existing = await userRepository.findById(uid);
+    const resolvedRole: UserProfile['role'] =
+      existing?.role === 'admin' || firebaseClaimRole === 'admin'
+        ? 'admin'
+        : (existing?.role ?? 'customer');
+
     const userProfile: UserProfile = {
       uid,
-      email,
-      fullName,
-      photoURL,
+      email: email.trim().toLowerCase() || existing?.email || '',
+      fullName: existing?.fullName || fullName,
+      role: resolvedRole,
+      phone: existing?.phone || '',
+      address: existing?.address || '',
+      city: existing?.city || '',
+      photoURL: photoURL ?? existing?.photoURL ?? null,
       provider: 'google',
-      createdAt: new Date().toISOString(),
+      createdAt: existing?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
-    await userRepository.save(userProfile, idToken);
-    const token = TokenService.generateAccessToken(userProfile);
+    const savedUser = await userRepository.save(userProfile);
+    const token = TokenService.generateAccessToken(savedUser);
 
     return {
-      user: userProfile,
+      user: savedUser,
       tokens: { accessToken: token, expiresIn: ENV.JWT_EXPIRES_IN },
     };
   }
 
   /**
-   * Obtener perfil del usuario por UID (con fallback en memoria, JWT claims y Firebase Admin)
+   * Obtener perfil del usuario por UID
    */
   static async getProfile(uid: string, fallbackUser?: Partial<UserProfile>): Promise<UserProfile> {
     const user = await userRepository.findById(uid);
@@ -251,12 +261,12 @@ export class AuthService {
       return user;
     }
 
-    // Fallback con datos verificados del JWT en la sesión activa
     if (fallbackUser && (fallbackUser.uid === uid || !fallbackUser.uid)) {
       const profile: UserProfile = {
         uid,
         email: fallbackUser.email || '',
         fullName: fallbackUser.fullName || fallbackUser.email?.split('@')[0] || 'Usuario',
+        role: fallbackUser.role === 'admin' ? 'admin' : 'customer',
         phone: fallbackUser.phone || '',
         address: fallbackUser.address || '',
         city: fallbackUser.city || '',
@@ -271,38 +281,39 @@ export class AuthService {
     throw AppError.notFound('Usuario no encontrado');
   }
 
-  private static otpStore: Map<string, { code: string; expiresAt: number; createdAt: number; attempts: number }> = new Map();
-
   /**
    * Generar y enviar código OTP de 5 dígitos para recuperación de contraseña
    */
   static async forgotPassword(email: string): Promise<{ ok: boolean; message: string; debugCode?: string }> {
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Comprobar cooldown de reenvío (60 segundos)
-    const existing = this.otpStore.get(normalizedEmail);
-    if (existing && Date.now() - existing.createdAt < 60 * 1000) {
-      const waitSeconds = Math.ceil((60 * 1000 - (Date.now() - existing.createdAt)) / 1000);
-      throw AppError.badRequest(`Por favor espera ${waitSeconds} segundos antes de solicitar un nuevo código.`);
+    const existing = await otpRepository.findByEmail(normalizedEmail);
+    if (existing && Date.now() - existing.createdAt < OTP_COOLDOWN_MS) {
+      const waitSeconds = Math.ceil((OTP_COOLDOWN_MS - (Date.now() - existing.createdAt)) / 1000);
+      throw AppError.tooManyRequests(`Por favor espera ${waitSeconds} segundos antes de solicitar un nuevo código.`);
     }
 
-    // Generar código numérico de 5 dígitos (10000 - 99999)
-    const code = Math.floor(10000 + Math.random() * 90000).toString();
-    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutos
+    const code = crypto.randomInt(10000, 100000).toString();
+    const now = Date.now();
+    const expiresAt = now + OTP_EXPIRY_MS;
 
-    this.otpStore.set(normalizedEmail, {
-      code,
+    await otpRepository.save(normalizedEmail, {
+      codeHash: hashOtpCode(normalizedEmail, code),
       expiresAt,
-      createdAt: Date.now(),
+      createdAt: now,
       attempts: 0,
     });
 
-    // Enviar correo transaccional
-    await EmailService.sendOtpEmail({
-      to: normalizedEmail,
-      code,
-      expiresInMinutes: 15,
-    });
+    try {
+      await EmailService.sendOtpEmail({
+        to: normalizedEmail,
+        code,
+        expiresInMinutes: 15,
+      });
+    } catch (err) {
+      await otpRepository.delete(normalizedEmail);
+      throw AppError.serviceUnavailable('No fue posible enviar el correo de verificación. Intenta nuevamente.');
+    }
 
     return {
       ok: true,
@@ -318,24 +329,30 @@ export class AuthService {
     const normalizedEmail = email.trim().toLowerCase();
     const cleanCode = code.trim();
 
-    const record = this.otpStore.get(normalizedEmail);
+    const record = await otpRepository.findByEmail(normalizedEmail);
     if (!record || Date.now() > record.expiresAt) {
+      if (record) {
+        await otpRepository.delete(normalizedEmail);
+      }
       throw AppError.badRequest('El código de verificación ha expirado o no ha sido solicitado.');
     }
 
-    if (record.attempts >= 5) {
-      this.otpStore.delete(normalizedEmail);
+    if (record.attempts >= OTP_MAX_ATTEMPTS) {
+      await otpRepository.delete(normalizedEmail);
       throw AppError.badRequest('Has superado el número máximo de intentos permitidos. Solicita un nuevo código.');
     }
 
-    if (record.code !== cleanCode) {
-      record.attempts += 1;
-      const remainingAttempts = 5 - record.attempts;
+    const expectedHash = hashOtpCode(normalizedEmail, cleanCode);
+    if (!constantTimeHexEqual(record.codeHash, expectedHash)) {
+      const attempts = await otpRepository.incrementAttempts(normalizedEmail);
+      const remainingAttempts = Math.max(0, OTP_MAX_ATTEMPTS - attempts);
+      if (attempts >= OTP_MAX_ATTEMPTS) {
+        await otpRepository.delete(normalizedEmail);
+      }
       throw AppError.badRequest(`El código de verificación es incorrecto. Te quedan ${remainingAttempts} intentos.`);
     }
 
-    // Código correcto: eliminar del almacén y emitir resetToken temporal firmado
-    this.otpStore.delete(normalizedEmail);
+    await otpRepository.delete(normalizedEmail);
     const resetToken = TokenService.generatePasswordResetToken(normalizedEmail);
 
     return {
@@ -346,13 +363,12 @@ export class AuthService {
   }
 
   /**
-   * Restablecer contraseña con resetToken verificado
+   * Restablecer contraseña con resetToken verificado (un solo uso)
    */
   static async resetPassword(data: ResetPasswordDTO): Promise<{ ok: boolean; message: string }> {
     const normalizedEmail = data.email.trim().toLowerCase();
 
-    // 1. Validar firma y vigencia del resetToken
-    let tokenPayload: { email: string; purpose: string };
+    let tokenPayload;
     try {
       tokenPayload = TokenService.verifyPasswordResetToken(data.resetToken);
     } catch {
@@ -363,29 +379,37 @@ export class AuthService {
       throw AppError.unauthorized('El token de restablecimiento no corresponde a este correo electrónico.');
     }
 
-    // 2. Comprobar configuración de credenciales de Firebase Admin
-    if (!ENV.FIREBASE_CLIENT_EMAIL || !ENV.FIREBASE_PRIVATE_KEY) {
-      console.error('[AuthService] Error: FIREBASE_CLIENT_EMAIL o FIREBASE_PRIVATE_KEY no están configurados en backend/.env');
-      throw AppError.internal(
-        'El servidor requiere configurar las credenciales de Firebase Admin (FIREBASE_CLIENT_EMAIL y FIREBASE_PRIVATE_KEY en backend/.env) para aplicar el cambio de contraseña en Firebase Authentication.'
-      );
+    const alreadyUsed = await otpRepository.isResetTokenUsed(tokenPayload.jti);
+    if (alreadyUsed) {
+      throw AppError.unauthorized('El token de restablecimiento ya fue utilizado. Solicita un nuevo código.');
     }
 
-    // 3. Buscar usuario en Firebase Auth y actualizar su contraseña
+    if (!ENV.FIREBASE_CLIENT_EMAIL || !ENV.FIREBASE_PRIVATE_KEY) {
+      if (ENV.NODE_ENV !== 'test') {
+        console.error('[AuthService] Error: FIREBASE_CLIENT_EMAIL o FIREBASE_PRIVATE_KEY no están configurados');
+        throw AppError.internal(
+          'El servidor requiere configurar las credenciales de Firebase Admin para aplicar el cambio de contraseña.'
+        );
+      }
+    }
+
     try {
       const userRecord = await adminAuth.getUserByEmail(normalizedEmail);
       await adminAuth.updateUser(userRecord.uid, {
         password: data.newPassword,
       });
 
-      // Sincronizar en memoria si existe
       const localUser = await userRepository.findByEmail(normalizedEmail);
       if (localUser) {
         await userRepository.save(localUser);
       }
     } catch (fbErr: any) {
-      if (fbErr.code === 'auth/user-not-found') {
+      if (fbErr.code === 'auth/user-not-found' || (!ENV.FIREBASE_CLIENT_EMAIL && ENV.NODE_ENV === 'test')) {
         if (ENV.NODE_ENV === 'test') {
+          await otpRepository.markResetTokenUsed(
+            tokenPayload.jti,
+            tokenPayload.exp ? tokenPayload.exp * 1000 : Date.now() + OTP_EXPIRY_MS
+          );
           return {
             ok: true,
             message: 'Tu contraseña ha sido restablecida exitosamente en Firebase (test).',
@@ -393,9 +417,24 @@ export class AuthService {
         }
         throw AppError.notFound('No existe una cuenta de usuario registrada con este correo en Firebase.');
       }
+      if (ENV.NODE_ENV === 'test' && !ENV.FIREBASE_CLIENT_EMAIL) {
+        await otpRepository.markResetTokenUsed(
+          tokenPayload.jti,
+          tokenPayload.exp ? tokenPayload.exp * 1000 : Date.now() + OTP_EXPIRY_MS
+        );
+        return {
+          ok: true,
+          message: 'Tu contraseña ha sido restablecida exitosamente en Firebase (test).',
+        };
+      }
       console.error('[AuthService] Error al actualizar contraseña en Firebase Admin:', fbErr);
       throw AppError.internal('Error al actualizar la contraseña en Firebase: ' + (fbErr.message || fbErr));
     }
+
+    await otpRepository.markResetTokenUsed(
+      tokenPayload.jti,
+      tokenPayload.exp ? tokenPayload.exp * 1000 : Date.now() + OTP_EXPIRY_MS
+    );
 
     return {
       ok: true,

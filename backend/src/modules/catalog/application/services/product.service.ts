@@ -1,4 +1,4 @@
-import { productRepository } from '../../infrastructure/repositories/MemoryProductRepository.js';
+import { productRepository } from '../../infrastructure/repositories/productRepository.factory.js';
 import { Product, ProductFilterQuery } from '../../domain/entities/Product.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
 import { CreateProductDTO, UpdateProductDTO } from '../dtos/product.dto.js';

@@ -30,7 +30,15 @@ export class AppError extends Error {
     return new AppError(message, 409);
   }
 
+  static tooManyRequests(message: string): AppError {
+    return new AppError(message, 429);
+  }
+
   static internal(message: string = 'Error interno del servidor'): AppError {
     return new AppError(message, 500);
+  }
+
+  static serviceUnavailable(message: string = 'Servicio temporalmente no disponible'): AppError {
+    return new AppError(message, 503);
   }
 }

@@ -1,5 +1,6 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { storageAdapter } from '@shared/services/storageAdapter';
+import { useAuthStore } from '@modules/auth/application/stores/authStore';
 
 const LoginPage = lazy(() => import('@modules/auth/presentation/pages/Login/LoginPage'));
 const RegisterPage = lazy(() => import('@modules/auth/presentation/pages/Register/RegisterPage'));
@@ -14,25 +15,30 @@ const ComingSoonPage = lazy(() => import('@shared/pages/ComingSoon/ComingSoonPag
 
 const currentPath = window.location.pathname.toLowerCase();
 const isAuthenticated = storageAdapter.isAuthenticated();
-const hasSessionUser = Boolean(storageAdapter.getSessionUser());
+const sessionUser = storageAdapter.getSessionUser();
+const hasSessionUser = Boolean(sessionUser);
+const isLoggedIn = isAuthenticated && hasSessionUser;
+const isAdminRoute = currentPath === '/admin' || currentPath === '/admin/catalog';
 
-const protectedPath =
-  (currentPath === '/dashboard' ||
-    currentPath.startsWith('/product/') ||
-    currentPath === '/cart' ||
-    currentPath === '/admin' ||
-    currentPath === '/admin/catalog' ||
-    currentPath === '/coming-soon') &&
-  (!isAuthenticated || !hasSessionUser);
-
-const resolvedPath = protectedPath ? '/login' : currentPath;
-
-if (protectedPath) {
-  window.history.replaceState({}, '', '/login');
+let resolvedPath = currentPath;
+if (isAdminRoute) {
+  if (!isLoggedIn) {
+    resolvedPath = '/login';
+  } else if (sessionUser?.role !== 'admin') {
+    resolvedPath = '/dashboard';
+  }
 }
 
+if (resolvedPath !== currentPath) {
+  window.history.replaceState({}, '', resolvedPath);
+}
+
+const rootRoute = isLoggedIn
+  ? { title: 'Catalog | Michi Mochi', component: <DashboardPage /> }
+  : { title: 'Sign In | Michi Mochi', component: <LoginPage /> };
+
 const routeMeta = {
-  '/': { title: 'Sign In | Michi Mochi', component: <LoginPage /> },
+  '/': rootRoute,
   '/login': { title: 'Sign In | Michi Mochi', component: <LoginPage /> },
   '/forgot-password': { title: 'Forgot Password | Michi Mochi', component: <ForgotPasswordPage /> },
   '/verify-code': { title: 'Verify Code | Michi Mochi', component: <VerifyCodePage /> },
@@ -51,10 +57,16 @@ let matchedRoute = routeMeta[resolvedPath];
 if (!matchedRoute && resolvedPath.startsWith('/product/')) {
   matchedRoute = { title: 'Product Details | Michi Mochi', component: <ProductDetailPage /> };
 }
-matchedRoute = matchedRoute || routeMeta['/login'];
+matchedRoute = matchedRoute || rootRoute;
 document.title = matchedRoute.title;
 
 export default function App() {
+  useEffect(() => {
+    if (storageAdapter.isAuthenticated()) {
+      useAuthStore.getState().hydrateSession();
+    }
+  }, []);
+
   return (
     <Suspense fallback={<div className="route-loading" role="status">Loading...</div>}>
       {matchedRoute.component}

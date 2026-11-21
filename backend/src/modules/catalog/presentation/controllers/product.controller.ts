@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { ProductService } from '../../application/services/product.service.js';
 import { AuthRequest } from '../../../../shared/middlewares/auth.middleware.js';
 import { ProductFilterQuery } from '../../domain/entities/Product.js';
-import { productFilterSchema } from '../../application/dtos/product.dto.js';
 
 export class ProductController {
   /**
@@ -11,8 +10,12 @@ export class ProductController {
    */
   static async getAll(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const parsed = productFilterSchema.safeParse(req.query);
-      const filters: ProductFilterQuery = parsed.success ? parsed.data : {};
+      const filters: ProductFilterQuery = {
+        category: req.query.category as string | undefined,
+        search: req.query.search as string | undefined,
+        featured: req.query.featured !== undefined ? req.query.featured === 'true' : undefined,
+        inStock: req.query.inStock !== undefined ? req.query.inStock === 'true' : undefined,
+      };
 
       const products = await ProductService.getAll(filters);
       res.status(200).json({
@@ -44,7 +47,7 @@ export class ProductController {
 
   /**
    * POST /api/products
-   * Crea y agrega un nuevo producto al catálogo (solo admin)
+   * Crea y agrega un nuevo producto al catálogo
    */
   static async create(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -61,7 +64,7 @@ export class ProductController {
 
   /**
    * PUT /api/products/:id
-   * Actualiza un producto existente en el catálogo (solo admin)
+   * Actualiza un producto existente en el catálogo
    */
   static async update(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -79,7 +82,7 @@ export class ProductController {
 
   /**
    * DELETE /api/products/:id
-   * Elimina un producto del catálogo por su ID (solo admin)
+   * Elimina un producto del catálogo por su ID
    */
   static async delete(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {

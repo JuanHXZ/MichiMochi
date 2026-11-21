@@ -192,18 +192,6 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
         },
       },
     },
-    '/api/auth/logout': {
-      post: {
-        tags: ['Auth'],
-        summary: 'Cerrar sesión',
-        description: 'Limpia la cookie de sesión httpOnly del navegador.',
-        responses: {
-          '200': {
-            description: 'Sesión cerrada exitosamente.',
-          },
-        },
-      },
-    },
     '/api/auth/me': {
       get: {
         tags: ['Auth'],
@@ -399,7 +387,12 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
       get: {
         tags: ['Products'],
         summary: 'Listar productos del catálogo',
-        description: 'Obtiene todos los productos disponibles (endpoint público con soporte para filtros).',
+        description: 'Obtiene todos los productos disponibles con soporte para filtros por categoría, búsqueda y disponibilidad.',
+        security: [
+          {
+            BearerAuth: [],
+          },
+        ],
         parameters: [
           {
             name: 'category',
@@ -503,16 +496,6 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
               },
             },
           },
-          '403': {
-            description: 'Acceso denegado: requiere rol admin.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ErrorResponse',
-                },
-              },
-            },
-          },
           '409': {
             description: 'Ya existe un producto con el ID proporcionado.',
             content: {
@@ -530,7 +513,12 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
       get: {
         tags: ['Products'],
         summary: 'Consultar producto por ID',
-        description: 'Retorna el detalle completo de un producto mediante su identificador único (endpoint público).',
+        description: 'Retorna el detalle completo de un producto mediante su identificador único.',
+        security: [
+          {
+            BearerAuth: [],
+          },
+        ],
         parameters: [
           {
             name: 'id',
@@ -769,7 +757,6 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
           address: { type: 'string', example: 'Calle 123 #45-67' },
           city: { type: 'string', example: 'Bogotá' },
           photoURL: { type: 'string', nullable: true, example: 'https://lh3.googleusercontent.com/...' },
-          role: { type: 'string', enum: ['customer', 'admin'], example: 'customer' },
           provider: { type: 'string', enum: ['password', 'google'], example: 'password' },
           createdAt: { type: 'string', format: 'date-time' },
         },

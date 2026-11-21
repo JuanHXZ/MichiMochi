@@ -15,12 +15,7 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
   const totalItems = useCartStore((state) => state.totalItems());
   const { theme, toggleTheme } = useThemeStore();
   const { toggleSidebar } = useSidebarStore();
-  const user = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const isSessionVerified = useAuthStore((state) => state.isSessionVerified);
   const clearSession = useAuthStore((state) => state.clearSession);
-
-  const isAdmin = Boolean(isAuthenticated && isSessionVerified && user?.role === 'admin');
 
   const handleLogout = () => {
     clearSession();
@@ -35,7 +30,7 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
 
   const navItems = [
     { id: 'catalog', label: t('nav.catalog'), href: '/dashboard' },
-    ...(isAdmin ? [{ id: 'admin-catalog', label: t('nav.adminCatalog'), href: '/admin/catalog' }] : []),
+    { id: 'admin-catalog', label: t('nav.adminCatalog'), href: '/admin/catalog' },
     { id: 'favorites', label: t('nav.favorites'), href: '/coming-soon' },
     { id: 'orders', label: t('nav.orders'), href: '/coming-soon' },
     { id: 'rewards', label: t('nav.rewards'), href: '/coming-soon' },
@@ -48,7 +43,7 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
       </a>
       <div className="navbar__content">
         <div className="navbar__left">
-          <button
+          <button 
             type="button"
             className="navbar__menu-btn"
             onClick={toggleSidebar}
@@ -58,7 +53,7 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
           </button>
 
           <a href="/dashboard" className="navbar__brand-text">Michi Mochi</a>
-
+          
           <nav className="navbar__nav" aria-label="Primary">
             {navItems.map((item) => (
               <a
@@ -74,9 +69,9 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
         </div>
 
         <div className="navbar__actions">
-          <button
+          <button 
             type="button"
-            className="navbar__icon-btn"
+            className="navbar__icon-btn" 
             onClick={toggleTheme}
             aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
@@ -88,9 +83,9 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
 
           <CurrencyToggle variant="navbar" />
 
-          <a
+          <a 
             href="/cart"
-            className="navbar__cart-btn"
+            className="navbar__cart-btn" 
             aria-label={totalItems > 0 ? `Shopping cart (${totalItems})` : 'Shopping cart'}
           >
             <ShoppingCart aria-hidden="true" />
@@ -99,46 +94,34 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
             )}
           </a>
 
-          {isAuthenticated && user ? (
-            <div className="navbar__user">
+          <div className="navbar__user">
+            <button
+              type="button"
+              className="navbar__avatar"
+              popoverTarget={userMenuId}
+              aria-label="Open user menu"
+            >
+              {userName.charAt(0).toUpperCase()}
+            </button>
+
+            <div id={userMenuId} popover="auto" className="navbar__menu">
+              <a
+                href="/admin/catalog"
+                className="navbar__menu-item"
+              >
+                <span aria-hidden="true">⚙️</span> {t('nav.adminCatalog')}
+              </a>
               <button
                 type="button"
-                className="navbar__avatar"
-                popoverTarget={userMenuId}
-                aria-label="Open user menu"
+                className="navbar__menu-item"
+                onClick={handleLogout}
               >
-                {userName.charAt(0).toUpperCase()}
+                {t('nav.logout')}
               </button>
-
-              <div id={userMenuId} popover="auto" className="navbar__menu">
-                {isAdmin && (
-                  <a
-                    href="/admin/catalog"
-                    className="navbar__menu-item"
-                  >
-                    <span aria-hidden="true">⚙️</span> {t('nav.adminCatalog')}
-                  </a>
-                )}
-                <button
-                  type="button"
-                  className="navbar__menu-item"
-                  onClick={handleLogout}
-                >
-                  {t('nav.logout')}
-                </button>
-              </div>
             </div>
-          ) : (
-            <div className="navbar__auth-links">
-              <a href="/login" className="navbar__auth-link navbar__auth-link--login">
-                {t('nav.login')}
-              </a>
-              <a href="/register" className="navbar__auth-link navbar__auth-link--register">
-                {t('nav.register')}
-              </a>
-            </div>
-          )}
+          </div>
         </div>
+
       </div>
     </header>
   );

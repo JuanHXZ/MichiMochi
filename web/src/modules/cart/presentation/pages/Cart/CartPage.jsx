@@ -19,7 +19,6 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState('');
   const { items: rawItems, updateQuantity, removeItem } = useCartStore();
   const user = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const items = useMemo(() => {
     return translateProducts(rawItems);
@@ -44,10 +43,6 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    if (!isAuthenticated || !user) {
-      window.location.href = '/login';
-      return;
-    }
     showToast({
       message: 'Proceeding to checkout...',
       type: 'success',

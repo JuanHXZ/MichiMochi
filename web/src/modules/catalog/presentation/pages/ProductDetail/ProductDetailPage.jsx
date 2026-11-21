@@ -32,9 +32,8 @@ export default function ProductDetailPage() {
 
   const product = useTranslatedProduct(productId);
   const activeFlavor = selectedFlavor ?? (product?.flavors?.[0]?.id ?? null);
-  const isOutOfStock = Boolean(
-    product && (product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0))
-  );
+
+
 
   const userName = useMemo(() => {
     if (!user) return "Usuario";
@@ -48,7 +47,7 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
-    if (product && !isOutOfStock) {
+    if (product) {
       for (let i = 0; i < quantity; i++) {
         addItem({ ...product, selectedFlavor: activeFlavor });
       }
@@ -87,14 +86,9 @@ export default function ProductDetailPage() {
                   images={product.images || [product.image]}
                   productName={product.name}
                 />
-                {product.featured && !isOutOfStock && (
+                {product.featured && (
                   <span className="product-detail__badge">
                     {t('productDetail.badge')}
-                  </span>
-                )}
-                {isOutOfStock && (
-                  <span className="product-detail__badge product-detail__badge--sold-out" role="status">
-                    {t('dashboard.card.soldOut')}
                   </span>
                 )}
               </div>
@@ -188,14 +182,11 @@ export default function ProductDetailPage() {
                 <button 
                   type="button"
                   onClick={handleAddToCart}
-                  disabled={isOutOfStock}
                   className="product-detail__add-to-cart-desktop"
                 >
                   <span aria-hidden="true">🛒</span>
-                  <span>{isOutOfStock ? t('dashboard.card.soldOut') : t('productDetail.addToCart')}</span>
-                  {!isOutOfStock && (
-                    <span className="product-detail__total-price">{formatPrice(totalPrice).formatted}</span>
-                  )}
+                  <span>{t('productDetail.addToCart')}</span>
+                  <span className="product-detail__total-price">{formatPrice(totalPrice).formatted}</span>
                 </button>
               </div>
             </section>
@@ -258,13 +249,10 @@ export default function ProductDetailPage() {
             <button 
               type="button"
               onClick={handleAddToCart}
-              disabled={isOutOfStock}
               className="product-detail__add-to-cart"
             >
-              <span>{isOutOfStock ? t('dashboard.card.soldOut') : t('productDetail.addToCart')}</span>
-              {!isOutOfStock && (
-                <span className="product-detail__total-price">{formatPrice(totalPrice).formatted}</span>
-              )}
+              <span>{t('productDetail.addToCart')}</span>
+              <span className="product-detail__total-price">{formatPrice(totalPrice).formatted}</span>
             </button>
           </div>
         </main>

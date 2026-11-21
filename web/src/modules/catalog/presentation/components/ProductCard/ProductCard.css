@@ -130,30 +130,3 @@
     transform: scale(0.95);
   }
 }
-
-.stitch-card__sold-out-badge {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  z-index: 1;
-  padding: 0.3rem 0.75rem;
-  border-radius: 9999px;
-  background: rgba(30, 30, 36, 0.85);
-  color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-.stitch-card--out-of-stock .stitch-card__image {
-  filter: grayscale(35%);
-  opacity: 0.85;
-}
-
-.stitch-card__add-btn:disabled {
-  background: var(--border-color);
-  color: var(--text-secondary);
-  cursor: not-allowed;
-  transform: none;
-}

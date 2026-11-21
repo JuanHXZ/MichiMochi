@@ -1,5 +1,5 @@
 import { auth, googleProvider } from '@shared/services/firebaseConfig';
-import { signInWithPopup, signOut, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, sendPasswordResetEmail, signOut, GoogleAuthProvider } from 'firebase/auth';
 import { apiClient } from '@shared/services/apiClient';
 import { storageAdapter } from '@shared/services/storageAdapter';
 
@@ -113,7 +113,18 @@ export const resetPasswordWithToken = async (email, resetToken, newPassword) => 
 
 export const sendPasswordReset = async (email) => {
   const trimmedEmail = email.trim();
-  const data = await requestPasswordResetOtp(trimmedEmail);
-  return { ok: true, data };
+  // Primero intentamos la ruta OTP del backend
+  try {
+    const data = await requestPasswordResetOtp(trimmedEmail);
+    return { ok: true, data };
+  } catch (backendErr) {
+    // Si falla el backend, intentamos fallback a Firebase si aplica
+    try {
+      await sendPasswordResetEmail(auth, trimmedEmail);
+      return { ok: true };
+    } catch {
+      throw backendErr;
+    }
+  }
 };
 

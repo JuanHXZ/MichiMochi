@@ -7,6 +7,5 @@ export interface IProductRepository {
   create(product: Product): Promise<Product>;
   update(id: string, product: Product): Promise<Product>;
   delete(id: string): Promise<boolean>;
-  seedIfEmpty?(products: Product[]): Promise<number>;
   resetToInitial(): void;
 }

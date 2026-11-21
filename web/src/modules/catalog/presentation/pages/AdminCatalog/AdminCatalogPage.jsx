@@ -30,7 +30,6 @@ export default function AdminCatalogPage() {
   const { format: formatPrice } = useCurrency();
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const hydrateSession = useAuthStore((state) => state.hydrateSession);
 
   const {
     products,
@@ -53,29 +52,8 @@ export default function AdminCatalogPage() {
   const deleteDialogRef = useRef(null);
 
   useEffect(() => {
-    let active = true;
-    (async () => {
-      const freshUser = await hydrateSession();
-      const effectiveUser = freshUser || user;
-      if (!active) return;
-      if (!effectiveUser) {
-        window.location.replace('/login');
-        return;
-      }
-      if (effectiveUser.role !== 'admin') {
-        showToast({
-          message: 'Acceso denegado: se requieren permisos de administrador.',
-          type: 'error',
-        });
-        window.location.replace('/dashboard');
-        return;
-      }
-      fetchProducts();
-    })();
-    return () => {
-      active = false;
-    };
-  }, [fetchProducts, hydrateSession]);
+    fetchProducts();
+  }, [fetchProducts]);
 
   // Safari fallback for closedby="any"
   useEffect(() => {
@@ -262,7 +240,7 @@ export default function AdminCatalogPage() {
     }
   };
 
-  if (!isAuthenticated || !user || user.role !== 'admin') {
+  if (!isAuthenticated && !user) {
     return null;
   }
 

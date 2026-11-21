@@ -8,8 +8,6 @@
     "cart": "Cart",
     "account": "Account",
     "logout": "Logout",
-    "login": "Sign In",
-    "register": "Sign Up",
     "adminCatalog": "Admin Catalog"
   },
   "admin": {
@@ -104,8 +102,7 @@
       "price": "Price"
     },
     "card": {
-      "add": "Add",
-      "soldOut": "Agotado"
+      "add": "Add"
     }
   },
   "productDetail": {

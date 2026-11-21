@@ -17,13 +17,15 @@ export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const fetchProducts = useProductStore((state) => state.fetchProducts);
-
+  
   const { filteredProducts } = useTranslatedProducts();
   const featuredProduct = useTranslatedFeaturedProduct();
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    if (isAuthenticated) {
+      fetchProducts();
+    }
+  }, [isAuthenticated, fetchProducts]);
 
   const SORT_OPTIONS = [
     { id: "Popular", label: t('dashboard.filters.popular') },
@@ -49,21 +51,29 @@ export default function DashboardPage() {
     });
   }, [filteredProducts, sortOption]);
 
-  const userName = isAuthenticated && user
-    ? String(user.fullName || "").trim() || String(user.email || "").split("@")[0] || "User"
-    : "";
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      window.location.replace("/login");
+    }
+  }, [isAuthenticated, user]);
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
+
+  const userName =
+    String(user.fullName || "").trim() ||
+    String(user.email || "").split("@")[0] ||
+    "User";
 
   const handleAddToCart = (product) => {
-    const isOutOfStock = product?.inStock === false || (typeof product?.stock === 'number' && product.stock <= 0);
-    if (isOutOfStock) return;
     addItem(product);
   };
 
   const handleOrderNow = () => {
-    if (!featuredProduct) return;
-    const isOutOfStock = featuredProduct.inStock === false || (typeof featuredProduct.stock === 'number' && featuredProduct.stock <= 0);
-    if (isOutOfStock) return;
-    addItem(featuredProduct);
+    if (featuredProduct) {
+      addItem(featuredProduct);
+    }
   };
 
   return (

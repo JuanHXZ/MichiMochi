@@ -12,7 +12,10 @@ export default function ProductCard({ product, onAddToCart }) {
 
   if (!product) return null;
 
+  const isOutOfStock = product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0);
+
   const handleAddClick = () => {
+    if (isOutOfStock) return;
     if (typeof onAddToCart === 'function') {
       onAddToCart(product);
     } else {
@@ -21,7 +24,7 @@ export default function ProductCard({ product, onAddToCart }) {
   };
 
   return (
-    <article className="stitch-card">
+    <article className={`stitch-card ${isOutOfStock ? 'stitch-card--out-of-stock' : ''}`}>
       <div className="stitch-card__image-container">
         <img
           src={product.image}
@@ -32,9 +35,14 @@ export default function ProductCard({ product, onAddToCart }) {
           loading="lazy"
           decoding="async"
         />
-        <button 
+        {isOutOfStock && (
+          <span className="stitch-card__sold-out-badge" role="status">
+            {t('dashboard.card.soldOut')}
+          </span>
+        )}
+        <button
           type="button"
-          className="stitch-card__favorite" 
+          className="stitch-card__favorite"
           aria-label={`Add ${product.shortName || product.name} to favorites`}
         >
           <Favorite aria-hidden="true" />
@@ -54,8 +62,14 @@ export default function ProductCard({ product, onAddToCart }) {
           <span className="stitch-card__price">{formattedPrice.formatted}</span>
         </div>
 
-        <button type="button" className="stitch-card__add-btn" onClick={handleAddClick}>
-          <AddShoppingCart fontSize="small" aria-hidden="true" /> {t('dashboard.card.add')}
+        <button
+          type="button"
+          className="stitch-card__add-btn"
+          onClick={handleAddClick}
+          disabled={isOutOfStock}
+        >
+          <AddShoppingCart fontSize="small" aria-hidden="true" />{' '}
+          {isOutOfStock ? t('dashboard.card.soldOut') : t('dashboard.card.add')}
         </button>
       </div>
     </article>

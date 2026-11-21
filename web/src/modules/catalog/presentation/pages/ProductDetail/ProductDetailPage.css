@@ -860,3 +860,17 @@
     transform: scale(0.95);
   }
 }
+
+.product-detail__badge--sold-out {
+  background: rgba(30, 30, 36, 0.88);
+  color: #ffffff;
+}
+
+.product-detail__add-to-cart-desktop:disabled,
+.product-detail__add-to-cart:disabled {
+  background: var(--border-color);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  filter: none;
+  box-shadow: none;
+}

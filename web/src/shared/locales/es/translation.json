@@ -8,6 +8,8 @@
     "cart": "Carrito",
     "account": "Cuenta",
     "logout": "Cerrar Sesión",
+    "login": "Iniciar Sesión",
+    "register": "Crear Cuenta",
     "adminCatalog": "Gestión Catálogo"
   },
   "admin": {
@@ -102,7 +104,8 @@
       "price": "Precio"
     },
     "card": {
-      "add": "Agregar"
+      "add": "Agregar",
+      "soldOut": "Agotado"
     }
   },
   "productDetail": {

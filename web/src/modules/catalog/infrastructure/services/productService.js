@@ -16,7 +16,7 @@ export const productService = {
         params.append('search', filters.search.trim());
       }
       const queryStr = params.toString() ? `?${params.toString()}` : '';
-      const response = await apiClient(`/products${queryStr}`, { requiresAuth: true });
+      const response = await apiClient(`/products${queryStr}`, { requiresAuth: false });
       if (response?.ok && Array.isArray(response.data)) {
         return response.data;
       }
@@ -29,7 +29,7 @@ export const productService = {
 
   async getProductById(id) {
     try {
-      const response = await apiClient(`/products/${id}`, { requiresAuth: true });
+      const response = await apiClient(`/products/${id}`, { requiresAuth: false });
       if (response?.ok && response.data) {
         return response.data;
       }

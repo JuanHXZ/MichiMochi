@@ -5,6 +5,7 @@ import { ENV } from './shared/config/env.js';
 import { openApiSpec } from './shared/docs/openapi.js';
 import authRoutes from './modules/auth/presentation/routes/auth.routes.js';
 import productRoutes from './modules/catalog/presentation/routes/product.routes.js';
+import orderRoutes from './modules/orders/presentation/routes/order.routes.js';
 import { errorHandler } from './shared/middlewares/error.middleware.js';
 import { AppError } from './shared/errors/AppError.js';
 
@@ -67,6 +68,7 @@ export const createApp = (): Express => {
 
   app.use('/api/auth', authRoutes);
   app.use('/api/products', productRoutes);
+  app.use('/api/orders', orderRoutes);
 
   app.use(errorHandler);
 

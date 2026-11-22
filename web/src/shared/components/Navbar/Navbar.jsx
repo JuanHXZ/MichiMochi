@@ -37,7 +37,7 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
     { id: 'catalog', label: t('nav.catalog'), href: '/dashboard' },
     ...(isAdmin ? [{ id: 'admin-catalog', label: t('nav.adminCatalog'), href: '/admin/catalog' }] : []),
     { id: 'favorites', label: t('nav.favorites'), href: '/coming-soon' },
-    { id: 'orders', label: t('nav.orders'), href: '/coming-soon' },
+    { id: 'orders', label: t('nav.orders'), href: '/orders' },
     { id: 'rewards', label: t('nav.rewards'), href: '/coming-soon' },
   ];
 
@@ -111,6 +111,12 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
               </button>
 
               <div id={userMenuId} popover="auto" className="navbar__menu">
+                <a
+                  href="/orders"
+                  className="navbar__menu-item"
+                >
+                  <span aria-hidden="true">📦</span> {t('sidebar.myOrders')}
+                </a>
                 {isAdmin && (
                   <a
                     href="/admin/catalog"

@@ -236,6 +236,152 @@
     },
     "backToCatalog": "Back to Catalog"
   },
+  "checkout": {
+    "backToCart": "Back to cart",
+    "title": "Checkout",
+    "subtitle": "Confirm your delivery address and simulate payment to place your order.",
+    "successToast": "Order #{{orderNumber}} placed and simulated payment approved!",
+    "errorGeneric": "Could not process your order. Please try again.",
+    "submitting": "Processing simulated payment...",
+    "submitBtn": "Confirm order & simulate payment ({{total}})",
+    "simulationBanner": {
+      "title": "Educational Environment — Simulated Checkout",
+      "text": "No real payment gateway is charged and no real card data is stored. Use test details to complete the e-commerce flow."
+    },
+    "empty": {
+      "title": "Your cart is empty",
+      "text": "Add your favorite mochi treats before checking out.",
+      "backToCatalog": "Browse Catalog",
+      "goToOrders": "View My Orders"
+    },
+    "shipping": {
+      "title": "Delivery Information",
+      "fullName": "Full name",
+      "phone": "Contact phone",
+      "address": "Delivery address",
+      "city": "City",
+      "notes": "Delivery notes (optional)",
+      "notesPlaceholder": "e.g., Apartment, gate code, or landmark"
+    },
+    "payment": {
+      "title": "Simulated Payment Method",
+      "methodLegend": "Choose a simulated payment method",
+      "methods": {
+        "card": "Credit / Debit Card (Simulated)",
+        "nequi": "Nequi (Simulated)",
+        "pse": "PSE (Simulated)",
+        "cash_on_delivery": "Cash on Delivery"
+      },
+      "fillApproved": "Autofill approved test card (4242)",
+      "fillDeclined": "Simulate declined card",
+      "cardHolder": "Name on card",
+      "cardNumber": "Test card number",
+      "cardNumberHint": "Enter 13 to 16 digits (spaces allowed)",
+      "expiry": "Expiry date",
+      "expHint": "Format: MM/YY",
+      "csc": "Security code (CVV)",
+      "cscHint": "3 or 4 digits on back",
+      "methodNotes": {
+        "nequi": "An instant Nequi wallet authorization will be simulated with no real charge.",
+        "pse": "A PSE bank transfer confirmation will be simulated for educational purposes.",
+        "cash_on_delivery": "Your order will be confirmed for payment upon delivery."
+      },
+      "outcomeLabel": "Simulation outcome",
+      "outcomeApproved": "Approve simulated payment",
+      "outcomeDeclined": "Simulate declined payment (error test)"
+    },
+    "errors": {
+      "fullName": "Please enter your full name (at least 2 characters).",
+      "phone": "Please enter a valid phone number (at least 7 digits).",
+      "address": "Please enter a complete street address.",
+      "city": "Please enter your delivery city.",
+      "cardHolder": "Enter the cardholder name as shown on the card.",
+      "cardNumber": "Enter a valid simulated card number (13–19 characters).",
+      "cardExpiry": "Use MM/YY format (e.g. 12/29).",
+      "cardCsc": "Enter a 3- or 4-digit security code."
+    },
+    "summary": {
+      "title": "Order Summary"
+    }
+  },
+  "orders": {
+    "statuses": {
+      "RECEIVED": {
+        "label": "Order received",
+        "description": "Your order has been confirmed and received by our shop."
+      },
+      "PREPARING": {
+        "label": "Order in preparation",
+        "description": "Our artisans are handcrafting and packing your mochis."
+      },
+      "SHIPPED": {
+        "label": "Order shipped",
+        "description": "Your order left the kitchen and is on its way to you."
+      },
+      "DELIVERED": {
+        "label": "Delivered",
+        "description": "Your order has been delivered! Enjoy your MichiMochi."
+      },
+      "CANCELLED": {
+        "label": "Cancelled",
+        "description": "This order was cancelled and product stock was restored."
+      }
+    },
+    "list": {
+      "title": "My Orders",
+      "subtitle": "Review your order history and track active deliveries.",
+      "newOrder": "Browse Catalog",
+      "filterLabel": "Filter orders by status",
+      "loading": "Loading your orders...",
+      "emptyTitle": "No orders in this category yet",
+      "emptyText": "Explore our handcrafted catalog and place your first simulated order.",
+      "emptyButton": "Explore Mochis",
+      "moreItems": "more",
+      "trackButton": "Track order",
+      "filters": {
+        "all": "All",
+        "active": "In Progress",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      }
+    },
+    "tracking": {
+      "backToOrders": "Back to My Orders",
+      "loading": "Loading order tracking...",
+      "notFoundTitle": "Unable to load this order",
+      "title": "Tracking Order #{{orderNumber}}",
+      "placedAt": "Placed on",
+      "eta": "Estimated delivery",
+      "progressLabel": "Order progress",
+      "progressAria": "Step {{step}} of {{total}}: {{status}}",
+      "liveAnnouncement": "Current order status: {{status}}",
+      "simBadge": "Educational Simulation · Customer View",
+      "simTitle": "Order Tracking Simulator",
+      "simDesc": "Because this is an educational project, you can advance stages manually or turn on automatic 5-second simulation until Delivered.",
+      "advanceBtn": "Advance to next stage",
+      "startAutoBtn": "Auto-simulate (5s)",
+      "pauseAutoBtn": "Pause simulation",
+      "cancelBtn": "Cancel order",
+      "statusUpdatedToast": "Order status updated to: {{status}}",
+      "advanceError": "Could not advance order status.",
+      "cancelledToast": "Your order was cancelled and product stock was restored.",
+      "cancelError": "Could not cancel the order.",
+      "historyTitle": "Status Timeline",
+      "itemsTitle": "Ordered Items",
+      "deliveryTitle": "Delivery Address",
+      "paymentTitle": "Simulated Payment Receipt",
+      "paymentMethod": "Method",
+      "paymentStatus": "Status",
+      "paymentApprovedSim": "Approved (Simulated)",
+      "paymentRef": "Reference",
+      "cancelDialog": {
+        "title": "Cancel this order?",
+        "text": "You are about to cancel order #{{orderNumber}}. Product inventory will be restored.",
+        "keep": "Keep order",
+        "confirm": "Yes, cancel order"
+      }
+    }
+  },
   "language": {
     "english": "English",
     "spanish": "Español"

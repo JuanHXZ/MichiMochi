@@ -26,6 +26,10 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
       description: 'Endpoints CRUD para la gestión y consulta del catálogo de productos MichiMochi.',
     },
     {
+      name: 'Orders',
+      description: 'Endpoints para creación de pedidos con pago simulado, historial, cancelación y seguimiento.',
+    },
+    {
       name: 'System',
       description: 'Verificación de estado y salud del servicio.',
     },
@@ -526,6 +530,20 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
         },
       },
     },
+    '/api/products/upload-images': {
+      post: {
+        tags: ['Products'],
+        summary: 'Subir imágenes de producto a S3',
+        description: 'Recibe hasta 8 imágenes (JPG, PNG, WebP o GIF, máx. 5 MB c/u) y retorna sus URLs públicas en S3. Requiere rol admin.',
+        security: [{ BearerAuth: [] }],
+        responses: {
+          '200': { description: 'Imágenes subidas exitosamente.' },
+          '400': { description: 'Formato o tamaño inválido.' },
+          '401': { description: 'No autorizado.' },
+          '403': { description: 'Acceso denegado: requiere rol admin.' },
+        },
+      },
+    },
     '/api/products/{id}': {
       get: {
         tags: ['Products'],
@@ -685,6 +703,273 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
           },
           '404': {
             description: 'Producto no encontrado.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/orders': {
+      post: {
+        tags: ['Orders'],
+        summary: 'Crear pedido con pago simulado',
+        description: 'Valida stock real, simula la aprobación o rechazo del pago, descuenta inventario y crea una orden en estado RECEIVED.',
+        security: [{ BearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/CreateOrderRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'Pedido creado exitosamente.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/OrderResponse',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Pago simulado rechazado, stock insuficiente o datos inválidos.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'No autorizado.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+      get: {
+        tags: ['Orders'],
+        summary: 'Listar pedidos del usuario autenticado',
+        description: 'Retorna el historial de pedidos del cliente (o todos los pedidos si el usuario es admin y pasa ?scope=all).',
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: 'status',
+            in: 'query',
+            required: false,
+            schema: {
+              $ref: '#/components/schemas/OrderStatus',
+            },
+          },
+          {
+            name: 'scope',
+            in: 'query',
+            required: false,
+            schema: {
+              type: 'string',
+              enum: ['mine', 'all'],
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Lista de pedidos.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/OrderListResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'No autorizado.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/orders/{id}': {
+      get: {
+        tags: ['Orders'],
+        summary: 'Obtener detalle y seguimiento de pedido',
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Detalle de la orden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/OrderResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'El pedido pertenece a otro usuario.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Pedido no encontrado.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/orders/{id}/simulate-advance': {
+      post: {
+        tags: ['Orders'],
+        summary: 'Simular avance de estado del pedido',
+        description: 'Avanza el pedido un paso en el flujo RECEIVED -> PREPARING -> SHIPPED -> DELIVERED para simulación educativa del cliente.',
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Pedido avanzado al siguiente estado.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/OrderResponse',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'El pedido ya fue entregado o cancelado.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/orders/{id}/cancel': {
+      post: {
+        tags: ['Orders'],
+        summary: 'Cancelar pedido y restaurar inventario',
+        description: 'Permite cancelar pedidos en estado RECEIVED o PREPARING, restaurando el stock descontado.',
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Pedido cancelado exitosamente.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/OrderResponse',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'No se puede cancelar un pedido ya enviado o finalizado.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ErrorResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/api/orders/{id}/status': {
+      patch: {
+        tags: ['Orders'],
+        summary: 'Actualizar estado de pedido (Admin)',
+        security: [{ BearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/UpdateOrderStatusRequest',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Estado actualizado.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/OrderResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Se requieren permisos de administrador.',
             content: {
               'application/json': {
                 schema: {
@@ -975,6 +1260,114 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
               id: { type: 'string', example: '1' },
               name: { type: 'string', example: 'Strawberry Dream Mochi' },
             },
+          },
+        },
+      },
+      OrderStatus: {
+        type: 'string',
+        enum: ['RECEIVED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
+        example: 'RECEIVED',
+      },
+      OrderItem: {
+        type: 'object',
+        required: ['productId', 'name', 'price', 'quantity', 'subtotal'],
+        properties: {
+          productId: { type: 'string', example: '1' },
+          name: { type: 'string', example: 'Strawberry Dream Mochi' },
+          shortName: { type: 'string', example: 'Strawberry Dream' },
+          price: { type: 'number', example: 4.25 },
+          originalPrice: { type: 'number', example: 4.25 },
+          quantity: { type: 'integer', example: 2 },
+          flavor: { type: 'string', example: 'classic-pink' },
+          image: { type: 'string', example: '/assets/strawberry1.png' },
+          subtotal: { type: 'number', example: 8.5 },
+        },
+      },
+      CreateOrderRequest: {
+        type: 'object',
+        required: ['items', 'shippingAddress', 'payment'],
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              required: ['productId', 'quantity'],
+              properties: {
+                productId: { type: 'string', example: '1' },
+                quantity: { type: 'integer', example: 2 },
+                flavor: { type: 'string', example: 'classic-pink' },
+              },
+            },
+          },
+          shippingAddress: {
+            type: 'object',
+            required: ['fullName', 'phone', 'address', 'city'],
+            properties: {
+              fullName: { type: 'string', example: 'Ana Gómez' },
+              phone: { type: 'string', example: '3001234567' },
+              address: { type: 'string', example: 'Calle 10 #42-15' },
+              city: { type: 'string', example: 'Medellín' },
+              notes: { type: 'string', example: 'Portería torre 2' },
+            },
+          },
+          payment: {
+            type: 'object',
+            required: ['method'],
+            properties: {
+              method: { type: 'string', enum: ['card', 'nequi', 'pse', 'cash_on_delivery'], example: 'card' },
+              cardLast4: { type: 'string', example: '4242' },
+              cardHolder: { type: 'string', example: 'ANA GOMEZ' },
+              simulateOutcome: { type: 'string', enum: ['approved', 'declined'], example: 'approved' },
+            },
+          },
+          currency: { type: 'string', enum: ['USD', 'COP'], example: 'USD' },
+        },
+      },
+      UpdateOrderStatusRequest: {
+        type: 'object',
+        required: ['status'],
+        properties: {
+          status: { $ref: '#/components/schemas/OrderStatus' },
+          note: { type: 'string', example: 'Entregado al repartidor' },
+        },
+      },
+      Order: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: 'ord_1732247123_abc12' },
+          orderNumber: { type: 'string', example: 'MM-7K2P9Q' },
+          userId: { type: 'string', example: 'uid_123' },
+          customerName: { type: 'string', example: 'Ana Gómez' },
+          customerEmail: { type: 'string', example: 'ana@example.com' },
+          items: { type: 'array', items: { $ref: '#/components/schemas/OrderItem' } },
+          subtotal: { type: 'number', example: 8.5 },
+          shipping: { type: 'number', example: 2.99 },
+          tax: { type: 'number', example: 0.51 },
+          savings: { type: 'number', example: 0 },
+          total: { type: 'number', example: 12.0 },
+          currency: { type: 'string', enum: ['USD', 'COP'], example: 'USD' },
+          status: { $ref: '#/components/schemas/OrderStatus' },
+          estimatedDelivery: { type: 'string', example: '25-35 min' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      OrderResponse: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean', example: true },
+          message: { type: 'string' },
+          data: { $ref: '#/components/schemas/Order' },
+        },
+      },
+      OrderListResponse: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean', example: true },
+          total: { type: 'integer', example: 1 },
+          data: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Order' },
           },
         },
       },

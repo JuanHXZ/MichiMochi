@@ -709,3 +709,114 @@ dialog::backdrop {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
+
+.admin-gallery-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-gallery-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 2px dashed var(--border-color, rgba(0, 0, 0, 0.2));
+  border-radius: 0.75rem;
+  background: var(--surface-bright, #fff8f5);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.admin-gallery-dropzone:hover {
+  border-color: var(--primary, #412817);
+}
+
+.admin-gallery-dropzone input[type="file"] {
+  display: none;
+}
+
+.admin-gallery-dropzone__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--heading-color);
+}
+
+.admin-gallery-dropzone__hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.admin-gallery-manual {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-gallery-manual .admin-form-input {
+  flex: 1;
+}
+
+.admin-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 0.65rem;
+}
+
+.admin-gallery-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 0.65rem;
+  overflow: hidden;
+  border: 2px solid var(--border-color, rgba(0, 0, 0, 0.12));
+  background: var(--surface-bright, #fff8f5);
+}
+
+.admin-gallery-item--primary {
+  border-color: var(--primary, #845000);
+}
+
+.admin-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.admin-gallery-item__actions {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.2rem;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.admin-gallery-item__btn {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+}
+
+.admin-gallery-item__btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-gallery-item__badge {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  background: var(--primary, #845000);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 9999px;
+}

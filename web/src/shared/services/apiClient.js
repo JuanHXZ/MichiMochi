@@ -15,8 +15,10 @@ export async function apiClient(endpoint, options = {}) {
 
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+
   const requestHeaders = {
-    'Content-Type': 'application/json',
+    ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
     ...headers,
   };
 
@@ -33,7 +35,7 @@ export async function apiClient(endpoint, options = {}) {
   };
 
   if (body) {
-    config.body = typeof body === 'string' ? body : JSON.stringify(body);
+    config.body = isFormData || typeof body === 'string' ? body : JSON.stringify(body);
   }
 
   let response;

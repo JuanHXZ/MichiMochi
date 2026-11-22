@@ -67,4 +67,17 @@ export const productService = {
     });
     return response.ok;
   },
+
+  async uploadProductImages(files) {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('images', file);
+    }
+    const response = await apiClient('/products/upload-images', {
+      method: 'POST',
+      body: formData,
+      requiresAuth: true,
+    });
+    return response.data?.urls || [];
+  },
 };

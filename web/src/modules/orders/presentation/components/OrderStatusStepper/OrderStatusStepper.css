@@ -1,0 +1,194 @@
+.order-stepper {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.order-stepper__progress-wrap {
+  margin-bottom: 1.75rem;
+}
+
+.order-stepper__progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.625rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--heading-color);
+}
+
+.order-stepper__progress-count {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.order-stepper__progress {
+  appearance: none;
+  border: 0 solid;
+  overflow: clip;
+  display: block;
+  width: 100%;
+  height: 12px;
+  --progress-bar-radius: 9999px;
+  border-radius: var(--progress-bar-radius);
+  background: var(--surface-container-high);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.order-stepper__progress::-webkit-progress-bar {
+  background: transparent;
+}
+
+.order-stepper__progress::-webkit-progress-value {
+  background: linear-gradient(90deg, var(--primary) 0%, var(--success-green) 100%);
+  border-radius: var(--progress-bar-radius);
+  transition: inline-size 0.35s ease;
+}
+
+.order-stepper__progress::-moz-progress-bar {
+  background: linear-gradient(90deg, var(--primary) 0%, var(--success-green) 100%);
+  border-radius: var(--progress-bar-radius);
+  transition: inline-size 0.35s ease;
+}
+
+.order-stepper__steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.order-stepper__step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-container-low);
+  transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.order-stepper__step--done {
+  border-color: var(--success-green);
+  background: rgba(76, 175, 80, 0.08);
+}
+
+.order-stepper__step--current {
+  border-color: var(--primary);
+  background: rgba(132, 80, 0, 0.08);
+  box-shadow: var(--shadow-sm);
+}
+
+.order-stepper__step--pending {
+  opacity: 0.7;
+}
+
+.order-stepper__icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-container-high);
+  color: var(--body-text);
+}
+
+.order-stepper__step--done .order-stepper__icon-wrap {
+  background: var(--success-green);
+  color: #ffffff;
+}
+
+.order-stepper__step--current .order-stepper__icon-wrap {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.order-stepper__step-body {
+  text-align: left;
+}
+
+.order-stepper__step-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--heading-color);
+  margin: 0 0 0.35rem;
+}
+
+.order-stepper__step-desc {
+  font-size: 0.85rem;
+  color: var(--body-text);
+  line-height: 1.45;
+  margin: 0 0 0.5rem;
+}
+
+.order-stepper__step-time {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.order-stepper--cancelled {
+  border-color: var(--error);
+  background: var(--error-container);
+}
+
+.order-stepper__cancelled-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  text-align: left;
+}
+
+.order-stepper__cancelled-icon {
+  font-size: 2.25rem !important;
+  color: var(--error);
+  flex-shrink: 0;
+}
+
+.order-stepper__cancelled-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--on-error-container);
+}
+
+.order-stepper__cancelled-desc {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  color: var(--on-error-container);
+}
+
+.order-stepper__cancelled-time {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--on-error-container);
+}
+
+@media (max-width: 960px) {
+  .order-stepper__steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .order-stepper {
+    padding: 1.25rem;
+  }
+
+  .order-stepper__steps {
+    grid-template-columns: 1fr;
+  }
+
+  .order-stepper__step {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}

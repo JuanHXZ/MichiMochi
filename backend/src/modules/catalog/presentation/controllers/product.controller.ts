@@ -3,6 +3,7 @@ import { ProductService } from '../../application/services/product.service.js';
 import { AuthRequest } from '../../../../shared/middlewares/auth.middleware.js';
 import { ProductFilterQuery } from '../../domain/entities/Product.js';
 import { productFilterSchema } from '../../application/dtos/product.dto.js';
+import { S3StorageService, UploadImageFile } from '../../../../shared/services/storage/s3Storage.service.js';
 
 export class ProductController {
   /**
@@ -36,6 +37,24 @@ export class ProductController {
       res.status(200).json({
         ok: true,
         data: product,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * POST /api/products/upload-images
+   * Sube una o varias imágenes de producto a Amazon S3 (solo admin)
+   */
+  static async uploadImages(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const files = (req.files as UploadImageFile[] | undefined) || [];
+      const urls = await S3StorageService.uploadProductImages(files);
+      res.status(200).json({
+        ok: true,
+        message: 'Imágenes subidas exitosamente.',
+        data: { urls },
       });
     } catch (err) {
       next(err);

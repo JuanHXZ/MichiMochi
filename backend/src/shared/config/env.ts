@@ -42,6 +42,9 @@ const envSchema = z.object({
   EMAIL_PROVIDER: z.enum(['resend', 'console']).optional(),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().optional(),
+  AWS_REGION: z.string().default('us-east-1'),
+  S3_BUCKET: z.string().optional(),
+  S3_PUBLIC_BASE_URL: z.string().optional(),
 });
 
 export interface AppEnv {
@@ -64,6 +67,9 @@ export interface AppEnv {
   EMAIL_PROVIDER: 'resend' | 'console';
   RESEND_API_KEY: string;
   EMAIL_FROM: string;
+  AWS_REGION: string;
+  S3_BUCKET: string;
+  S3_PUBLIC_BASE_URL: string;
 }
 
 export function parseEnv(rawEnv: Record<string, string | undefined> = process.env): AppEnv {
@@ -169,6 +175,9 @@ export function parseEnv(rawEnv: Record<string, string | undefined> = process.en
     EMAIL_PROVIDER: emailProvider,
     RESEND_API_KEY: resendApiKey,
     EMAIL_FROM: emailFrom,
+    AWS_REGION: parsed.AWS_REGION.trim() || 'us-east-1',
+    S3_BUCKET: parsed.S3_BUCKET?.trim() || '',
+    S3_PUBLIC_BASE_URL: parsed.S3_PUBLIC_BASE_URL?.trim() || '',
   };
 }
 

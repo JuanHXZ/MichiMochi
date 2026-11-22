@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '@shared/components/Navbar/Navbar';
 import SideNavBar from '@shared/components/SideNavBar/SideNavBar';
 import { useProductStore } from '@modules/catalog/application/stores/productStore';
+import { productService } from '@modules/catalog/infrastructure/services/productService';
 import { useAuthStore } from '@/modules/auth/application/stores/authStore';
 import { useCurrency } from '@/modules/cart/application/hooks/useCurrency';
 import { useToastStore } from '@shared/stores/toastStore';
@@ -47,6 +48,8 @@ export default function AdminCatalogPage() {
   const [stockFilter, setStockFilter] = useState('all');
   const [formData, setFormData] = useState(DEFAULT_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [manualImageUrl, setManualImageUrl] = useState('');
   const [productToDelete, setProductToDelete] = useState(null);
 
   const drawerDialogRef = useRef(null);
@@ -149,9 +152,10 @@ export default function AdminCatalogPage() {
     setFormData({
       ...DEFAULT_FORM,
       id: '',
-      image: '/assets/strawberry1.png',
-      images: ['/assets/strawberry1.png'],
+      image: '',
+      images: [],
     });
+    setManualImageUrl('');
     drawerDialogRef.current?.showModal();
   };
 
@@ -160,6 +164,11 @@ export default function AdminCatalogPage() {
       Number(prod.originalPrice) > 0
         ? Number(prod.originalPrice)
         : Number(prod.price) || 0;
+    const gallery = Array.isArray(prod.images) && prod.images.length
+      ? prod.images.filter(Boolean)
+      : prod.image
+      ? [prod.image]
+      : [];
     setFormData({
       id: prod.id,
       name: prod.name || '',
@@ -173,10 +182,78 @@ export default function AdminCatalogPage() {
       featured: prod.featured ?? false,
       description: prod.description || '',
       longDescription: prod.longDescription || '',
-      image: prod.image || '/assets/strawberry1.png',
-      images: prod.images?.length ? prod.images : [prod.image || '/assets/strawberry1.png'],
+      image: prod.image || gallery[0] || '',
+      images: gallery,
     });
+    setManualImageUrl('');
     drawerDialogRef.current?.showModal();
+  };
+
+  const handleImageFilesChange = async (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length === 0) return;
+
+    setIsUploadingImages(true);
+    try {
+      const uploadedUrls = await productService.uploadProductImages(files);
+      setFormData((prev) => {
+        const merged = Array.from(new Set([...(prev.images || []), ...uploadedUrls]));
+        return {
+          ...prev,
+          image: prev.image || merged[0] || '',
+          images: merged,
+        };
+      });
+      showToast({
+        message: `${uploadedUrls.length} imagen(es) subida(s) correctamente a S3.`,
+        type: 'success',
+      });
+    } catch (err) {
+      showToast({
+        message: `Error al subir imágenes: ${err.message}`,
+        type: 'error',
+      });
+    } finally {
+      setIsUploadingImages(false);
+    }
+  };
+
+  const handleAddManualUrl = () => {
+    const clean = manualImageUrl.trim();
+    if (!clean) return;
+    setFormData((prev) => {
+      const merged = Array.from(new Set([...(prev.images || []), clean]));
+      return {
+        ...prev,
+        image: prev.image || merged[0] || '',
+        images: merged,
+      };
+    });
+    setManualImageUrl('');
+  };
+
+  const handleSetPrimaryImage = (url) => {
+    setFormData((prev) => {
+      const rest = (prev.images || []).filter((item) => item !== url);
+      return {
+        ...prev,
+        image: url,
+        images: [url, ...rest],
+      };
+    });
+  };
+
+  const handleRemoveImage = (url) => {
+    setFormData((prev) => {
+      const nextImages = (prev.images || []).filter((item) => item !== url);
+      const nextPrimary = prev.image === url ? nextImages[0] || '' : prev.image;
+      return {
+        ...prev,
+        image: nextPrimary,
+        images: nextImages,
+      };
+    });
   };
 
   const handleToggleVisibility = async (prod) => {
@@ -232,6 +309,12 @@ export default function AdminCatalogPage() {
           ? Number((basePrice * (1 - discount / 100)).toFixed(2))
           : basePrice;
 
+      const gallery = (formData.images || []).filter(Boolean);
+      const primaryImage = formData.image || gallery[0] || '/assets/strawberry1.png';
+      const orderedGallery = gallery.length
+        ? [primaryImage, ...gallery.filter((url) => url !== primaryImage)]
+        : [primaryImage];
+
       const payload = {
         name: formData.name.trim(),
         shortName: formData.shortName.trim() || formData.name.trim(),
@@ -244,8 +327,8 @@ export default function AdminCatalogPage() {
         featured: Boolean(formData.featured),
         description: formData.description.trim() || 'Artesanal y delicioso mochi tradicional.',
         longDescription: formData.longDescription.trim() || formData.description.trim(),
-        image: formData.image || '/assets/strawberry1.png',
-        images: formData.images || [formData.image || '/assets/strawberry1.png'],
+        image: primaryImage,
+        images: orderedGallery,
       };
 
       if (formData.id) {
@@ -631,40 +714,96 @@ export default function AdminCatalogPage() {
             </div>
           </div>
 
-          <div className="admin-form-row">
-            <div className="admin-form-group">
-              <label htmlFor="admin-prod-stock" className="admin-form-label">{t('admin.form.stock')}</label>
-              <input
-                id="admin-prod-stock"
-                name="stock"
-                type="number"
-                min="0"
-                required
-                className="admin-form-input"
-                value={formData.stock}
-                onChange={(e) =>
-                  setFormData({ ...formData, stock: parseInt(e.target.value, 10) || 0 })
-                }
-              />
-            </div>
+          <div className="admin-form-group">
+            <label htmlFor="admin-prod-stock" className="admin-form-label">{t('admin.form.stock')}</label>
+            <input
+              id="admin-prod-stock"
+              name="stock"
+              type="number"
+              min="0"
+              required
+              className="admin-form-input"
+              value={formData.stock}
+              onChange={(e) =>
+                setFormData({ ...formData, stock: parseInt(e.target.value, 10) || 0 })
+              }
+            />
+          </div>
 
-            <div className="admin-form-group">
-              <label htmlFor="admin-prod-image" className="admin-form-label">{t('admin.form.image')}</label>
-              <input
-                id="admin-prod-image"
-                name="image"
-                type="text"
-                className="admin-form-input"
-                value={formData.image}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    image: e.target.value,
-                    images: [e.target.value],
-                  })
-                }
-                placeholder="/assets/strawberry1.png"
-              />
+          <div className="admin-form-group">
+            <span className="admin-form-label">{t('admin.form.image')} (Galería)</span>
+            <div className="admin-gallery-uploader">
+              <label htmlFor="admin-prod-images-upload" className="admin-gallery-dropzone">
+                <input
+                  id="admin-prod-images-upload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  multiple
+                  disabled={isUploadingImages}
+                  onChange={handleImageFilesChange}
+                />
+                <span className="admin-gallery-dropzone__title">
+                  {isUploadingImages ? 'Subiendo imágenes a S3...' : '📤 Subir una o varias imágenes (S3)'}
+                </span>
+                <span className="admin-gallery-dropzone__hint">
+                  JPG, PNG, WebP o GIF • Máx. 5 MB por archivo (hasta 8 imágenes)
+                </span>
+              </label>
+
+              <div className="admin-gallery-manual">
+                <input
+                  id="admin-prod-image"
+                  name="image"
+                  type="text"
+                  className="admin-form-input"
+                  value={manualImageUrl}
+                  onChange={(e) => setManualImageUrl(e.target.value)}
+                  placeholder="O pega una URL externa (https://... o /assets/...)"
+                />
+                <button
+                  type="button"
+                  className="admin-btn-secondary"
+                  onClick={handleAddManualUrl}
+                  disabled={!manualImageUrl.trim()}
+                >
+                  + Agregar
+                </button>
+              </div>
+
+              {(formData.images || []).length > 0 && (
+                <div className="admin-gallery-grid">
+                  {formData.images.map((url, idx) => {
+                    const isPrimary = (formData.image || formData.images[0]) === url;
+                    return (
+                      <div
+                        key={`${url}-${idx}`}
+                        className={`admin-gallery-item ${isPrimary ? 'admin-gallery-item--primary' : ''}`}
+                      >
+                        <img src={url} alt={`Imagen ${idx + 1}`} />
+                        {isPrimary && <span className="admin-gallery-item__badge">Principal</span>}
+                        <div className="admin-gallery-item__actions">
+                          <button
+                            type="button"
+                            className="admin-gallery-item__btn"
+                            title="Marcar como principal"
+                            onClick={() => handleSetPrimaryImage(url)}
+                          >
+                            ★
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-gallery-item__btn"
+                            title="Eliminar imagen"
+                            onClick={() => handleRemoveImage(url)}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
@@ -727,7 +866,7 @@ export default function AdminCatalogPage() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || isLoading}
+              disabled={isSubmitting || isLoading || isUploadingImages}
               className="admin-catalog__btn-primary"
               style={{ padding: '0.65rem 1.5rem' }}
             >

@@ -48,10 +48,7 @@ export default function CartPage() {
       window.location.href = '/login';
       return;
     }
-    showToast({
-      message: 'Proceeding to checkout...',
-      type: 'success',
-    });
+    window.location.assign('/checkout');
   };
 
   const handleApplyPromo = () => {

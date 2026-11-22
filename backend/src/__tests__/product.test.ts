@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { createApp } from '../app.js';
@@ -7,6 +8,7 @@ import { MemoryProductRepository } from '../modules/catalog/infrastructure/repos
 import { setProductRepository } from '../modules/catalog/infrastructure/repositories/productRepository.factory.js';
 import { MemoryUserRepository } from '../modules/auth/infrastructure/repositories/MemoryUserRepository.js';
 import { setUserRepository } from '../modules/auth/infrastructure/repositories/userRepository.factory.js';
+import { S3StorageService } from '../shared/services/storage/s3Storage.service.js';
 
 describe('Product Catalog CRUD & RBAC API Tests', () => {
   const app = createApp();
@@ -261,8 +263,64 @@ describe('Product Catalog CRUD & RBAC API Tests', () => {
       const res = await request(app).get('/docs/openapi.json');
       expect(res.status).toBe(200);
       expect(res.body.paths).toHaveProperty('/api/products');
+      expect(res.body.paths).toHaveProperty('/api/products/upload-images');
       expect(res.body.paths).toHaveProperty('/api/products/{id}');
       expect(res.body.components.schemas).toHaveProperty('Product');
+    });
+  });
+
+  describe('POST /api/products/upload-images (S3 Upload RBAC & Validation)', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should reject upload without token (401) and for customer role (403)', async () => {
+      const noAuthRes = await request(app).post('/api/products/upload-images');
+      expect(noAuthRes.status).toBe(401);
+
+      const customerRes = await request(app)
+        .post('/api/products/upload-images')
+        .set('Authorization', customerAuthHeader);
+      expect(customerRes.status).toBe(403);
+    });
+
+    it('should reject unsupported file MIME types with 400', async () => {
+      const res = await request(app)
+        .post('/api/products/upload-images')
+        .set('Authorization', adminAuthHeader)
+        .attach('images', Buffer.from('not an image'), {
+          filename: 'script.txt',
+          contentType: 'text/plain',
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.ok).toBe(false);
+    });
+
+    it('should allow admin to upload multiple valid images and return S3 URLs', async () => {
+      const spy = jest
+        .spyOn(S3StorageService, 'uploadProductImages')
+        .mockResolvedValueOnce([
+          'https://michimochi-catalog-media-adso.s3.us-east-1.amazonaws.com/products/1.png',
+          'https://michimochi-catalog-media-adso.s3.us-east-1.amazonaws.com/products/2.jpg',
+        ]);
+
+      const res = await request(app)
+        .post('/api/products/upload-images')
+        .set('Authorization', adminAuthHeader)
+        .attach('images', Buffer.from('fake-png'), {
+          filename: 'mochi1.png',
+          contentType: 'image/png',
+        })
+        .attach('images', Buffer.from('fake-jpg'), {
+          filename: 'mochi2.jpg',
+          contentType: 'image/jpeg',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data.urls).toHaveLength(2);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -236,6 +236,152 @@
     },
     "backToCatalog": "Volver al Catálogo"
   },
+  "checkout": {
+    "backToCart": "Volver al carrito",
+    "title": "Finalizar Compra",
+    "subtitle": "Completa tus datos de entrega y confirma el pago simulado para generar tu orden.",
+    "successToast": "¡Pedido #{{orderNumber}} creado y pago simulado aprobado!",
+    "errorGeneric": "No fue posible procesar el pedido. Intenta nuevamente.",
+    "submitting": "Procesando pago simulado...",
+    "submitBtn": "Confirmar pedido y simular pago ({{total}})",
+    "simulationBanner": {
+      "title": "Entorno Educativo — Pasarela Simulada",
+      "text": "No se realizará ningún cobro real ni se almacenarán datos bancarios reales. Usa las tarjetas o métodos de prueba para completar el ciclo comercial."
+    },
+    "empty": {
+      "title": "Tu carrito está vacío",
+      "text": "Agrega tus mochis favoritos antes de pasar al checkout.",
+      "backToCatalog": "Explorar Catálogo",
+      "goToOrders": "Ver Mis Pedidos"
+    },
+    "shipping": {
+      "title": "Datos de Entrega",
+      "fullName": "Nombre completo",
+      "phone": "Teléfono de contacto",
+      "address": "Dirección de entrega",
+      "city": "Ciudad",
+      "notes": "Instrucciones adicionales (opcional)",
+      "notesPlaceholder": "Ej. Portería, apartamento o referencia"
+    },
+    "payment": {
+      "title": "Método de Pago Simulado",
+      "methodLegend": "Selecciona un método de pago simulado",
+      "methods": {
+        "card": "Tarjeta Crédito / Débito (Simulada)",
+        "nequi": "Nequi (Simulado)",
+        "pse": "PSE (Simulado)",
+        "cash_on_delivery": "Pago Contra Entrega"
+      },
+      "fillApproved": "Autocompletar tarjeta aprobada (4242)",
+      "fillDeclined": "Simular tarjeta rechazada",
+      "cardHolder": "Titular de la tarjeta",
+      "cardNumber": "Número de tarjeta (ficticio)",
+      "cardNumberHint": "Ingresa entre 13 y 16 dígitos (puedes incluir espacios)",
+      "expiry": "Fecha de vencimiento",
+      "expHint": "Formato: MM/AA",
+      "csc": "Código de seguridad (CVV)",
+      "cscHint": "3 o 4 dígitos en el reverso",
+      "methodNotes": {
+        "nequi": "Se simulará una autorización instantánea mediante billetera Nequi sin cargo real.",
+        "pse": "Se simulará la confirmación bancaria vía débito PSE en ambiente académico.",
+        "cash_on_delivery": "El pedido quedará confirmado para pago al momento de la entrega."
+      },
+      "outcomeLabel": "Resultado de la simulación",
+      "outcomeApproved": "Aprobar pago simulado",
+      "outcomeDeclined": "Simular pago rechazado (prueba de error)"
+    },
+    "errors": {
+      "fullName": "Ingresa tu nombre completo (mínimo 2 caracteres).",
+      "phone": "Ingresa un teléfono válido (mínimo 7 dígitos).",
+      "address": "Ingresa una dirección de entrega completa.",
+      "city": "Ingresa la ciudad de entrega.",
+      "cardHolder": "Ingresa el nombre del titular tal como figura en la tarjeta.",
+      "cardNumber": "Ingresa un número de tarjeta simulado válido (13 a 19 caracteres).",
+      "cardExpiry": "Usa el formato MM/AA (ej. 12/29).",
+      "cardCsc": "Ingresa un código de 3 o 4 dígitos."
+    },
+    "summary": {
+      "title": "Resumen de Compra"
+    }
+  },
+  "orders": {
+    "statuses": {
+      "RECEIVED": {
+        "label": "Pedido recibido",
+        "description": "Tu pedido fue confirmado y recibido por nuestra tienda."
+      },
+      "PREPARING": {
+        "label": "Orden en preparación",
+        "description": "Nuestros artesanos están elaborando y empacando tus mochis."
+      },
+      "SHIPPED": {
+        "label": "Pedido enviado",
+        "description": "Tu orden salió de cocina y va en camino hacia tu dirección."
+      },
+      "DELIVERED": {
+        "label": "Entregado",
+        "description": "¡Tu pedido fue entregado! Disfruta tus MichiMochi."
+      },
+      "CANCELLED": {
+        "label": "Cancelado",
+        "description": "La orden fue cancelada y los productos retornaron al inventario."
+      }
+    },
+    "list": {
+      "title": "Mis Pedidos",
+      "subtitle": "Consulta tu historial de compras y simula el seguimiento en tiempo real.",
+      "newOrder": "Ir al Catálogo",
+      "filterLabel": "Filtrar pedidos por estado",
+      "loading": "Cargando tus pedidos...",
+      "emptyTitle": "Aún no tienes pedidos en esta categoría",
+      "emptyText": "Explora nuestro catálogo artesanal y realiza tu primer pedido simulado.",
+      "emptyButton": "Explorar Mochis",
+      "moreItems": "más",
+      "trackButton": "Ver seguimiento",
+      "filters": {
+        "all": "Todos",
+        "active": "En curso",
+        "delivered": "Entregados",
+        "cancelled": "Cancelados"
+      }
+    },
+    "tracking": {
+      "backToOrders": "Volver a Mis Pedidos",
+      "loading": "Cargando seguimiento del pedido...",
+      "notFoundTitle": "No pudimos cargar este pedido",
+      "title": "Seguimiento del Pedido #{{orderNumber}}",
+      "placedAt": "Realizado el",
+      "eta": "Entrega estimada",
+      "progressLabel": "Progreso del pedido",
+      "progressAria": "Etapa {{step}} de {{total}}: {{status}}",
+      "liveAnnouncement": "Estado actual del pedido: {{status}}",
+      "simBadge": "Simulación Educativa · Rol Customer",
+      "simTitle": "Simulador de Seguimiento de Orden",
+      "simDesc": "Como proyecto educativo, puedes avanzar manualmente o activar la simulación automática cada 5 segundos para recorrer el ciclo completo hasta Entregado.",
+      "advanceBtn": "Avanzar al siguiente estado",
+      "startAutoBtn": "Simulación automática (5s)",
+      "pauseAutoBtn": "Pausar simulación",
+      "cancelBtn": "Cancelar pedido",
+      "statusUpdatedToast": "Estado actualizado a: {{status}}",
+      "advanceError": "No se pudo avanzar el estado del pedido.",
+      "cancelledToast": "Tu pedido fue cancelado y el stock fue restaurado.",
+      "cancelError": "No se pudo cancelar el pedido.",
+      "historyTitle": "Historial de Estados",
+      "itemsTitle": "Productos del Pedido",
+      "deliveryTitle": "Dirección de Entrega",
+      "paymentTitle": "Comprobante de Pago Simulado",
+      "paymentMethod": "Método",
+      "paymentStatus": "Estado",
+      "paymentApprovedSim": "Aprobado (Simulado)",
+      "paymentRef": "Referencia",
+      "cancelDialog": {
+        "title": "¿Cancelar este pedido?",
+        "text": "Estás a punto de cancelar el pedido #{{orderNumber}}. Se restaurará el inventario de los productos.",
+        "keep": "Mantener pedido",
+        "confirm": "Sí, cancelar pedido"
+      }
+    }
+  },
   "language": {
     "english": "English",
     "spanish": "Español"

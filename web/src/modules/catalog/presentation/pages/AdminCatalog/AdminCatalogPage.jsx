@@ -156,13 +156,17 @@ export default function AdminCatalogPage() {
   };
 
   const handleOpenEdit = (prod) => {
+    const basePrice =
+      Number(prod.originalPrice) > 0
+        ? Number(prod.originalPrice)
+        : Number(prod.price) || 0;
     setFormData({
       id: prod.id,
       name: prod.name || '',
       shortName: prod.shortName || '',
       category: prod.category || 'Strawberry',
-      price: Number(prod.price) || 0,
-      originalPrice: Number(prod.originalPrice) || Number(prod.price) || 0,
+      price: basePrice,
+      originalPrice: basePrice,
       discount: Number(prod.discount) || 0,
       stock: Number(prod.stock) || 0,
       inStock: prod.inStock ?? true,
@@ -221,13 +225,20 @@ export default function AdminCatalogPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const basePrice = Number(formData.price);
+      const discount = Math.min(99, Math.max(0, Math.round(Number(formData.discount) || 0)));
+      const finalPrice =
+        discount > 0
+          ? Number((basePrice * (1 - discount / 100)).toFixed(2))
+          : basePrice;
+
       const payload = {
         name: formData.name.trim(),
         shortName: formData.shortName.trim() || formData.name.trim(),
         category: formData.category,
-        price: Number(formData.price),
-        originalPrice: Number(formData.originalPrice) || Number(formData.price),
-        discount: Number(formData.discount) || 0,
+        price: finalPrice,
+        originalPrice: basePrice,
+        discount,
         stock: Number(formData.stock) || 0,
         inStock: Boolean(formData.inStock),
         featured: Boolean(formData.featured),
@@ -610,7 +621,7 @@ export default function AdminCatalogPage() {
                 name="discount"
                 type="number"
                 min="0"
-                max="100"
+                max="99"
                 className="admin-form-input"
                 value={formData.discount}
                 onChange={(e) =>

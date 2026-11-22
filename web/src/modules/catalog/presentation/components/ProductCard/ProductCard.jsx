@@ -8,11 +8,15 @@ import "./ProductCard.css";
 export default function ProductCard({ product, onAddToCart }) {
   const { t } = useTranslation();
   const formattedPrice = useFormattedPrice(product?.price || 0);
+  const formattedOriginalPrice = useFormattedPrice(product?.originalPrice || 0);
   const addItem = useCartStore((state) => state.addItem);
 
   if (!product) return null;
 
   const isOutOfStock = product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0);
+  const discount = Number(product.discount) || 0;
+  const hasDiscount = discount > 0;
+  const showOriginalPrice = hasDiscount && Number(product.originalPrice) > Number(product.price);
 
   const handleAddClick = () => {
     if (isOutOfStock) return;
@@ -40,6 +44,11 @@ export default function ProductCard({ product, onAddToCart }) {
             {t('dashboard.card.soldOut')}
           </span>
         )}
+        {hasDiscount && !isOutOfStock && (
+          <span className="stitch-card__discount-badge">
+            -{discount}%
+          </span>
+        )}
         <button
           type="button"
           className="stitch-card__favorite"
@@ -59,7 +68,14 @@ export default function ProductCard({ product, onAddToCart }) {
             </h3>
             <p className="stitch-card__subtitle">{product.description}</p>
           </div>
-          <span className="stitch-card__price">{formattedPrice.formatted}</span>
+          <div className="stitch-card__price-group">
+            <span className="stitch-card__price">{formattedPrice.formatted}</span>
+            {showOriginalPrice && (
+              <span className="stitch-card__original-price">
+                {formattedOriginalPrice.formatted}
+              </span>
+            )}
+          </div>
         </div>
 
         <button

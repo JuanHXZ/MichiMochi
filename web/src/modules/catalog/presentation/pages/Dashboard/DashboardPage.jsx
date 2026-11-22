@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const featuredProduct = useTranslatedFeaturedProduct();
 
   useEffect(() => {
-    fetchProducts();
+    fetchProducts({ inStock: true });
   }, [fetchProducts]);
 
   const SORT_OPTIONS = [
@@ -32,14 +32,22 @@ export default function DashboardPage() {
   ];
 
   const sortedProducts = useMemo(() => {
-    const items = [...filteredProducts];
+    const items = filteredProducts.filter((p) => p.inStock !== false);
 
     if (sortOption === "Price") {
       return items.sort((a, b) => a.price - b.price);
     }
 
     if (sortOption === "Newest") {
-      return items.sort((a, b) => Number(b.id) - Number(a.id));
+      return items.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        if (dateA !== dateB) return dateB - dateA;
+        const numA = Number(a.id);
+        const numB = Number(b.id);
+        if (!Number.isNaN(numA) && !Number.isNaN(numB)) return numB - numA;
+        return String(b.id).localeCompare(String(a.id));
+      });
     }
 
     return items.sort((a, b) => {

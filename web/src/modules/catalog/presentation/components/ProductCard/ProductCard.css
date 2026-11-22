@@ -94,10 +94,25 @@
   margin: 0;
 }
 
+.stitch-card__price-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
 .stitch-card__price {
   font-size: 1rem;
   font-weight: 700;
   color: var(--primary);
+  white-space: nowrap;
+}
+
+.stitch-card__original-price {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-decoration: line-through;
   white-space: nowrap;
 }
 
@@ -144,6 +159,20 @@
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
+}
+
+.stitch-card__discount-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  background: #e11d48;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .stitch-card--out-of-stock .stitch-card__image {

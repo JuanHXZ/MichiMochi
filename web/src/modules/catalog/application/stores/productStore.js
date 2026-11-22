@@ -126,7 +126,7 @@ export const useProductStore = create((set, get) => ({
   },
 
   getFeaturedProduct: () => {
-    return get().products.find((p) => p.featured);
+    return get().products.find((p) => p.featured && p.inStock !== false);
   },
 
   getProductById: (id) => {

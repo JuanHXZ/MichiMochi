@@ -126,9 +126,11 @@ export default function ProductDetailPage() {
                   <span>{formatPrice(product.price).formatted}</span>
                   {product.discount > 0 && (
                     <>
-                      <span className="product-detail__original-price">
-                        {formatPrice(product.originalPrice).formatted}
-                      </span>
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <span className="product-detail__original-price">
+                          {formatPrice(product.originalPrice).formatted}
+                        </span>
+                      )}
                       <span className="product-detail__discount">
                         -{product.discount}%
                       </span>

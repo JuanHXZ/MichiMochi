@@ -29,6 +29,7 @@ export async function apiClient(endpoint, options = {}) {
     method,
     headers: requestHeaders,
     credentials: 'include',
+    ...(method.toUpperCase() === 'GET' ? { cache: 'no-store' } : {}),
   };
 
   if (body) {

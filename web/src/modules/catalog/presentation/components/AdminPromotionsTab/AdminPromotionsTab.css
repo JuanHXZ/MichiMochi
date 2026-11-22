@@ -1,0 +1,58 @@
+.admin-promos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin-promos__top-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-promos__heading {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+  color: var(--heading-color);
+}
+
+.admin-promos__subheading {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+.admin-promo-code-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.admin-promo-code {
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--primary);
+}
+
+.admin-promo-desc {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.admin-promo-scope {
+  display: inline-block;
+  width: fit-content;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.12rem 0.5rem;
+  border-radius: 9999px;
+  background: var(--summary-bg);
+  color: var(--heading-color);
+}
+
+.admin-promo-scope--reward {
+  background: rgba(234, 179, 8, 0.16);
+  color: #a16207;
+}

@@ -1,0 +1,316 @@
+.rewards-page {
+  min-height: 100dvh;
+  background: var(--background);
+  font-family: var(--sans);
+  padding-top: 80px;
+}
+
+.rewards-page__layout {
+  display: block;
+  min-height: calc(100dvh - 80px);
+}
+
+.rewards-page__main {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.rewards-page__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.rewards-page__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--heading-color);
+}
+
+.rewards-page__subtitle {
+  margin: 0;
+  color: var(--body-text);
+  font-size: 1rem;
+}
+
+.rewards-hero-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark, #5a3418) 100%);
+  color: #ffffff;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 2rem;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 768px) {
+  .rewards-hero-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rewards-hero-card__balance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rewards-hero-card__label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+.rewards-hero-card__points {
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.rewards-hero-card__hint {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.rewards-hero-card__tier {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rewards-hero-card__tier-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.rewards-tier-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.rewards-tier-next {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.rewards-progress {
+  height: 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.rewards-progress__bar {
+  height: 100%;
+  background: #ffd166;
+  border-radius: 9999px;
+  transition: width 0.35s ease;
+}
+
+.rewards-section__title {
+  margin: 0 0 1.25rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--heading-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rewards-coupons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.reward-coupon-card {
+  background: var(--card-bg);
+  border: 2px dashed var(--primary);
+  border-radius: 1rem;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.reward-coupon-card__code {
+  display: block;
+  font-size: 1.1rem;
+  color: var(--primary);
+  letter-spacing: 0.04em;
+}
+
+.reward-coupon-card__desc {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.reward-coupon-card__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reward-coupon-card__copy:hover {
+  background: var(--summary-bg);
+}
+
+.rewards-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.reward-tier-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.reward-tier-card__cost {
+  display: inline-block;
+  width: fit-content;
+  background: var(--summary-bg);
+  color: var(--primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.reward-tier-card__title {
+  margin: 0.25rem 0 0;
+  font-size: 1.125rem;
+  color: var(--heading-color);
+}
+
+.reward-tier-card__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  flex: 1;
+}
+
+.reward-tier-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.reward-tier-card__value {
+  font-weight: 800;
+  color: var(--heading-color);
+  font-size: 1.1rem;
+}
+
+.reward-tier-card__btn {
+  padding: 0.55rem 1.15rem;
+  border-radius: 9999px;
+  border: none;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.reward-tier-card__btn:disabled {
+  background: var(--border-color);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.rewards-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.rewards-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.rewards-history-item:last-child {
+  border-bottom: none;
+}
+
+.rewards-history-item__desc {
+  display: block;
+  color: var(--heading-color);
+  font-size: 0.95rem;
+}
+
+.rewards-history-item__date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.rewards-history-item__pts {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.rewards-history-item__pts--plus {
+  color: #16a34a;
+}
+
+.rewards-history-item__pts--minus {
+  color: #e11d48;
+}
+
+.rewards-empty-history,
+.rewards-loading {
+  color: var(--text-secondary);
+  margin: 0;
+}

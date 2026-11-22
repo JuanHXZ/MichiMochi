@@ -2,6 +2,7 @@
 .admin-catalog {
   min-height: 100dvh;
   background: var(--background);
+  font-family: var(--sans);
   padding-top: 80px;
   overflow-x: clip;
 }
@@ -16,16 +17,17 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 1.5rem 4rem;
   box-sizing: border-box;
+  text-align: left;
 }
 
 /* Header & Actions */
 .admin-catalog__header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
   gap: 1.5rem;
   flex-wrap: wrap;
 }
@@ -52,15 +54,15 @@
 }
 
 .admin-catalog__title {
-  font-size: 2rem;
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
   font-weight: 700;
   color: var(--heading-color);
-  margin: 0;
+  margin: 0 0 0.35rem;
 }
 
 .admin-catalog__subtitle {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
+  color: var(--body-text);
+  font-size: 1rem;
   margin: 0;
 }
 
@@ -518,16 +520,21 @@ dialog::backdrop {
 .admin-drawer {
   background: var(--card-bg, #ffffff);
   color: var(--body-text);
-  width: min(100%, 520px);
-  max-width: 520px;
+  font-family: var(--sans);
+  text-align: left;
+  width: min(100vw, 540px);
+  max-width: 540px;
   height: 100dvh;
   max-height: 100dvh;
   margin: 0;
   margin-inline-start: auto;
   padding: 0;
   border: 0;
-  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.15);
+  border-left: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  border-radius: 1.25rem 0 0 1.25rem;
+  box-shadow: -12px 0 36px rgba(0, 0, 0, 0.18);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .admin-drawer[open] {
@@ -549,6 +556,8 @@ dialog::backdrop {
 .admin-confirm-dialog {
   background: var(--card-bg, #ffffff);
   color: var(--body-text);
+  font-family: var(--sans);
+  text-align: left;
   border: 1px solid var(--border-color);
   border-radius: 1.25rem;
   padding: 1.5rem;
@@ -592,61 +601,102 @@ dialog::backdrop {
 }
 
 .admin-drawer__header {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+  background: var(--card-bg, #ffffff);
 }
 
 .admin-drawer__title {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--heading-color);
 }
 
 .admin-drawer__close {
   background: transparent;
   border: none;
-  font-size: 1.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
   cursor: pointer;
   color: var(--text-secondary);
   line-height: 1;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-drawer__close:hover {
+  background: var(--surface-bright, rgba(0, 0, 0, 0.06));
+  color: var(--heading-color);
 }
 
 .admin-drawer__body {
   padding: 1.5rem;
   overflow-y: auto;
-  flex-grow: 1;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.15rem;
 }
 
 .admin-form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.45rem;
+  min-width: 0;
 }
 
 .admin-form-label {
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
+  line-height: 1.3;
   color: var(--heading-color);
 }
 
 .admin-form-input,
 .admin-form-select,
 .admin-form-textarea {
+  width: 100%;
+  box-sizing: border-box;
   border: 1px solid var(--border-color, rgba(0, 0, 0, 0.15));
   border-radius: 0.75rem;
-  padding: 0.65rem 0.9rem;
-  font-size: 0.9rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.4;
   color: var(--body-text);
   background: var(--surface-bright, #fff8f5);
   font-family: inherit;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.admin-form-input:hover:not(:disabled),
+.admin-form-select:hover:not(:disabled),
+.admin-form-textarea:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--primary, #845000) 45%, var(--border-color, rgba(0, 0, 0, 0.2)));
+}
+
+.admin-form-input:disabled,
+.admin-form-select:disabled,
+.admin-form-textarea:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.admin-form-textarea {
+  resize: vertical;
+  min-height: 84px;
 }
 
 .admin-form-input:focus-visible,
@@ -665,28 +715,46 @@ dialog::backdrop {
 
 .admin-form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
+  align-items: end;
 }
 
 .admin-form-checkbox {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+  background: var(--surface-bright, #fff8f5);
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--heading-color);
-  margin-top: 0.5rem;
+  margin-top: 0;
+}
+
+.admin-form-checkbox input[type="checkbox"] {
+  accent-color: var(--primary, #845000);
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 .admin-drawer__footer {
-  padding: 1.25rem 1.5rem;
+  position: sticky;
+  bottom: -1.5rem;
+  margin: auto -1.5rem -1.5rem;
+  padding: 1.1rem 1.5rem;
   border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  background: var(--surface-bright, #fff8f5);
+  background: var(--card-bg, #ffffff);
+  z-index: 2;
 }
 
 .admin-btn-secondary {
@@ -698,6 +766,23 @@ dialog::backdrop {
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-btn-secondary:hover:not(:disabled) {
+  background: var(--surface-bright, rgba(0, 0, 0, 0.04));
+  border-color: var(--primary, #845000);
+  color: var(--heading-color);
+}
+
+@media (max-width: 560px) {
+  .admin-drawer {
+    border-radius: 0;
+  }
+
+  .admin-form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @keyframes fadeIn {
@@ -757,6 +842,8 @@ dialog::backdrop {
 
 .admin-gallery-manual .admin-form-input {
   flex: 1;
+  min-width: 0;
+  width: auto;
 }
 
 .admin-gallery-grid {
@@ -819,4 +906,44 @@ dialog::backdrop {
   font-weight: 700;
   padding: 0.1rem 0.35rem;
   border-radius: 9999px;
+}
+
+/* ===== ADMIN TABS ===== */
+.admin-tabs {
+  display: inline-flex;
+  gap: 0.5rem;
+  padding: 0.35rem;
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e6dcc8);
+  border-radius: 9999px;
+  margin-bottom: 1.5rem;
+}
+
+.admin-tab {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #6b5b4e);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 0.55rem 1.15rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-tab:hover {
+  color: var(--heading-color, #2f1f14);
+}
+
+.admin-tab--active {
+  background: var(--primary, #845000);
+  color: var(--on-primary, #ffffff);
+}
+
+.admin-tab--active:hover {
+  color: var(--on-primary, #ffffff);
 }

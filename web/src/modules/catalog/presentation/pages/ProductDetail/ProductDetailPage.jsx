@@ -1,10 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { Favorite, FavoriteBorder } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import Navbar from '@shared/components/Navbar/Navbar';
 import SideNavBar from '@shared/components/SideNavBar/SideNavBar';
 import ImageCarousel from '../../components/ImageCarousel/ImageCarousel';
 import { useCartStore } from '@/modules/cart/application/stores/cartStore';
 import { useAuthStore } from '@/modules/auth/application/stores/authStore';
+import { useFavoriteStore } from '@/modules/favorites/application/stores/favoriteStore';
+import { useToastStore } from '@shared/stores/toastStore';
 import { useProductStore } from '../../../application/stores/productStore';
 import { useTranslatedProduct } from '../../../application/hooks/useTranslatedProducts';
 import { useCurrency } from '@/modules/cart/application/hooks/useCurrency';
@@ -18,6 +21,9 @@ export default function ProductDetailPage() {
   const addItem = useCartStore((state) => state.addItem);
   const user = useAuthStore((state) => state.user);
   const fetchProductById = useProductStore((state) => state.fetchProductById);
+  const showToast = useToastStore((state) => state.showToast);
+  const favoriteIds = useFavoriteStore((state) => state.favoriteIds);
+  const toggleFavorite = useFavoriteStore((state) => state.toggleFavorite);
 
   const productId = useMemo(() => {
     const path = window.location.pathname;
@@ -32,6 +38,7 @@ export default function ProductDetailPage() {
 
   const product = useTranslatedProduct(productId);
   const activeFlavor = selectedFlavor ?? (product?.flavors?.[0]?.id ?? null);
+  const isFavorite = product ? favoriteIds.includes(String(product.id)) : false;
   const isOutOfStock = Boolean(
     product && (product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0))
   );
@@ -52,6 +59,24 @@ export default function ProductDetailPage() {
       for (let i = 0; i < quantity; i++) {
         addItem({ ...product, selectedFlavor: activeFlavor });
       }
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!product) return;
+    try {
+      const nowFavorite = await toggleFavorite(product);
+      showToast({
+        message: nowFavorite
+          ? t('favorites.addedToast', { name: product.shortName || product.name })
+          : t('favorites.removedToast', { name: product.shortName || product.name }),
+        type: 'info',
+      });
+    } catch (err) {
+      showToast({
+        message: err.message || 'Error al actualizar favoritos',
+        type: 'error',
+      });
     }
   };
 
@@ -119,7 +144,22 @@ export default function ProductDetailPage() {
                 </ol>
               </nav>
 
-              <h1 className="product-detail__title">{product.name}</h1>
+              <div className="product-detail__title-row">
+                <h1 className="product-detail__title">{product.name}</h1>
+                <button
+                  type="button"
+                  onClick={handleToggleFavorite}
+                  aria-pressed={isFavorite}
+                  aria-label={
+                    isFavorite
+                      ? `Remove ${product.shortName || product.name} from favorites`
+                      : `Add ${product.shortName || product.name} to favorites`
+                  }
+                  className={`product-detail__favorite-btn ${isFavorite ? 'product-detail__favorite-btn--active' : ''}`}
+                >
+                  {isFavorite ? <Favorite aria-hidden="true" /> : <FavoriteBorder aria-hidden="true" />}
+                </button>
+              </div>
 
               <div className="product-detail__price-row">
                 <div className="product-detail__price">

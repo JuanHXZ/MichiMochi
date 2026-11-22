@@ -17,6 +17,50 @@
     "subtitle": "Administración integral de productos, precios, stock y promociones",
     "newProduct": "+ Nuevo Producto",
     "editProduct": "Editar Producto",
+    "tabs": {
+      "products": "Productos",
+      "promotions": "Cupones y Promociones"
+    },
+    "promotions": {
+      "title": "Cupones y Promociones",
+      "subtitle": "Administra códigos globales de campaña y consulta cupones personales canjeados.",
+      "newPromo": "Nuevo Cupón",
+      "searchPlaceholder": "Buscar por código o descripción...",
+      "empty": "No se encontraron cupones con esos filtros.",
+      "metrics": {
+        "total": "Total Cupones",
+        "active": "Cupones Activos",
+        "uses": "Usos Totales"
+      },
+      "filters": {
+        "all": "Todos",
+        "global": "Globales",
+        "rewards": "De Recompensas",
+        "active": "Activos",
+        "inactive": "Inactivos"
+      },
+      "table": {
+        "code": "Código",
+        "discount": "Descuento",
+        "minSubtotal": "Mínimo Subtotal",
+        "uses": "Usos",
+        "active": "Estado"
+      },
+      "form": {
+        "titleNew": "Crear Nuevo Cupón",
+        "titleEdit": "Editar Cupón",
+        "code": "Código del Cupón",
+        "description": "Descripción visible",
+        "discountType": "Tipo de Descuento",
+        "discountValue": "Valor del Descuento",
+        "minSubtotal": "Subtotal Mínimo ($ USD)",
+        "maxDiscount": "Tope Máximo de Descuento ($ USD, opcional)",
+        "maxUses": "Usos Máximos Totales (vacío = ilimitado)",
+        "expiresAt": "Fecha de Expiración (opcional)",
+        "active": "Cupón activo y habilitado para compras",
+        "save": "Guardar Cupón"
+      }
+    },
     "metrics": {
       "totalProducts": "Total Productos",
       "active": "Activos",
@@ -204,12 +248,18 @@
       "total": "Total",
       "promoPlaceholder": "Código Promocional",
       "promoApply": "Aplicar",
+      "promoDiscount": "Cupón ({{code}})",
+      "promoAppliedToast": "Cupón {{code}} aplicado (−{{discount}}).",
+      "promoInvalid": "No fue posible aplicar este código promocional.",
+      "promoRemove": "Quitar código promocional",
       "checkout": "Proceder al Pago →",
       "terms": "Al continuar, aceptas nuestros Términos de Servicio."
     },
     "rewards": {
       "title": "¡Estás a 15 puntos!",
-      "text": "Agrega $5.00 más a tu carrito para desbloquear un daifuku gratis."
+      "text": "Agrega $5.00 más a tu carrito para desbloquear un daifuku gratis.",
+      "earnTitle": "Ganarás +{{points}} pts con este pedido",
+      "earnText": "Acumula 10 pts por cada $1 USD y canjea cupones exclusivos en Recompensas →"
     },
     "delivery": {
       "title": "Entrega Rápida",
@@ -381,6 +431,38 @@
         "confirm": "Sí, cancelar pedido"
       }
     }
+  },
+  "favorites": {
+    "title": "Mis Favoritos",
+    "subtitle": "Guarda tus mochis preferidos para pedirlos cuando quieras.",
+    "itemsLabel": "favoritos",
+    "addedToast": "{{name}} agregado a favoritos.",
+    "removedToast": "{{name}} eliminado de favoritos.",
+    "empty": {
+      "title": "Aún no tienes mochis favoritos",
+      "text": "Toca el ícono de corazón en cualquier producto del catálogo para guardarlo aquí.",
+      "cta": "Explorar Catálogo"
+    }
+  },
+  "rewards": {
+    "eyebrow": "Programa de Lealtad",
+    "title": "MichiMochi Rewards",
+    "subtitle": "Acumula puntos con cada pedido confirmado y canjéalos por cupones personales de un solo uso.",
+    "balanceLabel": "Saldo disponible",
+    "earnRate": "Ganas 10 pts por cada $1 USD en tus compras",
+    "nextTier": "Te faltan {{remaining}} pts para alcanzar {{tier}}",
+    "maxTier": "¡Has alcanzado el nivel máximo artesanal!",
+    "myCouponsTitle": "Mis Cupones Canjeados",
+    "copyCode": "Copiar",
+    "copiedToast": "Código {{code}} copiado. Úsalo en el carrito.",
+    "catalogTitle": "Catálogo de Canjes",
+    "loading": "Cargando tu información de recompensas...",
+    "redeemBtn": "Canjear Cupón",
+    "insufficientBtn": "Puntos insuficientes",
+    "redeemSuccess": "¡Canje exitoso! Tu código es {{code}}",
+    "redeemError": "No se pudo completar el canje.",
+    "historyTitle": "Historial de Puntos",
+    "emptyHistory": "Aún no tienes movimientos de puntos. Completa tu primer pedido para empezar a acumular."
   },
   "language": {
     "english": "English",

@@ -26,6 +26,18 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
       description: 'Endpoints CRUD para la gestión y consulta del catálogo de productos MichiMochi.',
     },
     {
+      name: 'Favorites',
+      description: 'Gestión de productos favoritos del usuario (RF12).',
+    },
+    {
+      name: 'Promotions',
+      description: 'Validación y gestión administrativa de códigos promocionales (RF14).',
+    },
+    {
+      name: 'Rewards',
+      description: 'Consulta de puntos, niveles e intercambio por recompensas (RF13).',
+    },
+    {
       name: 'Orders',
       description: 'Endpoints para creación de pedidos con pago simulado, historial, cancelación y seguimiento.',
     },
@@ -712,6 +724,79 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
             },
           },
         },
+      },
+    },
+    '/api/favorites': {
+      get: {
+        tags: ['Favorites'],
+        summary: 'Listar productos favoritos del usuario',
+        security: [{ BearerAuth: [] }],
+        responses: { '200': { description: 'Lista de favoritos obtenida.' } },
+      },
+    },
+    '/api/favorites/{productId}': {
+      post: {
+        tags: ['Favorites'],
+        summary: 'Agregar producto a favoritos',
+        security: [{ BearerAuth: [] }],
+        responses: { '200': { description: 'Agregado a favoritos.' }, '404': { description: 'Producto no encontrado.' } },
+      },
+      delete: {
+        tags: ['Favorites'],
+        summary: 'Eliminar producto de favoritos',
+        security: [{ BearerAuth: [] }],
+        responses: { '200': { description: 'Eliminado de favoritos.' } },
+      },
+    },
+    '/api/promotions/validate': {
+      post: {
+        tags: ['Promotions'],
+        summary: 'Validar código promocional contra el subtotal actual',
+        responses: { '200': { description: 'Cupón válido con descuento calculado.' } },
+      },
+    },
+    '/api/promotions': {
+      get: {
+        tags: ['Promotions'],
+        summary: 'Listar cupones (solo admin)',
+        security: [{ BearerAuth: [] }],
+        responses: { '200': { description: 'Listado de cupones.' }, '403': { description: 'Requiere rol admin.' } },
+      },
+      post: {
+        tags: ['Promotions'],
+        summary: 'Crear cupón global (solo admin)',
+        security: [{ BearerAuth: [] }],
+        responses: { '201': { description: 'Cupón creado.' }, '403': { description: 'Requiere rol admin.' } },
+      },
+    },
+    '/api/promotions/{code}': {
+      put: {
+        tags: ['Promotions'],
+        summary: 'Actualizar o activar/desactivar cupón (solo admin)',
+        security: [{ BearerAuth: [] }],
+        responses: { '200': { description: 'Cupón actualizado.' } },
+      },
+      delete: {
+        tags: ['Promotions'],
+        summary: 'Eliminar cupón (solo admin)',
+        security: [{ BearerAuth: [] }],
+        responses: { '200': { description: 'Cupón eliminado.' } },
+      },
+    },
+    '/api/rewards/me': {
+      get: {
+        tags: ['Rewards'],
+        summary: 'Consultar saldo de puntos, nivel, cupones e historial',
+        security: [{ BearerAuth: [] }],
+        responses: { '200': { description: 'Resumen de recompensas.' } },
+      },
+    },
+    '/api/rewards/redeem': {
+      post: {
+        tags: ['Rewards'],
+        summary: 'Canjear puntos por un cupón de descuento personal',
+        security: [{ BearerAuth: [] }],
+        responses: { '200': { description: 'Canje realizado.' }, '400': { description: 'Puntos insuficientes.' } },
       },
     },
     '/api/orders': {

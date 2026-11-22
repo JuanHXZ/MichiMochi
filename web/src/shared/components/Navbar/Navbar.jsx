@@ -36,9 +36,9 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
   const navItems = [
     { id: 'catalog', label: t('nav.catalog'), href: '/dashboard' },
     ...(isAdmin ? [{ id: 'admin-catalog', label: t('nav.adminCatalog'), href: '/admin/catalog' }] : []),
-    { id: 'favorites', label: t('nav.favorites'), href: '/coming-soon' },
+    { id: 'favorites', label: t('nav.favorites'), href: '/favorites' },
     { id: 'orders', label: t('nav.orders'), href: '/orders' },
-    { id: 'rewards', label: t('nav.rewards'), href: '/coming-soon' },
+    { id: 'rewards', label: t('nav.rewards'), href: '/rewards' },
   ];
 
   return (

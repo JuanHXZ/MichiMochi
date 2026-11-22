@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
-import { Delete, LocalShipping, CardGiftcard } from '@mui/icons-material';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Delete, LocalShipping, CardGiftcard, Close, LocalOffer } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import Navbar from '@shared/components/Navbar/Navbar';
 import SideNavBar from '@shared/components/SideNavBar/SideNavBar';
 import { useCartStore } from '@modules/cart/application/stores/cartStore';
 import { useAuthStore } from '@modules/auth/application/stores/authStore';
+import { promoService } from '@modules/cart/infrastructure/services/promoService';
 import { translateProducts } from '@shared/utils/translateProduct';
 import { useCurrency } from '@modules/cart/application/hooks/useCurrency';
 import { calculateOrderSummary } from '@modules/cart/domain/orderCalculator';
@@ -17,7 +18,15 @@ export default function CartPage() {
   const { format: formatPrice } = useCurrency();
   const showToast = useToastStore((state) => state.showToast);
   const [promoCode, setPromoCode] = useState('');
-  const { items: rawItems, updateQuantity, removeItem } = useCartStore();
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const {
+    items: rawItems,
+    updateQuantity,
+    removeItem,
+    appliedPromo,
+    setAppliedPromo,
+    clearAppliedPromo,
+  } = useCartStore();
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
@@ -36,8 +45,35 @@ export default function CartPage() {
     return calculateOrderSummary(items, {
       deliveryFee: BUSINESS_CONSTANTS.DELIVERY_FEE,
       taxRate: BUSINESS_CONSTANTS.TAX_RATE,
+      discountAmount: appliedPromo?.discountAmount || 0,
     });
-  }, [items]);
+  }, [items, appliedPromo?.discountAmount]);
+
+  useEffect(() => {
+    if (!appliedPromo?.code || summary.subtotal <= 0) return;
+    let active = true;
+    promoService
+      .validatePromoCode(appliedPromo.code, summary.subtotal)
+      .then((res) => {
+        if (!active) return;
+        if (Math.abs((res.discountAmount || 0) - (appliedPromo.discountAmount || 0)) > 0.001) {
+          setAppliedPromo({
+            code: res.code,
+            discountAmount: res.discountAmount,
+            description: res.description,
+            discountType: res.discountType,
+            discountValue: res.discountValue,
+          });
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        clearAppliedPromo();
+      });
+    return () => {
+      active = false;
+    };
+  }, [summary.subtotal, appliedPromo?.code, appliedPromo?.discountAmount, setAppliedPromo, clearAppliedPromo]);
 
   const handleBack = () => {
     window.history.back();
@@ -51,11 +87,35 @@ export default function CartPage() {
     window.location.assign('/checkout');
   };
 
-  const handleApplyPromo = () => {
-    showToast({
-      message: `Applying promo code: ${promoCode}`,
-      type: 'info',
-    });
+  const handleApplyPromo = async () => {
+    const clean = promoCode.trim().toUpperCase();
+    if (!clean || isApplyingPromo) return;
+    setIsApplyingPromo(true);
+    try {
+      const res = await promoService.validatePromoCode(clean, summary.subtotal);
+      setAppliedPromo({
+        code: res.code,
+        discountAmount: res.discountAmount,
+        description: res.description,
+        discountType: res.discountType,
+        discountValue: res.discountValue,
+      });
+      setPromoCode('');
+      showToast({
+        message: t('cart.summary.promoAppliedToast', {
+          code: res.code,
+          discount: formatPrice(res.discountAmount).formatted,
+        }),
+        type: 'success',
+      });
+    } catch (err) {
+      showToast({
+        message: err.message || t('cart.summary.promoInvalid'),
+        type: 'error',
+      });
+    } finally {
+      setIsApplyingPromo(false);
+    }
   };
 
   if (items.length === 0) {
@@ -185,6 +245,17 @@ export default function CartPage() {
                   </span>
                 </div>
               )}
+
+              {appliedPromo && summary.discountAmount > 0 && (
+                <div className="cart-summary__line cart-summary__line--savings">
+                  <span className="cart-summary__label">
+                    {t('cart.summary.promoDiscount', { code: appliedPromo.code })}
+                  </span>
+                  <span className="cart-summary__value cart-summary__value--savings">
+                    −{formatPrice(summary.discountAmount).formatted}
+                  </span>
+                </div>
+              )}
               
               <div className="cart-summary__divider"></div>
               
@@ -194,28 +265,55 @@ export default function CartPage() {
               </div>
               
               {/* Promo Code */}
-              <div className="cart-summary__promo">
-                <label htmlFor="cart-promo-code" className="visually-hidden">
-                  {t('cart.summary.promoPlaceholder')}
-                </label>
-                <input
-                  id="cart-promo-code"
-                  name="promoCode"
-                  type="text"
-                  placeholder={t('cart.summary.promoPlaceholder')}
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  className="cart-summary__promo-input"
-                />
-                <button
-                  type="button"
-                  onClick={handleApplyPromo}
-                  className="cart-summary__promo-btn"
-                  disabled={!promoCode.trim()}
-                >
-                  {t('cart.summary.promoApply')}
-                </button>
-              </div>
+              {appliedPromo ? (
+                <div className="cart-summary__promo-applied" role="status">
+                  <div className="cart-summary__promo-chip">
+                    <LocalOffer fontSize="small" aria-hidden="true" />
+                    <div className="cart-summary__promo-chip-info">
+                      <strong>{appliedPromo.code}</strong>
+                      {appliedPromo.description && <span>{appliedPromo.description}</span>}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearAppliedPromo}
+                    className="cart-summary__promo-remove"
+                    aria-label={t('cart.summary.promoRemove')}
+                    title={t('cart.summary.promoRemove')}
+                  >
+                    <Close fontSize="small" aria-hidden="true" />
+                  </button>
+                </div>
+              ) : (
+                <div className="cart-summary__promo">
+                  <label htmlFor="cart-promo-code" className="visually-hidden">
+                    {t('cart.summary.promoPlaceholder')}
+                  </label>
+                  <input
+                    id="cart-promo-code"
+                    name="promoCode"
+                    type="text"
+                    placeholder={t('cart.summary.promoPlaceholder')}
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleApplyPromo();
+                      }
+                    }}
+                    className="cart-summary__promo-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    className="cart-summary__promo-btn"
+                    disabled={!promoCode.trim() || isApplyingPromo}
+                  >
+                    {isApplyingPromo ? '...' : t('cart.summary.promoApply')}
+                  </button>
+                </div>
+              )}
               
               <button 
                 type="button"
@@ -230,15 +328,17 @@ export default function CartPage() {
               </p>
             </div>
 
-            <div className="cart-rewards">
+            <a href="/rewards" className="cart-rewards cart-rewards--link">
               <CardGiftcard className="cart-rewards__icon" aria-hidden="true" />
               <div className="cart-rewards__content">
-                <h2 className="cart-rewards__title">{t('cart.rewards.title')}</h2>
+                <h2 className="cart-rewards__title">
+                  {t('cart.rewards.earnTitle', { points: Math.floor(summary.subtotal * 10) })}
+                </h2>
                 <p className="cart-rewards__text">
-                  {t('cart.rewards.text')}
+                  {t('cart.rewards.earnText')}
                 </p>
               </div>
-            </div>
+            </a>
 
             <div className="cart-delivery">
               <LocalShipping className="cart-delivery__icon" aria-hidden="true" />

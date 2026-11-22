@@ -17,6 +17,8 @@ function mapRowToOrder(row: any): Order {
     shipping: Number(row.shipping),
     tax: Number(row.tax),
     savings: Number(row.savings ?? 0),
+    ...(row.promo_code ? { promoCode: String(row.promo_code) } : {}),
+    discountAmount: Number(row.discount_amount ?? 0),
     total: Number(row.total),
     currency: row.currency === 'COP' ? 'COP' : 'USD',
     status: row.status,
@@ -36,13 +38,13 @@ export class PostgresOrderRepository implements IOrderRepository {
         `INSERT INTO orders (
           id, order_number, user_id, customer_name, customer_email,
           items, shipping_address, payment,
-          subtotal, shipping, tax, savings, total, currency,
+          subtotal, shipping, tax, savings, promo_code, discount_amount, total, currency,
           status, status_history, estimated_delivery, created_at, updated_at
         ) VALUES (
           $1, $2, $3, $4, $5,
           $6::jsonb, $7::jsonb, $8::jsonb,
-          $9, $10, $11, $12, $13, $14,
-          $15, $16::jsonb, $17, $18, $19
+          $9, $10, $11, $12, $13, $14, $15, $16,
+          $17, $18::jsonb, $19, $20, $21
         ) RETURNING *`,
         [
           order.id,
@@ -57,6 +59,8 @@ export class PostgresOrderRepository implements IOrderRepository {
           order.shipping,
           order.tax,
           order.savings,
+          order.promoCode ?? null,
+          order.discountAmount ?? 0,
           order.total,
           order.currency,
           order.status,

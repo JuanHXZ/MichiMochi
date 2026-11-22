@@ -63,7 +63,8 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.stitch-card__favorite:hover {
+.stitch-card__favorite:hover,
+.stitch-card__favorite--active {
   background: var(--primary);
   color: var(--on-primary);
 }

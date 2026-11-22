@@ -26,6 +26,7 @@ export const createOrderSchema = z.object({
   shippingAddress: shippingAddressSchema,
   payment: paymentSimulationSchema,
   currency: z.enum(['USD', 'COP']).optional().default('USD'),
+  promoCode: z.string().trim().max(40).optional(),
 });
 
 export const updateOrderStatusSchema = z.object({

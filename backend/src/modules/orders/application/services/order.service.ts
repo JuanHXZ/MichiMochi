@@ -12,6 +12,8 @@ import { Product } from '../../../catalog/domain/entities/Product.js';
 import { AccessTokenPayload } from '../../../auth/domain/entities/User.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
 import { CreateOrderDTO, UpdateOrderStatusDTO } from '../dtos/order.dto.js';
+import { PromoService } from '../../../promotions/application/services/promo.service.js';
+import { RewardService } from '../../../rewards/application/services/reward.service.js';
 
 const DELIVERY_FEE = 2.99;
 const TAX_RATE = 0.06;
@@ -113,7 +115,16 @@ export class OrderService {
         return sum;
       }, 0)
     );
-    const total = round2(subtotal + shipping + tax);
+
+    let appliedPromoCode: string | undefined;
+    let discountAmount = 0;
+    if (data.promoCode && data.promoCode.trim()) {
+      const promoResult = await PromoService.validatePromo(data.promoCode, subtotal, user.uid);
+      appliedPromoCode = promoResult.code;
+      discountAmount = promoResult.discountAmount;
+    }
+
+    const total = Math.max(0, round2(subtotal + shipping + tax - discountAmount));
 
     const now = new Date().toISOString();
 
@@ -126,6 +137,10 @@ export class OrderService {
         inStock: nextStock > 0,
         updatedAt: now,
       });
+    }
+
+    if (appliedPromoCode) {
+      await PromoService.consumePromo(appliedPromoCode, subtotal, user.uid);
     }
 
     const orderNumber = generateOrderNumber();
@@ -150,6 +165,8 @@ export class OrderService {
       shipping,
       tax,
       savings,
+      ...(appliedPromoCode ? { promoCode: appliedPromoCode } : {}),
+      discountAmount,
       total,
       currency: data.currency ?? 'USD',
       status: 'RECEIVED',
@@ -159,7 +176,14 @@ export class OrderService {
       updatedAt: now,
     };
 
-    return orderRepository.create(order);
+    const createdOrder = await orderRepository.create(order);
+    try {
+      await RewardService.earnFromOrder(user.uid, createdOrder.id, createdOrder.orderNumber, subtotal);
+    } catch (err) {
+      console.warn('[OrderService] No se pudieron acreditar puntos de recompensa:', err);
+    }
+
+    return createdOrder;
   }
 
   /**

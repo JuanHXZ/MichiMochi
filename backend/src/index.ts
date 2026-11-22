@@ -4,13 +4,16 @@ import { getPgPool } from './shared/database/postgres.js';
 import { runMigrations } from './shared/database/migrate.js';
 import { productRepository } from './modules/catalog/infrastructure/repositories/productRepository.factory.js';
 import { INITIAL_PRODUCTS } from './modules/catalog/infrastructure/repositories/initialProducts.js';
+import { promoCodeRepository } from './modules/promotions/infrastructure/repositories/promoCodeRepository.factory.js';
+import { INITIAL_PROMOTIONS } from './modules/promotions/infrastructure/repositories/initialPromotions.js';
 
 async function bootstrap(): Promise<void> {
   if (ENV.PERSISTENCE_MODE === 'postgres') {
     const pool = getPgPool();
     await runMigrations(pool);
     const inserted = (await productRepository.seedIfEmpty?.(INITIAL_PRODUCTS)) ?? 0;
-    console.log(`PostgreSQL ready (seeded initial products: ${inserted})`);
+    const insertedPromos = (await promoCodeRepository.seedIfEmpty?.(INITIAL_PROMOTIONS)) ?? 0;
+    console.log(`PostgreSQL ready (seeded initial products: ${inserted}, promos: ${insertedPromos})`);
   }
 
   const app = createApp();

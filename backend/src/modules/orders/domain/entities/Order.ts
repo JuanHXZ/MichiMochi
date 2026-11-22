@@ -83,6 +83,8 @@ export interface Order {
   shipping: number;
   tax: number;
   savings: number;
+  promoCode?: string;
+  discountAmount?: number;
   total: number;
   currency: 'USD' | 'COP';
   status: OrderStatus;

@@ -6,6 +6,7 @@ export const useCartStore = create(
   persist(
     (set, get) => ({
       items: [],
+      appliedPromo: null,
 
       addItem: (product) => {
         set((state) => {
@@ -32,7 +33,11 @@ export const useCartStore = create(
               : state.items.map((i) => (i.id === productId ? { ...i, quantity } : i)),
         })),
 
-      clearCart: () => set({ items: [] }),
+      setAppliedPromo: (promo) => set({ appliedPromo: promo }),
+
+      clearAppliedPromo: () => set({ appliedPromo: null }),
+
+      clearCart: () => set({ items: [], appliedPromo: null }),
 
       totalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
 

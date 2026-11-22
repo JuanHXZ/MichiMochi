@@ -7,6 +7,7 @@ import { productService } from '@modules/catalog/infrastructure/services/product
 import { useAuthStore } from '@/modules/auth/application/stores/authStore';
 import { useCurrency } from '@/modules/cart/application/hooks/useCurrency';
 import { useToastStore } from '@shared/stores/toastStore';
+import AdminPromotionsTab from '@modules/catalog/presentation/components/AdminPromotionsTab/AdminPromotionsTab';
 import './AdminCatalogPage.css';
 
 const DEFAULT_FORM = {
@@ -43,6 +44,7 @@ export default function AdminCatalogPage() {
   } = useProductStore();
 
   const showToast = useToastStore((state) => state.showToast);
+  const [activeTab, setActiveTab] = useState('products');
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('All');
   const [stockFilter, setStockFilter] = useState('all');
@@ -376,16 +378,45 @@ export default function AdminCatalogPage() {
               <p className="admin-catalog__subtitle">{t('admin.subtitle')}</p>
             </div>
 
+            {activeTab === 'products' && (
+              <button
+                type="button"
+                className="admin-catalog__btn-primary"
+                onClick={handleOpenCreate}
+              >
+                <span aria-hidden="true">+</span>
+                <span>{t('admin.newProduct')}</span>
+              </button>
+            )}
+          </div>
+
+          <div className="admin-tabs" role="tablist" aria-label={t('admin.title')}>
             <button
               type="button"
-              className="admin-catalog__btn-primary"
-              onClick={handleOpenCreate}
+              role="tab"
+              aria-selected={activeTab === 'products'}
+              className={`admin-tab ${activeTab === 'products' ? 'admin-tab--active' : ''}`}
+              onClick={() => setActiveTab('products')}
             >
-              <span aria-hidden="true">+</span>
-              <span>{t('admin.newProduct')}</span>
+              <span aria-hidden="true">🍡</span>
+              <span>{t('admin.tabs.products')}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'promotions'}
+              className={`admin-tab ${activeTab === 'promotions' ? 'admin-tab--active' : ''}`}
+              onClick={() => setActiveTab('promotions')}
+            >
+              <span aria-hidden="true">🎟️</span>
+              <span>{t('admin.tabs.promotions')}</span>
             </button>
           </div>
 
+          {activeTab === 'promotions' ? (
+            <AdminPromotionsTab />
+          ) : (
+            <>
           {/* Metric KPI Cards */}
           <section className="admin-catalog__kpis" aria-label="Catalog metrics">
             <div className="admin-kpi-card">
@@ -607,6 +638,8 @@ export default function AdminCatalogPage() {
               </table>
             </div>
           </section>
+            </>
+          )}
         </main>
       </div>
 

@@ -48,6 +48,7 @@ export default function CheckoutPage() {
 
   const user = useAuthStore((state) => state.user);
   const rawItems = useCartStore((state) => state.items);
+  const appliedPromo = useCartStore((state) => state.appliedPromo);
   const clearCart = useCartStore((state) => state.clearCart);
   const createOrder = useOrderStore((state) => state.createOrder);
   const isSubmitting = useOrderStore((state) => state.isSubmitting);
@@ -86,8 +87,9 @@ export default function CheckoutPage() {
       calculateOrderSummary(items, {
         deliveryFee: BUSINESS_CONSTANTS.DELIVERY_FEE,
         taxRate: BUSINESS_CONSTANTS.TAX_RATE,
+        discountAmount: appliedPromo?.discountAmount || 0,
       }),
-    [items]
+    [items, appliedPromo?.discountAmount]
   );
 
   const userName = useMemo(() => {
@@ -276,6 +278,7 @@ export default function CheckoutPage() {
         simulateOutcome,
       },
       currency,
+      ...(appliedPromo?.code ? { promoCode: appliedPromo.code } : {}),
     };
 
     setProcessingPayment(true);
@@ -713,6 +716,12 @@ export default function CheckoutPage() {
                   <div className="checkout-summary__line checkout-summary__line--savings">
                     <span>{t('cart.summary.saving')}</span>
                     <span>−{formatPrice(summary.savings).formatted}</span>
+                  </div>
+                )}
+                {appliedPromo && summary.discountAmount > 0 && (
+                  <div className="checkout-summary__line checkout-summary__line--savings">
+                    <span>{t('cart.summary.promoDiscount', { code: appliedPromo.code })}</span>
+                    <span>−{formatPrice(summary.discountAmount).formatted}</span>
                   </div>
                 )}
               </div>

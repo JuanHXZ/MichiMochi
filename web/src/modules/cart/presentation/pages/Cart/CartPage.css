@@ -354,6 +354,74 @@
   cursor: not-allowed;
 }
 
+.cart-summary__promo-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 1.25rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--card-bg));
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border-color));
+}
+
+.cart-summary__promo-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--primary);
+  min-width: 0;
+}
+
+.cart-summary__promo-chip-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cart-summary__promo-chip-info strong {
+  font-size: 0.9rem;
+  color: var(--heading-color);
+  letter-spacing: 0.03em;
+}
+
+.cart-summary__promo-chip-info span {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cart-summary__promo-remove {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-summary__promo-remove:hover {
+  color: var(--heading-color);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.cart-rewards--link {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.cart-rewards--link:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
 .cart-summary__checkout-btn {
   width: 100%;
   padding: 1rem 2rem;

@@ -1,0 +1,104 @@
+.favorites-page {
+  min-height: 100dvh;
+  background: var(--background);
+  font-family: var(--sans);
+  padding-top: 80px;
+}
+
+.favorites-page__layout {
+  display: block;
+  min-height: calc(100dvh - 80px);
+}
+
+.favorites-page__main {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  text-align: left;
+}
+
+.favorites-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.favorites-page__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--heading-color);
+}
+
+.favorites-page__subtitle {
+  margin: 0;
+  color: var(--body-text);
+  font-size: 1rem;
+}
+
+.favorites-page__count {
+  background: var(--summary-bg);
+  color: var(--primary);
+  border: 1px solid var(--border-color);
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.favorites-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.75rem;
+}
+
+.favorites-page__empty {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 1.5rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  max-width: 540px;
+  margin: 3rem auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.favorites-page__empty-icon {
+  font-size: 3.5rem !important;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.favorites-page__empty-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--heading-color);
+}
+
+.favorites-page__empty-text {
+  margin: 0 0 1.75rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.favorites-page__empty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.75rem;
+  border-radius: 9999px;
+  background: var(--primary);
+  color: var(--on-primary);
+  text-decoration: none;
+  font-weight: 700;
+  transition: background-color 0.2s ease;
+}
+
+.favorites-page__empty-btn:hover {
+  background: var(--primary-dark);
+}

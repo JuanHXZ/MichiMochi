@@ -1,8 +1,10 @@
 import React from "react";
-import { AddShoppingCart, Favorite } from "@mui/icons-material";
+import { AddShoppingCart, Favorite, FavoriteBorder } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
 import { useFormattedPrice } from '@/modules/cart/application/hooks/useCurrency';
 import { useCartStore } from '@/modules/cart/application/stores/cartStore';
+import { useFavoriteStore } from '@/modules/favorites/application/stores/favoriteStore';
+import { useToastStore } from '@/shared/stores/toastStore';
 import "./ProductCard.css";
 
 export default function ProductCard({ product, onAddToCart }) {
@@ -10,9 +12,14 @@ export default function ProductCard({ product, onAddToCart }) {
   const formattedPrice = useFormattedPrice(product?.price || 0);
   const formattedOriginalPrice = useFormattedPrice(product?.originalPrice || 0);
   const addItem = useCartStore((state) => state.addItem);
+  const showToast = useToastStore((state) => state.showToast);
+
+  const favoriteIds = useFavoriteStore((state) => state.favoriteIds);
+  const toggleFavorite = useFavoriteStore((state) => state.toggleFavorite);
 
   if (!product) return null;
 
+  const isFavorite = favoriteIds.includes(String(product.id));
   const isOutOfStock = product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0);
   const discount = Number(product.discount) || 0;
   const hasDiscount = discount > 0;
@@ -24,6 +31,22 @@ export default function ProductCard({ product, onAddToCart }) {
       onAddToCart(product);
     } else {
       addItem(product);
+    }
+  };
+
+  const handleFavoriteClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const nowFavorite = await toggleFavorite(product);
+      showToast({
+        message: nowFavorite
+          ? t('favorites.addedToast', { name: product.shortName || product.name })
+          : t('favorites.removedToast', { name: product.shortName || product.name }),
+        type: 'info',
+      });
+    } catch (err) {
+      showToast({ message: err.message || 'Error al actualizar favoritos', type: 'error' });
     }
   };
 
@@ -51,10 +74,16 @@ export default function ProductCard({ product, onAddToCart }) {
         )}
         <button
           type="button"
-          className="stitch-card__favorite"
-          aria-label={`Add ${product.shortName || product.name} to favorites`}
+          className={`stitch-card__favorite ${isFavorite ? 'stitch-card__favorite--active' : ''}`}
+          aria-pressed={isFavorite}
+          aria-label={
+            isFavorite
+              ? `Remove ${product.shortName || product.name} from favorites`
+              : `Add ${product.shortName || product.name} to favorites`
+          }
+          onClick={handleFavoriteClick}
         >
-          <Favorite aria-hidden="true" />
+          {isFavorite ? <Favorite aria-hidden="true" /> : <FavoriteBorder aria-hidden="true" />}
         </button>
       </div>
 

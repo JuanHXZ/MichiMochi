@@ -17,6 +17,50 @@
     "subtitle": "Comprehensive management of products, prices, stock and promotions",
     "newProduct": "+ New Product",
     "editProduct": "Edit Product",
+    "tabs": {
+      "products": "Products",
+      "promotions": "Promo Codes"
+    },
+    "promotions": {
+      "title": "Promo Codes & Discounts",
+      "subtitle": "Manage global campaign codes and inspect personal reward coupons.",
+      "newPromo": "New Promo Code",
+      "searchPlaceholder": "Search by code or description...",
+      "empty": "No promo codes match the current filters.",
+      "metrics": {
+        "total": "Total Coupons",
+        "active": "Active Coupons",
+        "uses": "Total Redemptions"
+      },
+      "filters": {
+        "all": "All",
+        "global": "Global",
+        "rewards": "Rewards",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "code": "Code",
+        "discount": "Discount",
+        "minSubtotal": "Min. Subtotal",
+        "uses": "Uses",
+        "active": "Status"
+      },
+      "form": {
+        "titleNew": "Create Promo Code",
+        "titleEdit": "Edit Promo Code",
+        "code": "Promo Code",
+        "description": "Display Description",
+        "discountType": "Discount Type",
+        "discountValue": "Discount Value",
+        "minSubtotal": "Minimum Subtotal ($ USD)",
+        "maxDiscount": "Max Discount Cap ($ USD, optional)",
+        "maxUses": "Max Total Uses (blank = unlimited)",
+        "expiresAt": "Expiration Date (optional)",
+        "active": "Coupon is active and redeemable",
+        "save": "Save Promo Code"
+      }
+    },
     "metrics": {
       "totalProducts": "Total Products",
       "active": "Active",
@@ -204,12 +248,18 @@
       "total": "Total",
       "promoPlaceholder": "Promo Code",
       "promoApply": "Apply",
+      "promoDiscount": "Promo ({{code}})",
+      "promoAppliedToast": "Promo code {{code}} applied (−{{discount}}).",
+      "promoInvalid": "Could not apply this promo code.",
+      "promoRemove": "Remove promo code",
       "checkout": "Proceed to Checkout →",
       "terms": "By proceeding, you agree to our Terms of Service."
     },
     "rewards": {
       "title": "You're 15 points away!",
-      "text": "Add $5.00 more to your cart to unlock a free daifuku reward."
+      "text": "Add $5.00 more to your cart to unlock a free daifuku reward.",
+      "earnTitle": "Earn +{{points}} pts with this order",
+      "earnText": "Collect 10 pts per $1 USD and redeem exclusive coupons in Rewards →"
     },
     "delivery": {
       "title": "Fast Delivery",
@@ -381,6 +431,38 @@
         "confirm": "Yes, cancel order"
       }
     }
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "subtitle": "Save your favorite mochi flavors to reorder anytime.",
+    "itemsLabel": "saved",
+    "addedToast": "{{name}} added to favorites.",
+    "removedToast": "{{name}} removed from favorites.",
+    "empty": {
+      "title": "No favorite mochis yet",
+      "text": "Tap the heart icon on any catalog item to save it here.",
+      "cta": "Browse Catalog"
+    }
+  },
+  "rewards": {
+    "eyebrow": "Loyalty Program",
+    "title": "MichiMochi Rewards",
+    "subtitle": "Earn points with every confirmed order and redeem them for personal single-use promo codes.",
+    "balanceLabel": "Available points",
+    "earnRate": "Earn 10 pts for every $1 USD spent",
+    "nextTier": "{{remaining}} pts away from {{tier}}",
+    "maxTier": "You have reached our highest artisan tier!",
+    "myCouponsTitle": "My Redeemed Coupons",
+    "copyCode": "Copy",
+    "copiedToast": "Copied {{code}}. Apply it in your cart.",
+    "catalogTitle": "Redemption Catalog",
+    "loading": "Loading your rewards...",
+    "redeemBtn": "Redeem Coupon",
+    "insufficientBtn": "Not enough points",
+    "redeemSuccess": "Redeemed! Your personal code is {{code}}",
+    "redeemError": "Could not redeem this reward.",
+    "historyTitle": "Points History",
+    "emptyHistory": "No points activity yet. Place your first order to start earning!"
   },
   "language": {
     "english": "English",

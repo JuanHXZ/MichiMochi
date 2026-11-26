@@ -64,7 +64,6 @@ export default function CheckoutPage() {
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCsc, setCardCsc] = useState('');
-  const [simulateOutcome, setSimulateOutcome] = useState('approved');
   const [processingPayment, setProcessingPayment] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
@@ -265,7 +264,7 @@ export default function CheckoutPage() {
               cardHolder: cardHolder.trim(),
             }
           : {}),
-        simulateOutcome,
+        simulateOutcome: 'approved',
       },
       currency,
       ...(appliedPromo?.code ? { promoCode: appliedPromo.code } : {}),
@@ -618,21 +617,6 @@ export default function CheckoutPage() {
                     {t(`checkout.payment.methodNotes.${paymentMethod}`)}
                   </p>
                 )}
-
-                <div className="checkout-outcome">
-                  <label htmlFor="checkout-sim-outcome" className="checkout-label">
-                    {t('checkout.payment.outcomeLabel')}
-                  </label>
-                  <select
-                    id="checkout-sim-outcome"
-                    value={simulateOutcome}
-                    onChange={(e) => setSimulateOutcome(e.target.value)}
-                    className="checkout-select"
-                  >
-                    <option value="approved">{t('checkout.payment.outcomeApproved')}</option>
-                    <option value="declined">{t('checkout.payment.outcomeDeclined')}</option>
-                  </select>
-                </div>
               </section>
 
               {submitError && (

@@ -348,7 +348,7 @@
       "address": "Delivery address",
       "addressPlaceholder": "e.g. MichiAvenida # 3 - 54",
       "city": "City",
-      "cityPlaceholder": "Michigan",
+      "cityPlaceholder": "e.g. Michigan",
       "notes": "Delivery notes (optional)",
       "notesPlaceholder": "e.g., Apartment, gate code, or landmark"
     },

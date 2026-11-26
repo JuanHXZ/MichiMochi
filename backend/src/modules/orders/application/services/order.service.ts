@@ -79,7 +79,7 @@ export class OrderService {
 
     if (data.payment.simulateOutcome === 'declined') {
       throw AppError.badRequest(
-        'Pago simulado rechazado. Intenta nuevamente con otro método o tarjeta de prueba aprobada.'
+        'Pago rechazado. Intenta nuevamente con otro método o tarjeta de prueba aprobada.'
       );
     }
 

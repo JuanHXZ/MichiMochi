@@ -231,16 +231,6 @@ export default function CheckoutPage() {
     };
   }, [paymentMethod, items.length]);
 
-  const applyTestCard = (outcome) => {
-    setPaymentMethod('card');
-    setCardHolder(fullName || 'MICHI TEST USER');
-    setCardNumber(outcome === 'approved' ? '4242 4242 4242 4242' : '4000 0000 0000 0002');
-    setCardExpiry('12/29');
-    setCardCsc(outcome === 'approved' ? '888' : '000');
-    setSimulateOutcome(outcome);
-    setSubmitError('');
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
@@ -382,6 +372,7 @@ export default function CheckoutPage() {
                       minLength={2}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
+                      placeholder={t('checkout.shipping.fullNamePlaceholder')}
                       data-error="checkout-fullname-error"
                       className="checkout-input"
                     />
@@ -403,6 +394,7 @@ export default function CheckoutPage() {
                       minLength={7}
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
+                      placeholder={t('checkout.shipping.phonePlaceholder')}
                       data-error="checkout-phone-error"
                       className="checkout-input"
                     />
@@ -415,17 +407,18 @@ export default function CheckoutPage() {
                     <label htmlFor="checkout-address" className="checkout-label">
                       {t('checkout.shipping.address')}
                     </label>
-                    <textarea
+                    <input
                       id="checkout-address"
                       name="address"
+                      type="text"
                       autoComplete="street-address"
                       required
                       minLength={5}
-                      rows={2}
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
+                      placeholder={t('checkout.shipping.addressPlaceholder')}
                       data-error="checkout-address-error"
-                      className="checkout-textarea"
+                      className="checkout-input"
                     />
                     <div id="checkout-address-error" className="checkout-error-msg">
                       <span role="img" aria-label="Error">⚠️</span> {t('checkout.errors.address')}
@@ -445,6 +438,7 @@ export default function CheckoutPage() {
                       minLength={2}
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
+                      placeholder={t('checkout.shipping.cityPlaceholder')}
                       data-error="checkout-city-error"
                       className="checkout-input"
                     />
@@ -511,23 +505,6 @@ export default function CheckoutPage() {
 
                 {paymentMethod === 'card' ? (
                   <div className="checkout-card-box">
-                    <div className="checkout-quick-fills">
-                      <button
-                        type="button"
-                        onClick={() => applyTestCard('approved')}
-                        className="checkout-chip-btn checkout-chip-btn--ok"
-                      >
-                        {t('checkout.payment.fillApproved')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyTestCard('declined')}
-                        className="checkout-chip-btn checkout-chip-btn--warn"
-                      >
-                        {t('checkout.payment.fillDeclined')}
-                      </button>
-                    </div>
-
                     <div className="checkout-form-grid">
                       <div className="checkout-field checkout-field--full">
                         <label htmlFor="cc-name" className="checkout-label">
@@ -543,6 +520,7 @@ export default function CheckoutPage() {
                           required
                           value={cardHolder}
                           onChange={(e) => setCardHolder(e.target.value)}
+                          placeholder={t('checkout.payment.cardHolderPlaceholder')}
                           data-error="cc-name-error"
                           className="checkout-input"
                         />
@@ -570,6 +548,7 @@ export default function CheckoutPage() {
                           required
                           value={cardNumber}
                           onChange={(e) => setCardNumber(formatCardNumberInput(e.target.value))}
+                          placeholder={t('checkout.payment.cardNumberPlaceholder')}
                           data-error="cc-number-error"
                           className="checkout-input"
                         />
@@ -596,6 +575,7 @@ export default function CheckoutPage() {
                           required
                           value={cardExpiry}
                           onChange={(e) => setCardExpiry(formatExpiryInput(e.target.value))}
+                          placeholder={t('checkout.payment.expiryPlaceholder')}
                           data-error="cc-exp-error"
                           className="checkout-input"
                         />
@@ -623,6 +603,7 @@ export default function CheckoutPage() {
                           required
                           value={cardCsc}
                           onChange={(e) => setCardCsc(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                          placeholder={t('checkout.payment.cscPlaceholder')}
                           data-error="cc-csc-error"
                           className="checkout-input"
                         />

@@ -39,7 +39,7 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
     },
     {
       name: 'Orders',
-      description: 'Endpoints para creación de pedidos con pago simulado, historial, cancelación y seguimiento.',
+      description: 'Endpoints para creación de pedidos con pago, historial, cancelación y seguimiento.',
     },
     {
       name: 'System',
@@ -802,7 +802,7 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
     '/api/orders': {
       post: {
         tags: ['Orders'],
-        summary: 'Crear pedido con pago simulado',
+        summary: 'Crear pedido con pago',
         description: 'Valida stock real, simula la aprobación o rechazo del pago, descuenta inventario y crea una orden en estado RECEIVED.',
         security: [{ BearerAuth: [] }],
         requestBody: {
@@ -827,7 +827,7 @@ Provee servicios unificados de autenticación con JWT, integración con Firebase
             },
           },
           '400': {
-            description: 'Pago simulado rechazado, stock insuficiente o datos inválidos.',
+            description: 'Pago rechazado, stock insuficiente o datos inválidos.',
             content: {
               'application/json': {
                 schema: {

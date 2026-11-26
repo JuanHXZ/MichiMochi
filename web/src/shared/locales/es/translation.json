@@ -324,13 +324,13 @@
   "checkout": {
     "backToCart": "Volver al carrito",
     "title": "Finalizar Compra",
-    "subtitle": "Completa tus datos de entrega y confirma el pago simulado para generar tu orden.",
-    "successToast": "¡Pedido #{{orderNumber}} creado y pago simulado aprobado!",
+    "subtitle": "Completa tus datos de entrega y confirma el pago para generar tu orden.",
+    "successToast": "¡Pedido #{{orderNumber}} creado y pago aprobado!",
     "errorGeneric": "No fue posible procesar el pedido. Intenta nuevamente.",
-    "submitting": "Procesando pago simulado...",
-    "submitBtn": "Confirmar pedido y simular pago ({{total}})",
+    "submitting": "Procesando pago...",
+    "submitBtn": "Confirmar pedido y pago ({{total}})",
     "simulationBanner": {
-      "title": "Entorno Educativo — Pasarela Simulada",
+      "title": "Entorno Educativo — Pasarela",
       "text": "No se realizará ningún cobro real ni se almacenarán datos bancarios reales. Usa las tarjetas o métodos de prueba para completar el ciclo comercial."
     },
     "empty": {
@@ -342,29 +342,37 @@
     "shipping": {
       "title": "Datos de Entrega",
       "fullName": "Nombre completo",
+      "fullNamePlaceholder": "Ej. Michacio Michicato",
       "phone": "Teléfono de contacto",
+      "phonePlaceholder": "Ej. 3000000000",
       "address": "Dirección de entrega",
+      "addressPlaceholder": "Ej. MichiAvenida # 3 - 54",
       "city": "Ciudad",
+      "cityPlaceholder": "Michigan",
       "notes": "Instrucciones adicionales (opcional)",
       "notesPlaceholder": "Ej. Portería, apartamento o referencia"
     },
     "payment": {
-      "title": "Método de Pago Simulado",
-      "methodLegend": "Selecciona un método de pago simulado",
+      "title": "Método de Pago",
+      "methodLegend": "Selecciona un método de pago",
       "methods": {
-        "card": "Tarjeta Crédito / Débito (Simulada)",
-        "nequi": "Nequi (Simulado)",
-        "pse": "PSE (Simulado)",
+        "card": "Tarjeta Crédito / Débito",
+        "nequi": "Nequi",
+        "pse": "PSE",
         "cash_on_delivery": "Pago Contra Entrega"
       },
       "fillApproved": "Autocompletar tarjeta aprobada (4242)",
       "fillDeclined": "Simular tarjeta rechazada",
       "cardHolder": "Titular de la tarjeta",
+      "cardHolderPlaceholder": "Ej. Michacio Michicato",
       "cardNumber": "Número de tarjeta (ficticio)",
+      "cardNumberPlaceholder": "Ej. 0000 0000 0000 0000",
       "cardNumberHint": "Ingresa entre 13 y 16 dígitos (puedes incluir espacios)",
       "expiry": "Fecha de vencimiento",
+      "expiryPlaceholder": "MM/AA",
       "expHint": "Formato: MM/AA",
       "csc": "Código de seguridad (CVV)",
+      "cscPlaceholder": "Ej. 000",
       "cscHint": "3 o 4 dígitos en el reverso",
       "methodNotes": {
         "nequi": "Se simulará una autorización instantánea mediante billetera Nequi sin cargo real.",
@@ -372,8 +380,8 @@
         "cash_on_delivery": "El pedido quedará confirmado para pago al momento de la entrega."
       },
       "outcomeLabel": "Resultado de la simulación",
-      "outcomeApproved": "Aprobar pago simulado",
-      "outcomeDeclined": "Simular pago rechazado (prueba de error)"
+      "outcomeApproved": "Aprobar pago",
+      "outcomeDeclined": "Pago rechazado (prueba de error)"
     },
     "errors": {
       "fullName": "Ingresa tu nombre completo (mínimo 2 caracteres).",
@@ -381,7 +389,7 @@
       "address": "Ingresa una dirección de entrega completa.",
       "city": "Ingresa la ciudad de entrega.",
       "cardHolder": "Ingresa el nombre del titular tal como figura en la tarjeta.",
-      "cardNumber": "Ingresa un número de tarjeta simulado válido (13 a 19 caracteres).",
+      "cardNumber": "Ingresa un número de tarjeta válido (13 a 19 caracteres).",
       "cardExpiry": "Usa el formato MM/AA (ej. 12/29).",
       "cardCsc": "Ingresa un código de 3 o 4 dígitos."
     },
@@ -419,7 +427,7 @@
       "filterLabel": "Filtrar pedidos por estado",
       "loading": "Cargando tus pedidos...",
       "emptyTitle": "Aún no tienes pedidos en esta categoría",
-      "emptyText": "Explora nuestro catálogo artesanal y realiza tu primer pedido simulado.",
+      "emptyText": "Explora nuestro catálogo artesanal y realiza tu primer pedido.",
       "emptyButton": "Explorar Mochis",
       "moreItems": "más",
       "trackButton": "Ver seguimiento",
@@ -441,7 +449,7 @@
       "progressAria": "Etapa {{step}} de {{total}}: {{status}}",
       "liveAnnouncement": "Estado actual del pedido: {{status}}",
       "simBadge": "Simulación Educativa · Rol Customer",
-      "simTitle": "Simulador de Seguimiento de Orden",
+      "simTitle": "Seguimiento de Orden",
       "simDesc": "Como proyecto educativo, puedes avanzar manualmente o activar la simulación automática cada 5 segundos para recorrer el ciclo completo hasta Entregado.",
       "advanceBtn": "Avanzar al siguiente estado",
       "startAutoBtn": "Simulación automática (5s)",
@@ -454,10 +462,10 @@
       "historyTitle": "Historial de Estados",
       "itemsTitle": "Productos del Pedido",
       "deliveryTitle": "Dirección de Entrega",
-      "paymentTitle": "Comprobante de Pago Simulado",
+      "paymentTitle": "Comprobante de Pago",
       "paymentMethod": "Método",
       "paymentStatus": "Estado",
-      "paymentApprovedSim": "Aprobado (Simulado)",
+      "paymentApprovedSim": "Aprobado",
       "paymentRef": "Referencia",
       "cancelDialog": {
         "title": "¿Cancelar este pedido?",

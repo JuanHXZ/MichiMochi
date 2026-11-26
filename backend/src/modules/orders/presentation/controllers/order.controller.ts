@@ -18,7 +18,7 @@ export class OrderController {
       const order = await OrderService.createOrder(req.user, req.body);
       res.status(201).json({
         ok: true,
-        message: 'Pedido creado y pago simulado aprobado exitosamente.',
+        message: 'Pedido creado y pago aprobado exitosamente.',
         data: order,
       });
     } catch (err) {

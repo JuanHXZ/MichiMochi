@@ -57,7 +57,15 @@ const Navbar = ({ userName = "User", onLogout, currentPage = "catalog" }) => {
             <MenuIcon aria-hidden="true" />
           </button>
 
-          <a href="/dashboard" className="navbar__brand-text">Michi Mochi</a>
+          <a href="/dashboard" className="navbar__brand-text" aria-label="Michi Mochi">
+            <img
+              src="/assets/navbar-logo.png"
+              alt="Michi Mochi"
+              className="navbar__brand-logo"
+              width={129}
+              height={42}
+            />
+          </a>
 
           <nav className="navbar__nav" aria-label="Primary">
             {navItems.map((item) => (

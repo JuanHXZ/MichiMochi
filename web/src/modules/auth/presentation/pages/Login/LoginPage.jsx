@@ -101,8 +101,8 @@ export default function LoginPage() {
               src="/assets/navbar-logo.png"
               alt="Michi Mochi Logo"
               className="login-logo"
-              width={52}
-              height={52}
+              width={190}
+              height={62}
               data-node-id="1:435"
             />
             <h2 className="login-form-title" data-node-id="1:437">

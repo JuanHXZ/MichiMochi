@@ -6,6 +6,7 @@ export interface IProductRepository {
   findByName(name: string): Promise<Product | null>;
   create(product: Product): Promise<Product>;
   update(id: string, product: Product): Promise<Product>;
+  clearFeatured(excludeId?: string): Promise<void>;
   delete(id: string): Promise<boolean>;
   seedIfEmpty?(products: Product[]): Promise<number>;
   resetToInitial(): void;

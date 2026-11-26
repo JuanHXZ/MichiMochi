@@ -31,11 +31,11 @@ export const useProductStore = create((set, get) => ({
       if (product) {
         const { products } = get();
         const exists = products.some((p) => String(p.id) === String(product.id));
-        if (!exists) {
-          const updated = [...products, product];
-          set({ products: updated });
-          get().applyFilters();
-        }
+        const updated = exists
+          ? products.map((p) => (String(p.id) === String(product.id) ? product : p))
+          : [...products, product];
+        set({ products: updated });
+        get().applyFilters();
       }
       return product;
     } catch (err) {
@@ -49,7 +49,10 @@ export const useProductStore = create((set, get) => ({
     try {
       const created = await productService.createProduct(productData);
       const { products } = get();
-      const updated = [created, ...products];
+      const baseProducts = created?.featured
+        ? products.map((p) => (p.featured ? { ...p, featured: false } : p))
+        : products;
+      const updated = [created, ...baseProducts];
       set({ products: updated, isLoading: false });
       get().applyFilters();
       return created;
@@ -64,9 +67,13 @@ export const useProductStore = create((set, get) => ({
     try {
       const updatedProduct = await productService.updateProduct(id, productData);
       const { products } = get();
-      const updated = products.map((p) =>
-        String(p.id) === String(id) ? { ...p, ...updatedProduct } : p
-      );
+      const isNowFeatured = Boolean(updatedProduct?.featured);
+      const updated = products.map((p) => {
+        if (String(p.id) === String(id)) {
+          return { ...p, ...updatedProduct };
+        }
+        return isNowFeatured && p.featured ? { ...p, featured: false } : p;
+      });
       set({ products: updated, isLoading: false });
       get().applyFilters();
       return updatedProduct;
@@ -126,7 +133,15 @@ export const useProductStore = create((set, get) => ({
   },
 
   getFeaturedProduct: () => {
-    return get().products.find((p) => p.featured && p.inStock !== false);
+    const featuredItems = get().products.filter((p) => p.featured && p.inStock !== false);
+    if (featuredItems.length <= 1) {
+      return featuredItems[0];
+    }
+    return [...featuredItems].sort((a, b) => {
+      const timeA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+      const timeB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+      return timeB - timeA;
+    })[0];
   },
 
   getProductById: (id) => {

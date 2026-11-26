@@ -84,6 +84,18 @@ describe('PostgreSQL Persistence Repositories (P0.2)', () => {
     ).rejects.toThrow(/PostgreSQL/i);
   });
 
+  it('should clear featured flag on all other products in PostgreSQL', async () => {
+    const queryMock = jest.fn<any>().mockResolvedValueOnce({ rowCount: 1 });
+    const repo = new PostgresProductRepository({ query: queryMock } as any);
+
+    await repo.clearFeatured('2');
+
+    expect(queryMock).toHaveBeenCalledWith(
+      'UPDATE products SET featured = FALSE WHERE featured = TRUE AND id <> $1',
+      ['2']
+    );
+  });
+
   it('should persist OTP and increment attempts atomically in PostgreSQL', async () => {
     const pool = {
       query: jest

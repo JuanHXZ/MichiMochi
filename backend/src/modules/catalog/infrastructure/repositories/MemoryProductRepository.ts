@@ -59,6 +59,14 @@ export class MemoryProductRepository implements IProductRepository {
     return product;
   }
 
+  async clearFeatured(excludeId?: string): Promise<void> {
+    for (const [id, product] of this.productsStore.entries()) {
+      if (id !== excludeId && product.featured) {
+        this.productsStore.set(id, { ...product, featured: false });
+      }
+    }
+  }
+
   async delete(id: string): Promise<boolean> {
     return this.productsStore.delete(id);
   }

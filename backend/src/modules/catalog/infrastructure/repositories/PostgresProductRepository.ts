@@ -212,6 +212,17 @@ export class PostgresProductRepository implements IProductRepository {
     return (result.rowCount ?? 0) > 0;
   }
 
+  async clearFeatured(excludeId?: string): Promise<void> {
+    if (excludeId) {
+      await this.pool.query(
+        'UPDATE products SET featured = FALSE WHERE featured = TRUE AND id <> $1',
+        [excludeId]
+      );
+      return;
+    }
+    await this.pool.query('UPDATE products SET featured = FALSE WHERE featured = TRUE');
+  }
+
   async seedIfEmpty(products: Product[]): Promise<number> {
     const countRes = await this.pool.query('SELECT COUNT(*)::int AS count FROM products');
     const count = Number(countRes.rows[0]?.count ?? 0);

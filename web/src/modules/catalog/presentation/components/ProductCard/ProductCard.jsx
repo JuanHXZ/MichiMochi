@@ -41,8 +41,8 @@ export default function ProductCard({ product, onAddToCart }) {
       const nowFavorite = await toggleFavorite(product);
       showToast({
         message: nowFavorite
-          ? t('favorites.addedToast', { name: product.shortName || product.name })
-          : t('favorites.removedToast', { name: product.shortName || product.name }),
+          ? t('favorites.addedToast', { name: product.name || product.shortName })
+          : t('favorites.removedToast', { name: product.name || product.shortName }),
         type: 'info',
       });
     } catch (err) {
@@ -78,8 +78,8 @@ export default function ProductCard({ product, onAddToCart }) {
           aria-pressed={isFavorite}
           aria-label={
             isFavorite
-              ? `Remove ${product.shortName || product.name} from favorites`
-              : `Add ${product.shortName || product.name} to favorites`
+              ? `Remove ${product.name || product.shortName} from favorites`
+              : `Add ${product.name || product.shortName} to favorites`
           }
           onClick={handleFavoriteClick}
         >
@@ -89,10 +89,10 @@ export default function ProductCard({ product, onAddToCart }) {
 
       <div className="stitch-card__body">
         <div className="stitch-card__header">
-          <div>
+          <div className="stitch-card__text">
             <h3 className="stitch-card__title">
               <a href={`/product/${product.id}`} className="stitch-card__link">
-                {product.shortName || product.name}
+                {product.name || product.shortName}
               </a>
             </h3>
             <p className="stitch-card__subtitle">{product.description}</p>

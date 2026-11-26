@@ -547,7 +547,12 @@ export default function AdminCatalogPage() {
                               }}
                             />
                             <div className="admin-product-info">
-                              <span className="admin-product-name">{prod.name}</span>
+                              <span className="admin-product-name">
+                                {prod.name}
+                                {prod.featured && (
+                                  <span className="admin-featured-badge">⭐ Hero</span>
+                                )}
+                              </span>
                               <span className="admin-product-desc">
                                 {prod.description || prod.shortName}
                               </span>

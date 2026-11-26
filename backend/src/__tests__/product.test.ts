@@ -184,6 +184,26 @@ describe('Product Catalog CRUD & RBAC API Tests', () => {
       expect(getRes.body.data.name).toBe(newProductPayload.name);
     });
 
+    it('should clear featured flag on previously featured product when creating a new featured product', async () => {
+      const res = await request(app)
+        .post('/api/products')
+        .set('Authorization', adminAuthHeader)
+        .send({
+          name: 'Yuzu Blossom Mochi',
+          description: 'Bright Japanese yuzu citrus ganache in soft mochi',
+          price: 5.0,
+          category: 'Special',
+          featured: true,
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.featured).toBe(true);
+
+      const previousFeatured = await request(app).get('/api/products/1');
+      expect(previousFeatured.status).toBe(200);
+      expect(previousFeatured.body.data.featured).toBe(false);
+    });
+
     it('should reject creation with 409 Conflict when product name already exists', async () => {
       const res = await request(app)
         .post('/api/products')
@@ -217,6 +237,49 @@ describe('Product Catalog CRUD & RBAC API Tests', () => {
       expect(res.body.data.name).toBe(updatePayload.name);
       expect(res.body.data.price).toBe(4.95);
       expect(res.body.data.stock).toBe(50);
+    });
+
+    it('should make featured exclusive when activating featured on another product', async () => {
+      const res = await request(app)
+        .put('/api/products/2')
+        .set('Authorization', adminAuthHeader)
+        .send({ featured: true });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.featured).toBe(true);
+
+      const prevRes = await request(app).get('/api/products/1');
+      expect(prevRes.status).toBe(200);
+      expect(prevRes.body.data.featured).toBe(false);
+    });
+
+    it('should persist edited name, description, and longDescription on an existing product', async () => {
+      const updatePayload = {
+        name: 'Mango Tropical Premium',
+        description: 'Mango maduro con crema fresca de coco artesanal',
+        longDescription: 'Elaborado diariamente con pulpa de mango fresco y relleno cremoso.',
+      };
+
+      const res = await request(app)
+        .put('/api/products/2')
+        .set('Authorization', adminAuthHeader)
+        .send(updatePayload);
+
+      expect(res.status).toBe(200);
+
+      const listRes = await request(app).get('/api/products');
+      expect(listRes.status).toBe(200);
+      const updatedFromList = listRes.body.data.find((p: any) => p.id === '2');
+      expect(updatedFromList).toBeDefined();
+      expect(updatedFromList.name).toBe(updatePayload.name);
+      expect(updatedFromList.description).toBe(updatePayload.description);
+      expect(updatedFromList.longDescription).toBe(updatePayload.longDescription);
+
+      const byIdRes = await request(app).get('/api/products/2');
+      expect(byIdRes.status).toBe(200);
+      expect(byIdRes.body.data.name).toBe(updatePayload.name);
+      expect(byIdRes.body.data.description).toBe(updatePayload.description);
+      expect(byIdRes.body.data.longDescription).toBe(updatePayload.longDescription);
     });
 
     it('should return 404 when attempting to update a non-existent product', async () => {

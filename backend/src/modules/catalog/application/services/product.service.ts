@@ -53,7 +53,11 @@ export class ProductService {
       updatedAt: now,
     };
 
-    return productRepository.create(newProduct);
+    const created = await productRepository.create(newProduct);
+    if (created.featured === true) {
+      await productRepository.clearFeatured(created.id);
+    }
+    return created;
   }
 
   /**
@@ -83,7 +87,11 @@ export class ProductService {
       updatedAt: new Date().toISOString(),
     };
 
-    return productRepository.update(id, updatedProduct);
+    const saved = await productRepository.update(id, updatedProduct);
+    if (data.featured === true) {
+      await productRepository.clearFeatured(id);
+    }
+    return saved;
   }
 
   /**

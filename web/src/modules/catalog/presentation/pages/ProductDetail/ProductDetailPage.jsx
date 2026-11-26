@@ -17,7 +17,6 @@ export default function ProductDetailPage() {
   const { t } = useTranslation();
   const { format: formatPrice } = useCurrency();
   const [quantity, setQuantity] = useState(1);
-  const [selectedFlavor, setSelectedFlavor] = useState(null);
   const addItem = useCartStore((state) => state.addItem);
   const user = useAuthStore((state) => state.user);
   const fetchProductById = useProductStore((state) => state.fetchProductById);
@@ -57,7 +56,6 @@ export default function ProductDetailPage() {
     const local = unique.filter((url) => !/^https?:\/\//i.test(url));
     return remote.length > 0 && local.length > 0 ? [...remote, ...local] : unique;
   }, [product]);
-  const activeFlavor = selectedFlavor ?? (product?.flavors?.[0]?.id ?? null);
   const isFavorite = product ? favoriteIds.includes(String(product.id)) : false;
   const isOutOfStock = Boolean(
     product && (product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0))
@@ -77,7 +75,7 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     if (product && !isOutOfStock) {
       for (let i = 0; i < quantity; i++) {
-        addItem({ ...product, selectedFlavor: activeFlavor });
+        addItem(product);
       }
     }
   };
@@ -218,25 +216,6 @@ export default function ProductDetailPage() {
               <p className="product-detail__description">
                 {product.longDescription || product.description}
               </p>
-
-              <div className="product-detail__flavors">
-                <h2 className="product-detail__flavors-title">{t('productDetail.selectFlavor')}</h2>
-                <div className="product-detail__flavors-list">
-                  {product.flavors?.map((flavor) => (
-                    <button
-                      type="button"
-                      key={flavor.id}
-                      onClick={() => setSelectedFlavor(flavor.id)}
-                      aria-pressed={activeFlavor === flavor.id}
-                      className={`product-detail__flavor-btn ${
-                        activeFlavor === flavor.id ? 'active' : ''
-                      }`}
-                    >
-                      {flavor.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
               <div className="product-detail__actions-row">
                 <div className="product-detail__quantity">

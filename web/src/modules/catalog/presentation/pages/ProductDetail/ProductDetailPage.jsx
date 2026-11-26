@@ -30,13 +30,33 @@ export default function ProductDetailPage() {
     return path.split('/product/')[1];
   }, []);
 
+  const [isLoadingProduct, setIsLoadingProduct] = useState(Boolean(productId));
+
   useEffect(() => {
-    if (productId) {
-      fetchProductById(productId);
-    }
+    if (!productId) return undefined;
+    let active = true;
+    fetchProductById(productId).finally(() => {
+      if (active) {
+        setIsLoadingProduct(false);
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, [productId, fetchProductById]);
 
   const product = useTranslatedProduct(productId);
+  const galleryImages = useMemo(() => {
+    if (!product) return [];
+    const unique = Array.from(
+      new Set(
+        [product.image, ...(Array.isArray(product.images) ? product.images : [])].filter(Boolean)
+      )
+    );
+    const remote = unique.filter((url) => /^https?:\/\//i.test(url));
+    const local = unique.filter((url) => !/^https?:\/\//i.test(url));
+    return remote.length > 0 && local.length > 0 ? [...remote, ...local] : unique;
+  }, [product]);
   const activeFlavor = selectedFlavor ?? (product?.flavors?.[0]?.id ?? null);
   const isFavorite = product ? favoriteIds.includes(String(product.id)) : false;
   const isOutOfStock = Boolean(
@@ -80,6 +100,18 @@ export default function ProductDetailPage() {
     }
   };
 
+  if (isLoadingProduct && !product) {
+    return (
+      <div className="product-detail">
+        <Navbar userName={userName} />
+        <div className="product-detail__layout">
+          <SideNavBar />
+          <div className="route-loading" role="status">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="product-detail">
@@ -108,8 +140,8 @@ export default function ProductDetailPage() {
             <section className="product-detail__image-section">
               <div className="product-detail__image-container">
                 <ImageCarousel
-                  key={product.id}
-                  images={product.images || [product.image]}
+                  key={`${product.id}-${galleryImages.join('|')}`}
+                  images={galleryImages}
                   productName={product.name}
                 />
                 {product.featured && !isOutOfStock && (

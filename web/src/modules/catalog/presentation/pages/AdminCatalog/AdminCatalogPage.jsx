@@ -200,10 +200,13 @@ export default function AdminCatalogPage() {
     try {
       const uploadedUrls = await productService.uploadProductImages(files);
       setFormData((prev) => {
-        const merged = Array.from(new Set([...(prev.images || []), ...uploadedUrls]));
+        const shouldPromoteUploaded = !prev.image || prev.image.startsWith('/assets/');
+        const merged = shouldPromoteUploaded
+          ? Array.from(new Set([...uploadedUrls, ...(prev.images || [])]))
+          : Array.from(new Set([...(prev.images || []), ...uploadedUrls]));
         return {
           ...prev,
-          image: prev.image || merged[0] || '',
+          image: shouldPromoteUploaded ? uploadedUrls[0] || merged[0] || '' : prev.image || merged[0] || '',
           images: merged,
         };
       });
@@ -630,7 +633,7 @@ export default function AdminCatalogPage() {
                     );
                   })}
 
-                  {filteredList.length === 0 && (
+                  {!isLoading && filteredList.length === 0 && (
                     <tr>
                       <td colSpan={6} style={{ textAlign: 'center', padding: '3rem 1rem' }}>
                         <p style={{ color: 'var(--text-secondary)', margin: 0 }}>

@@ -1,26 +1,24 @@
 import { create } from 'zustand';
-import productsData from '@/shared/data/products.json';
 import { productService } from '../../infrastructure/services/productService';
 
-const PRODUCTS_DATA = productsData.products;
-
 export const useProductStore = create((set, get) => ({
-  products: PRODUCTS_DATA,
-  filteredProducts: PRODUCTS_DATA,
+  products: [],
+  filteredProducts: [],
   selectedCategory: 'All',
   searchQuery: '',
   isLoading: false,
+  hasLoaded: false,
   error: null,
 
   fetchProducts: async (filters = {}) => {
     set({ isLoading: true, error: null });
     try {
       const data = await productService.getProducts(filters);
-      set({ products: data, isLoading: false });
+      set({ products: data, isLoading: false, hasLoaded: true });
       get().applyFilters();
       return data;
     } catch (err) {
-      set({ error: err.message, isLoading: false });
+      set({ error: err.message, isLoading: false, hasLoaded: true });
       return get().products;
     }
   },

@@ -17,6 +17,8 @@ export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const fetchProducts = useProductStore((state) => state.fetchProducts);
+  const isLoading = useProductStore((state) => state.isLoading);
+  const hasLoaded = useProductStore((state) => state.hasLoaded);
 
   const { filteredProducts } = useTranslatedProducts();
   const featuredProduct = useTranslatedFeaturedProduct();
@@ -118,7 +120,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {sortedProducts.length === 0 && (
+          {hasLoaded && !isLoading && sortedProducts.length === 0 && (
             <div className="dashboard-stitch__empty">
               <p>{t('dashboard.catalog.empty')}</p>
             </div>

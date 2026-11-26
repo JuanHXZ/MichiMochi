@@ -141,14 +141,19 @@ export default function RewardsPage() {
               <div className="rewards-catalog-grid">
                 {(summary?.catalog || []).map((item) => {
                   const canRedeem = points >= item.pointsCost && !isRedeeming;
+                  const formattedDiscount = formatPrice(item.discountUsd).formatted;
+                  const discountPricePattern = /\$[\d.,]+(?:\s*(?:COP|USD))*/i;
+                  const displayTitle = String(item.title || '').replace(discountPricePattern, formattedDiscount);
+                  const displayDescription = String(item.description || '').replace(discountPricePattern, formattedDiscount);
+
                   return (
                     <article key={item.id} className="reward-tier-card">
                       <span className="reward-tier-card__cost">{item.pointsCost} pts</span>
-                      <h3 className="reward-tier-card__title">{item.title}</h3>
-                      <p className="reward-tier-card__desc">{item.description}</p>
+                      <h3 className="reward-tier-card__title">{displayTitle}</h3>
+                      <p className="reward-tier-card__desc">{displayDescription}</p>
                       <div className="reward-tier-card__footer">
                         <span className="reward-tier-card__value">
-                          {formatPrice(item.discountUsd).formatted}
+                          {formattedDiscount}
                         </span>
                         <button
                           type="button"

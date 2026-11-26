@@ -2,6 +2,7 @@
 import { Close, LightMode, DarkMode } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
 import { useProductStore } from '@modules/catalog/application/stores/productStore';
+import { useCategoryStore } from '@modules/catalog/application/stores/categoryStore';
 import { useSidebarStore } from '@shared/stores/sidebarStore';
 import { useThemeStore } from '@shared/stores/themeStore';
 import LanguageToggle from '../LanguageToggle/LanguageToggle';
@@ -11,6 +12,9 @@ import "./SideNavBar.css";
 export default function SideNavBar() {
   const { t } = useTranslation();
   const { selectedCategory, setCategory } = useProductStore();
+  const categories = useCategoryStore((state) => state.categories);
+  const hasLoadedCategories = useCategoryStore((state) => state.hasLoaded);
+  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
   const { isOpen, closeSidebar } = useSidebarStore();
   const { theme, toggleTheme } = useThemeStore();
 
@@ -19,12 +23,21 @@ export default function SideNavBar() {
   const sheetRef = useRef(null);
   const closeTimeoutRef = useRef(null);
 
+  useEffect(() => {
+    if (!hasLoadedCategories) {
+      fetchCategories({ visible: true });
+    }
+  }, [hasLoadedCategories, fetchCategories]);
+
   const CATEGORIES = [
-    { id: "All", labelKey: "sidebar.categories.all", icon: "🍰", isComingSoon: false },
-    { id: "Strawberry", labelKey: "sidebar.categories.daifuku", icon: "🍡", isComingSoon: true },
-    { id: "Chocolate", labelKey: "sidebar.categories.iceCream", icon: "🍨", isComingSoon: true },
-    { id: "Matcha", labelKey: "sidebar.categories.beverages", icon: "☕", isComingSoon: true },
-    { id: "Special", labelKey: "sidebar.categories.seasonal", icon: "🌸", isComingSoon: true },
+    { id: "All", label: t("sidebar.categories.all"), icon: "🍰" },
+    ...categories
+      .filter((c) => c.visible !== false)
+      .map((c) => ({
+        id: c.name,
+        label: c.name,
+        icon: c.icon || "🍡",
+      })),
   ];
 
   const finalizeClose = useCallback(() => {
@@ -155,16 +168,12 @@ export default function SideNavBar() {
     };
   }, [finalizeClose]);
 
-  const handleCategoryClick = (categoryId, isComingSoon) => {
+  const handleCategoryClick = (categoryId) => {
     finalizeClose();
-    if (isComingSoon) {
-      window.location.assign('/coming-soon');
-    } else {
-      setCategory(categoryId);
+    setCategory(categoryId);
 
-      if (window.location.pathname !== '/dashboard') {
-        window.location.assign('/dashboard');
-      }
+    if (window.location.pathname !== '/dashboard') {
+      window.location.assign('/dashboard');
     }
   };
 
@@ -211,12 +220,12 @@ export default function SideNavBar() {
                 type="button"
                 key={category.id}
                 className={`sidenav__link ${
-                  selectedCategory === category.id ? "sidenav__link--active" : ""
+                  selectedCategory.toLowerCase() === category.id.toLowerCase() ? "sidenav__link--active" : ""
                 }`}
-                onClick={() => handleCategoryClick(category.id, category.isComingSoon)}
+                onClick={() => handleCategoryClick(category.id)}
               >
                 <span className="sidenav__icon" aria-hidden="true">{category.icon}</span>
-                <span>{t(category.labelKey)}</span>
+                <span>{category.label}</span>
               </button>
             ))}
           </nav>

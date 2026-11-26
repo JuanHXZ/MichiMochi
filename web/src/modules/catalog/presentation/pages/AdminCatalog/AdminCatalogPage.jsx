@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '@shared/components/Navbar/Navbar';
 import SideNavBar from '@shared/components/SideNavBar/SideNavBar';
 import { useProductStore } from '@modules/catalog/application/stores/productStore';
+import { useCategoryStore } from '@modules/catalog/application/stores/categoryStore';
 import { productService } from '@modules/catalog/infrastructure/services/productService';
 import { useAuthStore } from '@/modules/auth/application/stores/authStore';
 import { useCurrency } from '@/modules/cart/application/hooks/useCurrency';
 import { useToastStore } from '@shared/stores/toastStore';
 import AdminPromotionsTab from '@modules/catalog/presentation/components/AdminPromotionsTab/AdminPromotionsTab';
+import AdminCategoriesTab from '@modules/catalog/presentation/components/AdminCategoriesTab/AdminCategoriesTab';
 import './AdminCatalogPage.css';
 
 const DEFAULT_FORM = {
@@ -42,6 +44,8 @@ export default function AdminCatalogPage() {
     deleteProduct,
     isLoading,
   } = useProductStore();
+  const categories = useCategoryStore((state) => state.categories);
+  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
 
   const showToast = useToastStore((state) => state.showToast);
   const [activeTab, setActiveTab] = useState('products');
@@ -76,11 +80,12 @@ export default function AdminCatalogPage() {
         return;
       }
       fetchProducts();
+      fetchCategories();
     })();
     return () => {
       active = false;
     };
-  }, [fetchProducts, hydrateSession]);
+  }, [fetchProducts, fetchCategories, hydrateSession]);
 
   // Safari fallback for closedby="any"
   useEffect(() => {
@@ -119,7 +124,35 @@ export default function AdminCatalogPage() {
     String(user?.email || '').split('@')[0] ||
     'Admin';
 
-  const CATEGORIES = ['All', 'Strawberry', 'Mango', 'Matcha', 'Chocolate', 'Special'];
+  const CATEGORIES = useMemo(() => {
+    const names = categories.length > 0
+      ? categories.map((c) => c.name)
+      : ['Strawberry', 'Mango', 'Matcha', 'Chocolate', 'Special'];
+    return ['All', ...names];
+  }, [categories]);
+
+  const productFormCategories = useMemo(() => {
+    const visible = categories.filter((c) => c.visible !== false);
+    const list = visible.length > 0
+      ? visible
+      : categories.length > 0
+      ? categories
+      : [
+          { id: 'cat_strawberry', name: 'Strawberry' },
+          { id: 'cat_mango', name: 'Mango' },
+          { id: 'cat_matcha', name: 'Matcha' },
+          { id: 'cat_chocolate', name: 'Chocolate' },
+          { id: 'cat_special', name: 'Special' },
+        ];
+
+    if (
+      formData.category &&
+      !list.some((c) => c.name.toLowerCase() === formData.category.toLowerCase())
+    ) {
+      return [...list, { id: `current-${formData.category}`, name: formData.category }];
+    }
+    return list;
+  }, [categories, formData.category]);
 
   // Metrics
   const totalCount = products.length;
@@ -407,6 +440,16 @@ export default function AdminCatalogPage() {
             <button
               type="button"
               role="tab"
+              aria-selected={activeTab === 'categories'}
+              className={`admin-tab ${activeTab === 'categories' ? 'admin-tab--active' : ''}`}
+              onClick={() => setActiveTab('categories')}
+            >
+              <span aria-hidden="true">🏷️</span>
+              <span>{t('admin.tabs.categories')}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
               aria-selected={activeTab === 'promotions'}
               className={`admin-tab ${activeTab === 'promotions' ? 'admin-tab--active' : ''}`}
               onClick={() => setActiveTab('promotions')}
@@ -416,7 +459,9 @@ export default function AdminCatalogPage() {
             </button>
           </div>
 
-          {activeTab === 'promotions' ? (
+          {activeTab === 'categories' ? (
+            <AdminCategoriesTab />
+          ) : activeTab === 'promotions' ? (
             <AdminPromotionsTab />
           ) : (
             <>
@@ -711,11 +756,11 @@ export default function AdminCatalogPage() {
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               >
-                <option value="Strawberry">Strawberry</option>
-                <option value="Mango">Mango</option>
-                <option value="Matcha">Matcha</option>
-                <option value="Chocolate">Chocolate</option>
-                <option value="Special">Special / Seasonal</option>
+                {productFormCategories.map((cat) => (
+                  <option key={cat.id || cat.name} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

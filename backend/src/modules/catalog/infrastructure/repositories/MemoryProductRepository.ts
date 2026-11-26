@@ -67,6 +67,29 @@ export class MemoryProductRepository implements IProductRepository {
     }
   }
 
+  async countByCategory(categoryName: string): Promise<number> {
+    const normalized = categoryName.trim().toLowerCase();
+    let count = 0;
+    for (const product of this.productsStore.values()) {
+      if (product.category.trim().toLowerCase() === normalized) {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
+  async renameCategory(oldName: string, newName: string): Promise<number> {
+    const normalizedOld = oldName.trim().toLowerCase();
+    let updated = 0;
+    for (const [id, product] of this.productsStore.entries()) {
+      if (product.category.trim().toLowerCase() === normalizedOld) {
+        this.productsStore.set(id, { ...product, category: newName, updatedAt: new Date().toISOString() });
+        updated += 1;
+      }
+    }
+    return updated;
+  }
+
   async delete(id: string): Promise<boolean> {
     return this.productsStore.delete(id);
   }

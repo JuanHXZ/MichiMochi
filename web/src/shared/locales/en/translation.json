@@ -19,7 +19,41 @@
     "editProduct": "Edit Product",
     "tabs": {
       "products": "Products",
+      "categories": "Categories",
       "promotions": "Promo Codes"
+    },
+    "categories": {
+      "title": "Catalog Categories",
+      "subtitle": "Create, edit, hide, or delete categories available for products and catalog filters.",
+      "newCategory": "New Category",
+      "searchPlaceholder": "Search by name or description...",
+      "empty": "No categories match the current filters.",
+      "deleteConfirm": "Are you sure you want to permanently delete the category \"{{name}}\"?",
+      "metrics": {
+        "total": "Total Categories",
+        "visible": "Visible in Catalog",
+        "hidden": "Hidden"
+      },
+      "filters": {
+        "all": "All",
+        "visible": "Visible",
+        "hidden": "Hidden"
+      },
+      "table": {
+        "category": "Category",
+        "products": "Products",
+        "order": "Order"
+      },
+      "form": {
+        "titleNew": "Create New Category",
+        "titleEdit": "Edit Category",
+        "name": "Category Name",
+        "icon": "Icon (Emoji)",
+        "order": "Display Order",
+        "description": "Description",
+        "visible": "Visible in catalog and filters (/dashboard)",
+        "save": "Save Category"
+      }
     },
     "promotions": {
       "title": "Promo Codes & Discounts",
@@ -143,6 +177,7 @@
       "empty": "No mochis found with your criteria"
     },
     "filters": {
+      "allCategories": "All",
       "popular": "Popular",
       "newest": "Newest",
       "price": "Price"

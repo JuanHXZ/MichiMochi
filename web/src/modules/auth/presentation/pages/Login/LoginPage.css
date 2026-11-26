@@ -17,6 +17,34 @@
   color: var(--on-surface);
 }
 
+.login-top-actions {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.login-theme-btn {
+  padding: 0.5rem;
+  color: var(--body-text);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.login-theme-btn:hover {
+  background: var(--summary-bg);
+}
+
 /* Container Tarjeta Principal */
 .login-card-container {
   width: 100%;
@@ -169,7 +197,7 @@
   max-width: 100%;
   height: auto;
   object-fit: contain;
-  margin-bottom: 20px;
+  margin: 0 auto 20px;
   display: block;
 }
 

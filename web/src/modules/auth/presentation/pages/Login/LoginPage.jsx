@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { FaLock, FaEye, FaEyeSlash, FaHeart, FaStar, FaCookieBite } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
+import { DarkMode, LightMode } from '@mui/icons-material';
+import { useThemeStore } from '@shared/stores/themeStore';
+import LanguageToggle from '@shared/components/LanguageToggle/LanguageToggle';
 import { useAuth } from '../../../application/hooks/useAuth';
 import { validateLoginForm } from '../../../domain/authValidation';
 import './LoginPage.css';
@@ -14,6 +17,7 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
 
   const { login, signInWithGoogle, loading, error: authError } = useAuth();
+  const { theme, toggleTheme } = useThemeStore();
 
   const handleFieldChange = (field) => (event) => {
     const nextValue = event.target.value;
@@ -57,6 +61,19 @@ export default function LoginPage() {
 
   return (
     <div className="login-page-container" data-node-id="1:408">
+      <div className="login-top-actions">
+        <button
+          type="button"
+          className="login-theme-btn"
+          onClick={toggleTheme}
+          aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+        >
+          {theme === 'light' ? <DarkMode aria-hidden="true" /> : <LightMode aria-hidden="true" />}
+        </button>
+        <LanguageToggle variant="navbar" />
+      </div>
+
       <main id="main-content" className="login-card-container" data-node-id="1:409">
         {/* Lado Izquierdo: Branding & Visual */}
         <section className="login-visual-section" data-node-id="1:410">

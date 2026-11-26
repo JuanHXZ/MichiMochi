@@ -207,6 +207,7 @@
 
 .reward-tier-card__cost {
   display: inline-block;
+  align-self: center;
   width: fit-content;
   background: var(--summary-bg);
   color: var(--primary);

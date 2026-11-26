@@ -365,7 +365,7 @@
       "fillDeclined": "Simular tarjeta rechazada",
       "cardHolder": "Titular de la tarjeta",
       "cardHolderPlaceholder": "Ej. Michacio Michicato",
-      "cardNumber": "Número de tarjeta (ficticio)",
+      "cardNumber": "Número de tarjeta",
       "cardNumberPlaceholder": "Ej. 0000 0000 0000 0000",
       "cardNumberHint": "Ingresa entre 13 y 16 dígitos (puedes incluir espacios)",
       "expiry": "Fecha de vencimiento",

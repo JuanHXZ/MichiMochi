@@ -62,6 +62,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [cardHolder, setCardHolder] = useState(user?.fullName || '');
   const [cardNumber, setCardNumber] = useState('');
+  const [isCardNumberMasked, setIsCardNumberMasked] = useState(false);
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCsc, setCardCsc] = useState('');
   const [processingPayment, setProcessingPayment] = useState(false);
@@ -538,7 +539,7 @@ export default function CheckoutPage() {
                         <input
                           id="cc-number"
                           name="cc-number"
-                          type="text"
+                          type={isCardNumberMasked ? 'password' : 'text'}
                           inputMode="numeric"
                           autoComplete="cc-number"
                           maxLength={19}
@@ -547,6 +548,12 @@ export default function CheckoutPage() {
                           required
                           value={cardNumber}
                           onChange={(e) => setCardNumber(formatCardNumberInput(e.target.value))}
+                          onFocus={() => setIsCardNumberMasked(false)}
+                          onBlur={() => {
+                            if (cardNumber.replace(/\D/g, '').length >= 13) {
+                              setIsCardNumberMasked(true);
+                            }
+                          }}
                           placeholder={t('checkout.payment.cardNumberPlaceholder')}
                           data-error="cc-number-error"
                           className="checkout-input"

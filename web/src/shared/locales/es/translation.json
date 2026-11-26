@@ -375,13 +375,13 @@
       "cscPlaceholder": "Ej. 000",
       "cscHint": "3 o 4 dígitos en el reverso",
       "methodNotes": {
-        "nequi": "Se simulará una autorización instantánea mediante billetera Nequi sin cargo real.",
-        "pse": "Se simulará la confirmación bancaria vía débito PSE en ambiente académico.",
+        "nequi": "Se enviará a tu aplicación de Nequi una autorización para finalizar la compra del producto.",
+        "pse": "Se redirigirá a la platafomra de PSE para finalizar la compra del producto.",
         "cash_on_delivery": "El pedido quedará confirmado para pago al momento de la entrega."
       },
-      "outcomeLabel": "Resultado de la simulación",
+      "outcomeLabel": "Resultado",
       "outcomeApproved": "Aprobar pago",
-      "outcomeDeclined": "Pago rechazado (prueba de error)"
+      "outcomeDeclined": "Pago rechazado"
     },
     "errors": {
       "fullName": "Ingresa tu nombre completo (mínimo 2 caracteres).",

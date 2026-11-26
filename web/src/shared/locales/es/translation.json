@@ -15,7 +15,7 @@
   "admin": {
     "title": "Gestión de Catálogo",
     "subtitle": "Administración integral de productos, precios, stock y promociones",
-    "newProduct": "+ Nuevo Producto",
+    "newProduct": "Nuevo Producto",
     "editProduct": "Editar Producto",
     "tabs": {
       "products": "Productos",

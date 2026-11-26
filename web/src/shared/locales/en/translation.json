@@ -15,7 +15,7 @@
   "admin": {
     "title": "Catalog Management",
     "subtitle": "Comprehensive management of products, prices, stock and promotions",
-    "newProduct": "+ New Product",
+    "newProduct": "New Product",
     "editProduct": "Edit Product",
     "tabs": {
       "products": "Products",

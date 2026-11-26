@@ -91,7 +91,11 @@ export default function ProductCard({ product, onAddToCart }) {
         <div className="stitch-card__header">
           <div className="stitch-card__text">
             <h3 className="stitch-card__title">
-              <a href={`/product/${product.id}`} className="stitch-card__link">
+              <a
+                href={`/product/${product.id}`}
+                className="stitch-card__link"
+                title={product.name || product.shortName}
+              >
                 {product.name || product.shortName}
               </a>
             </h3>

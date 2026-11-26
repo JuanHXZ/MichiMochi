@@ -17,6 +17,7 @@ import { OrderSummaryCard } from '@/components/cart/OrderSummaryCard';
 import { CheckoutActionButton } from '@/components/cart/CheckoutActionButton';
 import { BottomNavBar, TabType } from '@/components/shared/BottomNavBar';
 
+// Datos iniciales de prueba (mock) para simular los productos dentro del carrito
 const INITIAL_CART_ITEMS: CartItem[] = [
   {
     id: '1',
@@ -38,18 +39,38 @@ const INITIAL_CART_ITEMS: CartItem[] = [
   },
 ];
 
+/**
+ * Pantalla principal del Carrito de Compras (CartScreen).
+ * Permite visualizar los productos agregados, modificar cantidades,
+ * eliminar artículos, ver el resumen de costos y proceder al pago.
+ */
 export default function CartScreen() {
+  // Hook de navegación de Expo Router para cambiar de pantalla
   const router = useRouter();
+
+  // --- ESTADOS LOCALES ---
+  // cartItems: Almacena la lista de productos actualmente en el carrito
   const [cartItems, setCartItems] = useState<CartItem[]>(INITIAL_CART_ITEMS);
+  // activeTab: Controla qué pestaña de la barra de navegación inferior está seleccionada
   const [activeTab, setActiveTab] = useState<TabType>('cart');
 
-  const deliveryFee = 2.0;
+  // --- CÁLCULOS DE TOTALES ---
+  const deliveryFee = 2.0; // Tarifa fija de envío
+
+  // Subtotal: Suma el precio por la cantidad de cada producto en la cesta
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  // Total: Subtotal + Envío (si el carrito está vacío, el total es 0)
   const total = cartItems.length > 0 ? subtotal + deliveryFee : 0;
 
+  // --- MANEJADORES DE EVENTOS (HANDLERS) ---
+
+  /**
+   * Incrementa en 1 la cantidad del producto especificado por su ID.
+   */
   const handleIncrement = (id: string) => {
     setCartItems((prev) =>
       prev.map((item) =>
@@ -58,6 +79,9 @@ export default function CartScreen() {
     );
   };
 
+  /**
+   * Disminuye en 1 la cantidad del producto (con un mínimo de 1).
+   */
   const handleDecrement = (id: string) => {
     setCartItems((prev) =>
       prev.map((item) =>
@@ -68,10 +92,16 @@ export default function CartScreen() {
     );
   };
 
+  /**
+   * Elimina un producto de la lista del carrito según su ID.
+   */
   const handleRemove = (id: string) => {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  /**
+   * Valida que la cesta no esté vacía e inicia el flujo de checkout.
+   */
   const handleCheckout = () => {
     if (cartItems.length === 0) {
       Alert.alert('Cesta vacía', 'Agrega algún mochi a tu cesta antes de pagar.');
@@ -83,6 +113,10 @@ export default function CartScreen() {
     );
   };
 
+  /**
+   * Maneja el cambio de pestaña en la barra inferior (BottomNavBar).
+   * Redirecciona al Dashboard si se presiona "home".
+   */
   const handleTabPress = (tab: TabType) => {
     setActiveTab(tab);
     if (tab === 'home') {
@@ -91,19 +125,24 @@ export default function CartScreen() {
   };
 
   return (
+    // SafeAreaView: Asegura que el contenido respete los bordes de la pantalla (notch, status bar, etc.)
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={ThemeTokens.colors.background} />
 
+      {/* Barra superior con botón para retroceder */}
       <BasketHeaderBar
         onBackPress={() => router.back()}
       />
 
+      {/* Contenedor scrolleable con los productos y el resumen de compra */}
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Título y subtítulo de la pantalla de cesta */}
         <BasketHeadline />
 
+        {/* Renderizado condicional: Lista de productos si hay items, o mensaje de cesta vacía */}
         {cartItems.length > 0 ? (
           cartItems.map((item) => (
             <CartItemCard
@@ -123,6 +162,7 @@ export default function CartScreen() {
           </View>
         )}
 
+        {/* Resumen del pedido y botón de checkout (solo visibles si hay productos) */}
         {cartItems.length > 0 && (
           <>
             <OrderSummaryCard
@@ -140,11 +180,13 @@ export default function CartScreen() {
         )}
       </ScrollView>
 
+      {/* Barra de navegación inferior compartida */}
       <BottomNavBar activeTab={activeTab} onTabPress={handleTabPress} />
     </SafeAreaView>
   );
 }
 
+// --- ESTILOS VISUALES ---
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

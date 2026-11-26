@@ -5,6 +5,7 @@ import { ENV } from './shared/config/env.js';
 import { openApiSpec } from './shared/docs/openapi.js';
 import authRoutes from './modules/auth/presentation/routes/auth.routes.js';
 import productRoutes from './modules/catalog/presentation/routes/product.routes.js';
+import categoryRoutes from './modules/catalog/presentation/routes/category.routes.js';
 import orderRoutes from './modules/orders/presentation/routes/order.routes.js';
 import favoriteRoutes from './modules/favorites/presentation/routes/favorite.routes.js';
 import promoRoutes from './modules/promotions/presentation/routes/promo.routes.js';
@@ -71,6 +72,7 @@ export const createApp = (): Express => {
 
   app.use('/api/auth', authRoutes);
   app.use('/api/products', productRoutes);
+  app.use('/api/categories', categoryRoutes);
   app.use('/api/orders', orderRoutes);
   app.use('/api/favorites', favoriteRoutes);
   app.use('/api/promotions', promoRoutes);

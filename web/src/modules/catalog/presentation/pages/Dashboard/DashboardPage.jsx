@@ -7,6 +7,7 @@ import ProductCard from "../../components/ProductCard/ProductCard";
 import { useCartStore } from "@/modules/cart/application/stores/cartStore";
 import { useAuthStore } from "@/modules/auth/application/stores/authStore";
 import { useProductStore } from "../../../application/stores/productStore";
+import { useCategoryStore } from "../../../application/stores/categoryStore";
 import { useTranslatedProducts, useTranslatedFeaturedProduct } from "../../../application/hooks/useTranslatedProducts";
 import "./DashboardPage.css";
 
@@ -17,15 +18,35 @@ export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const fetchProducts = useProductStore((state) => state.fetchProducts);
+  const selectedCategory = useProductStore((state) => state.selectedCategory);
+  const setCategory = useProductStore((state) => state.setCategory);
   const isLoading = useProductStore((state) => state.isLoading);
   const hasLoaded = useProductStore((state) => state.hasLoaded);
+  const categories = useCategoryStore((state) => state.categories);
+  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
 
   const { filteredProducts } = useTranslatedProducts();
   const featuredProduct = useTranslatedFeaturedProduct();
 
   useEffect(() => {
     fetchProducts({ inStock: true });
-  }, [fetchProducts]);
+    fetchCategories({ visible: true });
+  }, [fetchProducts, fetchCategories]);
+
+  const visibleCategories = useMemo(
+    () => categories.filter((c) => c.visible !== false),
+    [categories]
+  );
+
+  useEffect(() => {
+    if (selectedCategory === "All" || visibleCategories.length === 0) return;
+    const stillVisible = visibleCategories.some(
+      (c) => c.name.toLowerCase() === selectedCategory.toLowerCase()
+    );
+    if (!stillVisible) {
+      setCategory("All");
+    }
+  }, [selectedCategory, visibleCategories, setCategory]);
 
   const SORT_OPTIONS = [
     { id: "Popular", label: t('dashboard.filters.popular') },
@@ -109,6 +130,41 @@ export default function DashboardPage() {
               ))}
             </div>
           </section>
+
+          {visibleCategories.length > 0 && (
+            <div
+              className="dashboard-stitch__category-pills"
+              role="group"
+              aria-label={t('sidebar.title')}
+            >
+              <button
+                type="button"
+                aria-pressed={selectedCategory === "All"}
+                className={`dashboard-stitch__pill ${
+                  selectedCategory === "All" ? "dashboard-stitch__pill--active" : ""
+                }`}
+                onClick={() => setCategory("All")}
+              >
+                {t('dashboard.filters.allCategories')}
+              </button>
+              {visibleCategories.map((cat) => {
+                const isActive = selectedCategory.toLowerCase() === cat.name.toLowerCase();
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    aria-pressed={isActive}
+                    className={`dashboard-stitch__pill ${
+                      isActive ? "dashboard-stitch__pill--active" : ""
+                    }`}
+                    onClick={() => setCategory(cat.name)}
+                  >
+                    {cat.icon ? `${cat.icon} ` : ""}{cat.name}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           <div className="dashboard-stitch__grid">
             {sortedProducts.map((product) => (

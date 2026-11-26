@@ -47,6 +47,13 @@
   flex-shrink: 0;
 }
 
+.dashboard-stitch__category-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
 .dashboard-stitch__pill {
   padding: 0.5rem 1.5rem;
   border-radius: 9999px;

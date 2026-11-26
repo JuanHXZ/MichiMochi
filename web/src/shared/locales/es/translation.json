@@ -19,7 +19,41 @@
     "editProduct": "Editar Producto",
     "tabs": {
       "products": "Productos",
+      "categories": "Categorías",
       "promotions": "Cupones y Promociones"
+    },
+    "categories": {
+      "title": "Categorías del Catálogo",
+      "subtitle": "Crea, edita, oculta o elimina las categorías disponibles para productos y filtros del catálogo.",
+      "newCategory": "Nueva Categoría",
+      "searchPlaceholder": "Buscar por nombre o descripción...",
+      "empty": "No se encontraron categorías con esos filtros.",
+      "deleteConfirm": "¿Estás seguro de que deseas eliminar permanentemente la categoría \"{{name}}\"?",
+      "metrics": {
+        "total": "Total Categorías",
+        "visible": "Visibles en Catálogo",
+        "hidden": "Ocultas"
+      },
+      "filters": {
+        "all": "Todas",
+        "visible": "Visibles",
+        "hidden": "Ocultas"
+      },
+      "table": {
+        "category": "Categoría",
+        "products": "Productos",
+        "order": "Orden"
+      },
+      "form": {
+        "titleNew": "Crear Nueva Categoría",
+        "titleEdit": "Editar Categoría",
+        "name": "Nombre de la Categoría",
+        "icon": "Ícono (Emoji)",
+        "order": "Orden de visualización",
+        "description": "Descripción",
+        "visible": "Visible en el catálogo y filtros (/dashboard)",
+        "save": "Guardar Categoría"
+      }
     },
     "promotions": {
       "title": "Cupones y Promociones",
@@ -143,6 +177,7 @@
       "empty": "No se encontraron mochis con tus criterios"
     },
     "filters": {
+      "allCategories": "Todas",
       "popular": "Popular",
       "newest": "Más Recientes",
       "price": "Precio"

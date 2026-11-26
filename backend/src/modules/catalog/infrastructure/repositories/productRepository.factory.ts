@@ -22,6 +22,12 @@ export const productRepository: IProductRepository = {
   create: (product) => activeProductRepository.create(product),
   update: (id, product) => activeProductRepository.update(id, product),
   clearFeatured: (excludeId) => activeProductRepository.clearFeatured(excludeId),
+  countByCategory: (categoryName) =>
+    activeProductRepository.countByCategory ? activeProductRepository.countByCategory(categoryName) : Promise.resolve(0),
+  renameCategory: (oldName, newName) =>
+    activeProductRepository.renameCategory
+      ? activeProductRepository.renameCategory(oldName, newName)
+      : Promise.resolve(0),
   delete: (id) => activeProductRepository.delete(id),
   seedIfEmpty: (products) =>
     activeProductRepository.seedIfEmpty ? activeProductRepository.seedIfEmpty(products) : Promise.resolve(0),

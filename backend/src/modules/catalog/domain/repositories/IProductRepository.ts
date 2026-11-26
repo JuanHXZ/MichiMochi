@@ -7,6 +7,8 @@ export interface IProductRepository {
   create(product: Product): Promise<Product>;
   update(id: string, product: Product): Promise<Product>;
   clearFeatured(excludeId?: string): Promise<void>;
+  countByCategory?(categoryName: string): Promise<number>;
+  renameCategory?(oldName: string, newName: string): Promise<number>;
   delete(id: string): Promise<boolean>;
   seedIfEmpty?(products: Product[]): Promise<number>;
   resetToInitial(): void;

@@ -223,6 +223,22 @@ export class PostgresProductRepository implements IProductRepository {
     await this.pool.query('UPDATE products SET featured = FALSE WHERE featured = TRUE');
   }
 
+  async countByCategory(categoryName: string): Promise<number> {
+    const result = await this.pool.query(
+      'SELECT COUNT(*)::int AS count FROM products WHERE LOWER(TRIM(category)) = $1',
+      [categoryName.trim().toLowerCase()]
+    );
+    return Number(result.rows[0]?.count ?? 0);
+  }
+
+  async renameCategory(oldName: string, newName: string): Promise<number> {
+    const result = await this.pool.query(
+      'UPDATE products SET category = $2, updated_at = NOW() WHERE LOWER(TRIM(category)) = $1',
+      [oldName.trim().toLowerCase(), newName]
+    );
+    return result.rowCount ?? 0;
+  }
+
   async seedIfEmpty(products: Product[]): Promise<number> {
     const countRes = await this.pool.query('SELECT COUNT(*)::int AS count FROM products');
     const count = Number(countRes.rows[0]?.count ?? 0);

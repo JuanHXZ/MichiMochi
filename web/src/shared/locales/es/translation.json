@@ -95,7 +95,7 @@
       "name": "Nombre del Producto",
       "shortName": "Nombre Corto",
       "category": "Categoría",
-      "price": "Precio Base ($ USD)",
+      "price": "Precio Base ($ COP)",
       "discount": "Descuento (%)",
       "stock": "Unidades en Inventario",
       "description": "Descripción Corta",
@@ -257,9 +257,9 @@
     },
     "rewards": {
       "title": "¡Estás a 15 puntos!",
-      "text": "Agrega $5.00 más a tu carrito para desbloquear un daifuku gratis.",
+      "text": "Agrega $15.000 más a tu carrito para desbloquear un daifuku gratis.",
       "earnTitle": "Ganarás +{{points}} pts con este pedido",
-      "earnText": "Acumula 10 pts por cada $1 USD y canjea cupones exclusivos en Recompensas →"
+      "earnText": "Acumula 10 pts por cada $5.000 COP y canjea cupones exclusivos en Recompensas →"
     },
     "delivery": {
       "title": "Entrega Rápida",
@@ -449,7 +449,7 @@
     "title": "MichiMochi Rewards",
     "subtitle": "Acumula puntos con cada pedido confirmado y canjéalos por cupones personales de un solo uso.",
     "balanceLabel": "Saldo disponible",
-    "earnRate": "Ganas 10 pts por cada $1 USD en tus compras",
+    "earnRate": "Ganas 10 pts por cada $5.000 COP en tus compras",
     "nextTier": "Te faltan {{remaining}} pts para alcanzar {{tier}}",
     "maxTier": "¡Has alcanzado el nivel máximo artesanal!",
     "myCouponsTitle": "Mis Cupones Canjeados",

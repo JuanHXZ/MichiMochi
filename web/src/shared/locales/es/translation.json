@@ -330,8 +330,8 @@
     "submitting": "Procesando pago...",
     "submitBtn": "Confirmar pedido y pago ({{total}})",
     "simulationBanner": {
-      "title": "Entorno Educativo — Pasarela",
-      "text": "No se realizará ningún cobro real ni se almacenarán datos bancarios reales. Usa las tarjetas o métodos de prueba para completar el ciclo comercial."
+      "title": "Pasarela de compra",
+      "text": "Se realizará el cobro del producto al finalizar el proceso y llenar los datos de compra."
     },
     "empty": {
       "title": "Tu carrito está vacío",

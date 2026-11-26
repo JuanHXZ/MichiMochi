@@ -236,6 +236,8 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--body-text);
+  text-align: left;
+  align-self: flex-start;
 }
 
 .login-forgot-link {

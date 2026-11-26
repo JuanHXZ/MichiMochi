@@ -3,7 +3,6 @@ import { FaLock, FaEye, FaEyeSlash, FaHeart, FaStar, FaCookieBite } from 'react-
 import { MdEmail } from 'react-icons/md';
 import { DarkMode, LightMode } from '@mui/icons-material';
 import { useThemeStore } from '@shared/stores/themeStore';
-import LanguageToggle from '@shared/components/LanguageToggle/LanguageToggle';
 import { useAuth } from '../../../application/hooks/useAuth';
 import { validateLoginForm } from '../../../domain/authValidation';
 import './LoginPage.css';
@@ -71,7 +70,6 @@ export default function LoginPage() {
         >
           {theme === 'light' ? <DarkMode aria-hidden="true" /> : <LightMode aria-hidden="true" />}
         </button>
-        <LanguageToggle variant="navbar" />
       </div>
 
       <main id="main-content" className="login-card-container" data-node-id="1:409">
@@ -96,11 +94,11 @@ export default function LoginPage() {
             </div>
 
             <h1 className="login-visual-title" data-node-id="1:415">
-              Join the Sweetness
+              Unete a la MichiFelicidad
             </h1>
 
             <p className="login-visual-subtitle" data-node-id="1:417">
-              Step into a world of chewy, creamy, and delightful treats. Your daily dose of happiness is just a sign-in away!
+              ¡Adéntrate en un mundo de delicias cremosas y de textura irresistible. Tu dosis diaria de felicidad está a solo un inicio de sesión de distancia.!
             </p>
 
             <div className="login-visual-icons" data-node-id="1:418" aria-hidden="true">
@@ -123,10 +121,10 @@ export default function LoginPage() {
               data-node-id="1:435"
             />
             <h2 className="login-form-title" data-node-id="1:437">
-              Welcome Back
+              Bienvenido de nuevo
             </h2>
             <p className="login-form-subtitle" data-node-id="1:438">
-              Please enter your details to access your account.
+              Porfavor ingresa tus datos para acceder a tu cuenta.
             </p>
           </div>
 
@@ -140,7 +138,7 @@ export default function LoginPage() {
             {/* Email Field */}
             <div className="login-input-group" data-node-id="1:440">
               <label htmlFor="login-email" className="login-label" data-node-id="1:442">
-                Email Address
+                Correo Electrónico
               </label>
               <div className="login-input-wrapper" data-node-id="1:443">
                 <MdEmail className="login-input-icon" aria-hidden="true" />
@@ -152,7 +150,7 @@ export default function LoginPage() {
                   spellCheck={false}
                   enterKeyHint="next"
                   className={`login-input ${errors.email ? 'has-error' : ''}`}
-                  placeholder="hello@example.com"
+                  placeholder="hola@ejemplo.com"
                   value={formValues.email}
                   onChange={handleFieldChange('email')}
                   autoComplete="username"
@@ -171,10 +169,10 @@ export default function LoginPage() {
             <div className="login-input-group" data-node-id="1:449">
               <div className="login-label-row">
                 <label htmlFor="login-password" className="login-label" data-node-id="1:452">
-                  Password
+                  Contraseña
                 </label>
                 <a href="/forgot-password" className="login-forgot-link" data-node-id="1:454">
-                  Forgot password?
+                  ¿Olvidaste tu contraseña?
                 </a>
               </div>
               <div className="login-input-wrapper" data-node-id="1:455">
@@ -226,7 +224,7 @@ export default function LoginPage() {
             <div className="login-divider-row" data-node-id="1:480">
               <div className="login-divider-line" />
               <span className="login-divider-text" data-node-id="1:485">
-                or continue with
+                o continuar con
               </span>
               <div className="login-divider-line" />
             </div>
@@ -263,9 +261,9 @@ export default function LoginPage() {
 
             {/* Sign Up Link */}
             <div className="login-signup-prompt" data-node-id="1:477">
-              <span>Don't have an account?</span>
+              <span>¿No tienes una cuenta?</span>
               <a href="/register" className="login-signup-link" data-node-id="1:478">
-                Sign up for free
+                Registrate gratis
               </a>
             </div>
           </form>
